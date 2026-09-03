@@ -577,7 +577,7 @@ label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;t
 .ac-t b{font-size:13.5px;line-height:1.35;color:var(--tx);display:block}
 .ac-t span{font-size:11px;color:var(--mut)}
 .ac-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
-.ac-prices{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.ac-prices{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:14px;white-space:nowrap}
 .ac-prices s{color:var(--mut);font-size:11.5px}
 .ac-prices .t2l{font-size:12px}
 .ac-stock{font-size:12px;color:var(--mut)}
@@ -586,6 +586,26 @@ label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;t
 .ac-act .btn{padding:9px 4px;font-size:12px;min-height:38px}
 @media(max-width:940px){ .plist-m{display:flex;flex-direction:column;gap:10px} }
 @media(min-width:941px){ .plist-m{display:none} }
+
+/* ---- layout blowout guards (fixes admin 693px viewport on phones) ---- */
+.admin-grid{grid-template-columns:minmax(0,1fr)}
+.admin-grid>*{min-width:0}
+.panel{min-width:0}
+.cartlay>*{min-width:0}
+.pd>*{min-width:0}
+.tblwrap{max-width:100%}
+.ptable{min-width:0}
+img{max-width:100%}
+/* on phones the table is replaced by product cards */
+@media(max-width:940px){
+  .admin-grid .tblwrap{display:none}
+  .sec-head .btn{white-space:nowrap}
+}
+/* modal: proper sheet with side margins */
+@media(max-width:700px){
+  .pm-dl{width:calc(100% - 20px)}
+  .pm-ov{padding:10px}
+}
 </style>
 </head>
 <body>
@@ -1698,7 +1718,7 @@ function vAdmin(){
     </div>
     <div class="panel">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Products (${all.length})</h3><button class="btn btn-sm" data-add-product>＋ Add product</button></div>
-      <div class="filters" style="margin:2px 0 12px">${["all","psn","pc","xbox"].map(k=>{const n=k==="all"?all.length:all.filter(p=>p.platform===k).length;const lb=k==="all"?"All":k==="psn"?"PSN":k==="pc"?"PC / Steam":"Xbox";return '<button class="fbtn'+(state.adPlat===k?" on":"")+'" data-adplat="'+k+'">'+lb+' ('+n+')</button>';}).join("")}</div>
+      <div class="filters" style="margin:2px 0 12px;flex-wrap:wrap">${["all","psn","pc","xbox"].map(k=>{const n=k==="all"?all.length:all.filter(p=>p.platform===k).length;const lb=k==="all"?"All":k==="psn"?"PSN":k==="pc"?"PC / Steam":"Xbox";return '<button class="fbtn'+(state.adPlat===k?" on":"")+'" data-adplat="'+k+'">'+lb+' ('+n+')</button>';}).join("")}</div>
       <label for="ad-search" style="margin-top:0">Search</label>
       <input class="f" id="ad-search" placeholder="Filter by title…" oninput="renderAdminTable()">
       <div class="tblwrap"><table class="ptable"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
