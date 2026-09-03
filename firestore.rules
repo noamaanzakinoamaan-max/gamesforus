@@ -29,7 +29,8 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /orders/{oid} {
-      allow read: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow get: if true; // single-order tracking by random ID (status + items only)
+      allow list: if request.auth != null && isAdmin();
       allow create: if request.auth != null && (request.resource.data.uid == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }

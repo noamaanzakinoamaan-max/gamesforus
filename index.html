@@ -18,6 +18,10 @@
 <title>HeavenDigital — PSN, Xbox & PC game accounts at up to 90% off</title>
 <meta name="description" content="Buy PSN, Xbox and PC game accounts with top titles — Until Dawn, Spider-Man 2, Game Pass and more. Delivered on WhatsApp in minutes, 30-day warranty, UPI accepted.">
 <meta name="theme-color" content="#0b0d12">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="img/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HeavenDigital">
 <meta name="mobile-web-app-capable" content="yes">
 <meta property="og:title" content="HeavenDigital — game accounts at up to 90% off">
 <meta property="og:description" content="PSN, Xbox & PC accounts with top games included. WhatsApp delivery, 30-day warranty, UPI accepted.">
@@ -657,6 +661,33 @@ img{max-width:100%}
 .dist i{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--mut);font-style:normal}
 .dist i em{font-style:normal;flex:0 0 26px}
 .dist i b{height:7px;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--gold2));min-width:4px}
+
+/* ---- trust elements ---- */
+.protect{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pcard{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.pcard .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:rgba(245,192,68,.13);color:var(--gold);margin-bottom:2px}
+.pcard .ic svg{width:20px;height:20px}
+.pcard b{font-size:14px}
+.pcard span{font-size:12px;color:var(--mut);line-height:1.55}
+@media(max-width:700px){.protect{grid-template-columns:1fr}}
+.ownerbox{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.owner-av{width:74px;height:74px;flex:0 0 74px;border-radius:50%;overflow:hidden;border:2.5px solid var(--gold);box-shadow:0 0 0 4px rgba(245,192,68,.14);background:#1a1408}
+.owner-av img{width:100%;height:100%;object-fit:cover}
+.owner-tx{flex:1;min-width:230px}
+.owner-tx b{font-size:16px}
+.owner-tx p{margin:6px 0 10px;font-size:13.5px;color:var(--mut);line-height:1.7}
+.owner-tx .sig{font-family:var(--mono);color:var(--gold);font-size:12.5px;margin-bottom:12px}
+.tstrip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0 2px}
+.tstrip span{font-size:11.5px;font-weight:700;color:var(--green);background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.25);border-radius:99px;padding:6px 11px}
+.foot-badges{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;padding:0 0 18px;font-size:11.5px;color:var(--mut)}
+.foot-badges b{color:var(--gold);font-weight:700}
+.track-steps{display:flex;flex-direction:column;gap:0;margin:6px 0 2px}
+.tk-step{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.tk-step:last-child{border-bottom:0}
+.tk-dot{width:12px;height:12px;border-radius:50%;background:var(--line);flex:0 0 12px}
+.tk-step.done .tk-dot{background:var(--green);box-shadow:0 0 10px rgba(74,222,128,.5)}
+.tk-step.done{color:var(--tx)}
+.tk-step{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -714,6 +745,7 @@ img{max-width:100%}
 
 <footer class="site-foot">
   <div class="wrap">
+  <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
     <div class="foot-in">
       <div class="foot-brand">
         <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
@@ -1510,6 +1542,30 @@ function vHome(){
   </section>
 
   <section class="sec">
+  <div class="sec-head rv"><div><span class="eyebrow">Your money is protected</span><h2>Every order, covered</h2><p class="sub">This is a promise, not fine print — it's on every product page and every checkout.</p></div></div>
+  <div class="protect rv">
+    <div class="pcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-4"/></svg></span><b>Tested before delivery</b><span>We sign in and verify every single account works before it reaches your WhatsApp.</span></div>
+    <div class="pcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><b>Guided setup, live</b><span>You're never alone — our team stays on WhatsApp through download and launch, till you're playing.</span></div>
+    <div class="pcard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.5 13l1.5 8-5-3-5 3 1.5-8"/></svg></span><b>30-day replacement or refund</b><span>If anything goes wrong that isn't your doing — replacement first, refund if you prefer. Your choice.</span></div>
+  </div>
+  <div class="panel ownerbox rv" style="margin-top:18px">
+    <div class="owner-av"><img src="img/icon-180.png" alt="HeavenDigital founder" onerror="this.remove()"></div>
+    <div class="owner-tx">
+      <b>Hi, I'm Noamaan — I run HeavenDigital.</b>
+      <p>I've been selling to Indian gamers since our old storefront days, and most of our buyers come from friends telling friends. Every account is checked by me or my team before it reaches your WhatsApp, and if anything is ever off, you message me directly and I make it right. That's not a policy page — that's a promise.</p>
+      <div class="sig">— Noamaan, founder</div>
+      <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/919000000000">Message me directly</a>
+    </div>
+  </div>
+  <div class="panel rv" style="margin-top:18px">
+    <h3>Track your order</h3>
+    <p class="hint" style="margin-top:0">Enter your order ID (like HD-8KQ2A) anytime to see exactly where it is — no account needed.</p>
+    <div class="couprow"><input class="f" id="trackId" placeholder="HD-XXXXX" style="text-transform:uppercase"><button class="btn btn-sm" data-track-go>Track</button></div>
+    <div id="trackOut"></div>
+  </div>
+</section>
+
+<section class="sec">
     <div class="sec-head rv"><div><span class="eyebrow">Verified buyers · updated weekly</span><h2>⭐ What gamers say</h2><p class="sub">4.9★ average from ${REVIEWS.length}+ buyer reviews.</p></div><a class="btn btn-ghost btn-sm" href="#/reviews">Read all ${REVIEWS.length} reviews</a></div>
     <div class="bestrail">${REVIEWS.slice(0,10).map(r=>'<div class="rvw"><div class="stars">'+"★".repeat(r.r)+'<span style="color:var(--mut)">'+"★".repeat(5-r.r)+'</span></div><p>\u201C'+esc(r.t)+'\u201D</p><span class="gtag">'+esc(r.g)+'</span><div class="who"><span class="avatar">'+esc(r.n.slice(0,1))+'</span><span><b>'+esc(r.n)+'</b><span>'+esc(r.c)+' · verified buyer</span></span></div></div>').join("")}</div>
   </section>
@@ -2052,6 +2108,33 @@ function vReviews(){
   <div class="rvw-page rv">${list.slice().reverse().map(r=>'<div class="rvw" style="flex:none"><div class="stars">'+"★".repeat(r.r)+'<span style="color:var(--mut)">'+"★".repeat(5-r.r)+'</span></div><p>\u201C'+esc(r.t)+'\u201D</p><span class="gtag">'+esc(r.g)+'</span><div class="who"><span class="avatar">'+esc(r.n.slice(0,1))+'</span><span><b>'+esc(r.n)+'</b><span>'+esc(r.c)+' · verified buyer</span></span></div></div>').join("")}</div>
   <div class="cta-band rv"><div><h2>Bought from us?</h2><p>Send your feedback on WhatsApp — it lands here and helps other gamers.</p></div><a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+CONFIG.whatsapp+'">Send review</a></div>`;
 }
+/* ---- order tracking ---- */
+const TK_STEPS=[["pending","Order placed"], ["paid","Payment verified"], ["delivered","Delivered — game on its way to your WhatsApp"]];
+function vTrack(){
+  return `<div class="sec-head rv" style="padding-top:26px;margin-bottom:6px"><div><h2>Track your order</h2><p class="sub">Real-time status — the same board our team works from.</p></div></div>
+  <div class="panel" style="max-width:520px">
+    <div class="couprow"><input class="f" id="trackGoInput" placeholder="HD-XXXXX" style="text-transform:uppercase" value="${esc((location.hash.split("?")[1]||"").replace("id=",""))}"><button class="btn btn-sm" id="trackGoBtn" data-track-go2>Track</button></div>
+    <div id="trackOut2">${state._trackHtml||""}</div>
+  </div>
+  <div class="cta-band rv"><div><h2>Ordered on WhatsApp?</h2><p>Those orders are tracked here too — use the order ID we sent you.</p></div><a class="btn btn-ghost" href="#/contact">Ask on WhatsApp</a></div>`;
+}
+async function trackGo(){
+  const inp=$("#trackGoInput")||$("#trackId");
+  const out=$("#trackOut2")||$("#trackOut");
+  const oid=((inp&&inp.value)||"").trim().toUpperCase();
+  if(!out) return;
+  if(!/^HD-[A-Z0-9]{3,8}$/.test(oid)){ out.innerHTML='<div class="err">Order IDs look like HD-8KQ2A — check your WhatsApp message.</div>'; return; }
+  if(!firebaseConfigured()){ out.innerHTML='<div class="ok-note">Live tracking activates with our store sync — meanwhile, WhatsApp us this order ID and you\'ll get the status in a minute.</div>'; return; }
+  out.innerHTML='<p class="sub">Checking…</p>';
+  try{
+    const doc=await firebase.firestore().collection("orders").doc(oid).get();
+    if(!doc.exists){ out.innerHTML='<div class="err">No order found with that ID — double-check it, or WhatsApp us and we\'ll find it.</div>'; return; }
+    const o=doc.data(); const st=(o.status||"pending").toLowerCase();
+    if(st==="cancelled"||st==="refunded"){ out.innerHTML='<div class="err">This order was '+esc(st)+'. Questions? Message us with '+esc(oid)+'.</div>'; return; }
+    out.innerHTML='<div class="track-steps">'+TK_STEPS.map(s=>'<div class="tk-step'+(st===s[0]||TK_STEPS.findIndex(t=>t[0]===st)>TK_STEPS.findIndex(t=>t[0]===s[0])?" done":"")+'"><span class="tk-dot"></span>'+s[1]+'</div>').join("")+'</div>'+
+      '<p class="hint" style="margin-top:8px">Order '+esc(oid)+' · '+inr(o.total||0)+' · updated '+(o.updatedAt?new Date(o.updatedAt).toLocaleString("en-IN"):"just now")+'</p>';
+  }catch(err){ out.innerHTML='<div class="err">Could not check right now — WhatsApp us with your order ID.</div>'; }
+}
 /* ============ checkout ============ */
 function openCheckout(){
   const ids=Object.keys(cart); if(!ids.length) return;
@@ -2070,12 +2153,13 @@ function openCheckout(){
    '<div style="margin-top:12px">'+rows+
    (disc?'<div class="sumline"><span>Coupon '+esc(appliedCoupon||"")+'</span><span>− '+inr(disc)+'</span></div>':'')+
    '<div class="sumline total"><span>Total</span><span>'+inr(total)+'</span></div></div>'+
+   '<div class="tstrip"><span>\u2713 30-day warranty</span><span>\u2713 Guided setup till you play</span><span>\u2713 Replacement or refund</span></div>'+
    '<div class="paybtns">'+
    '<a class="btn btn-block" href="'+upi+'">Pay '+inr(total)+' via any UPI app</a>'+
    '<button class="btn btn-ghost btn-block" data-copy="'+esc(CONFIG.upiId)+'">Copy UPI ID: '+esc(CONFIG.upiId)+'</button>'+
    '<a class="btn btn-block" target="_blank" rel="noopener" href="'+wa+'">I&#39;ve paid — confirm on WhatsApp</a>'+
    '</div>'+
-   '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Keep order ID <b>'+oid+'</b>.</p>'+
+   '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Track this order anytime with ID <b>'+oid+'</b> on our Track page.</p>'+
    '</div></div>';
   if(state.user && window.firebase){
     try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending"},{merge:true}).catch(()=>{}); }catch(e){}
@@ -2099,6 +2183,7 @@ const ROUTES={
   "/contact":{t:"Contact support",v:vContact},
   "/about":{t:"About us",v:vAbout},
   "/reviews":{t:"Buyer reviews — 4.9★ from 100+ gamers",v:vReviews},
+  "/track":{t:"Track your order",v:vTrack},
   "/admin":{t:"Owner admin",v:vAdmin},
   "/refund-policy":{t:"Refund & warranty policy",v:()=>vPolicy("refund-policy")},
   "/terms":{t:"Terms of service",v:()=>vPolicy("terms")},
@@ -2333,6 +2418,7 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
   if((el=q("[data-ordfilter]"))){ state.ordFilter=el.dataset.ordfilter; renderOrders(); return; }
   if((el=q("[data-rvwfilter]"))){ state.rvwFilter=parseInt(el.dataset.rvwfilter,10)||0; route(); return; }
+  if(q("[data-track-go]") || q("[data-track-go2]")){ trackGo(); return; }
   if((el=q("[data-load-orders]")) && state.fbReady && state.user){ state.ordersLoaded=false; await loadAdminOrders(); return; }
   if((el=q("[data-add-order]")) && state.fbReady && state.user){ openOrderModal(); return; }
   if((el=q("[data-mo-save]")) && state.fbReady && state.user){
