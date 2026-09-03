@@ -753,7 +753,17 @@ img{max-width:100%}
 
 <footer class="site-foot">
   <div class="wrap">
+<<<<<<< Updated upstream
   <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
+=======
+  <div class="foot-badges" style="margin-bottom:6px"><span style="color:var(--gold);font-weight:800">FREE GUIDES:</span>
+      <a href="guides/how-to-buy-ps5-games-cheap-india.html" style="color:var(--mut)">How to buy PS5 games cheap</a> ·
+      <a href="guides/psn-secondary-vs-primary-explained.html" style="color:var(--mut)">Secondary vs Primary</a> ·
+      <a href="guides/xbox-game-pass-cheap-india.html" style="color:var(--mut)">Game Pass cheap</a> ·
+      <a href="guides/pc-games-steam-account-offline-online.html" style="color:var(--mut)">PC offline vs online</a> ·
+      <a href="guides/is-buying-game-accounts-safe.html" style="color:var(--mut)">Is it safe?</a></div>
+    <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
+>>>>>>> Stashed changes
     <div class="foot-in">
       <div class="foot-brand">
         <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
@@ -1330,7 +1340,7 @@ function initAnalytics(){
     if(window.gtag){ window.gtag("event","page_view",{page_path:location.pathname+location.search+location.hash, page_title:document.title}); }
   }catch(e){}
 }
-const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all" };
+const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0 };
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length) p.forEach(x=>state.products[x.id]=x); else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
   try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
@@ -1694,11 +1704,13 @@ function vCart(){
     <div class="panel">
       <h3 style="margin-top:0">Order summary</h3>
       <div class="couprow"><input class="f" id="coupon" placeholder="Coupon code" value="${appliedCoupon?esc(appliedCoupon):""}"><button class="btn btn-sm" data-coupon>Apply</button></div>
+      ${state.refBy?'<div class="coup-ok">🎁 Referral '+esc(state.refBy)+' applied — ₹50 off <button class="rm" data-ref-remove style="margin-left:8px">remove</button></div>':'<div class="couprow"><input class="f" id="refCode" placeholder="Referral code (₹50 off)" style="text-transform:uppercase"><button class="btn btn-sm" data-ref-apply>Apply</button></div>'}
       <div id="couponMsg">${appliedCoupon?'<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+state.settings.couponPercent+'% off</div>':""}</div>
       <div class="sumline"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
       ${disc?'<div class="sumline"><span>Coupon ('+esc(state.settings.couponCode)+')</span><span>− '+inr(disc)+'</span></div>':""}
       <div class="sumline"><span>Delivery (WhatsApp handover)</span><span>Free</span></div>
-      <div class="sumline total"><span>Total</span><span>${inr(cartTotal()-disc)}</span></div>
+      ${(state.refBy&&state.refOff)?'<div class="sumline"><span>Referral ('+esc(state.refBy)+')</span><span>− '+inr(state.refOff)+'</span></div>':""}
+      <div class="sumline total"><span>Total</span><span>${inr(Math.max(0,cartTotal()-disc-state.refOff))}</span></div>
       <div class="paybtns"><button class="btn btn-block" data-checkout>Proceed to checkout</button></div>
       <p class="hint">You pay via UPI, tap confirm on WhatsApp, we verify and hand over the account — usually under 10 minutes during ${esc(CONFIG.hours)}.</p>
     </div>
@@ -1888,6 +1900,7 @@ function vAdmin(){
         <div class="stats"><div class="stat"><b id="custCount">–</b><span>Registered buyers</span></div><div class="stat"><b id="custOpt">–</b><span>Want offers</span></div></div>
         <div class="paybtns"><button class="btn btn-sm" data-load-customers>↻ Load customers</button><button class="btn btn-ghost btn-sm" data-copy-emails>Copy opted-in emails</button></div>
         <div id="custMsg"></div>
+        <div id="topRef"></div>
       </div>
     </div>
     <div class="panel">
@@ -1932,7 +1945,7 @@ function renderOrders(){
   rows=rows.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
   if(!rows.length){ box.innerHTML='<p class="sub" style="margin:0">No orders here yet. Signed-in buyers\' checkouts land here automatically — add WhatsApp orders with "＋ Add order".</p>'; return; }
   box.innerHTML=rows.map(o=>'<div class="acard">'+
-    '<div class="ord-top"><b>'+esc(o.oid||"?")+'</b><span>'+(o.ts?new Date(o.ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</span>'+ordPill(o.status)+'</div>'+
+    '<div class="ord-top"><b>'+esc(o.oid||"?")+'</b><span>'+(o.ts?new Date(o.ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</span>'+ordPill(o.status)+(o.refBy?' <span class="pill pay">🎁 '+esc(o.refBy)+'</span>':'')+'</div>'+
     '<div class="ord-buyer">'+esc(o.email||"")+(o.wa?" · WhatsApp "+esc(o.wa):"")+(o.name?" · "+esc(o.name):"")+'</div>'+
     (o.items&&o.items.length?'<p class="ord-it">'+esc(o.items.join("\n"))+'</p>':'')+
     '<div class="ord-top" style="margin-top:4px"><span class="ord-amt">'+inr(o.total||0)+'</span><span class="rowbtns">'+ordActions(o)+'</span></div>'+
@@ -2097,13 +2110,44 @@ function vAccount(){
   return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Hey, '+esc(nm)+' 👋</h2><p class="sub">'+esc(state.user.email||"")+'</p></div><button class="btn btn-ghost btn-sm" data-signout>Sign out</button></div>'+
   '<div class="stats"><div class="stat"><b id="mo-count">–</b><span>Your orders</span></div><div class="stat"><b id="mo-spent">–</b><span>Total spent</span></div></div>'+
   '<div class="panel" style="margin-bottom:18px"><h3>Order history</h3><div id="myOrders"><p class="sub">Loading…</p></div></div>'+
+  '<div class="panel" style="max-width:520px;margin-bottom:18px"><h3>🎁 Give ₹50, get ₹50</h3>'+
+  '<div id="refBox"><p class="sub">Setting up your code…</p></div></div>'+
   '<div class="panel" style="max-width:520px"><h3>Offers &amp; contact</h3>'+
   '<label class="pm-l" for="ac-wa">Your WhatsApp number (for offer pings)</label><input class="f" id="ac-wa" inputmode="numeric" placeholder="9198XXXXXX" value=""><button class="btn btn-ghost btn-sm" data-save-wa style="margin-top:10px">Save number</button>'+
   '<label style="display:flex;gap:8px;align-items:center;margin-top:16px"><input type="checkbox" id="ac-optin" data-optin> Send me new offers &amp; sale alerts</label>'+
   '</div>';
 }
+function renderRefBox(u){
+  const box=$("#refBox"); if(!box) return;
+  if(!u||!u.refCode){ box.innerHTML='<p class="sub">Your code appears in a moment…</p>'; return; }
+  const link=location.origin+location.pathname.replace("index.html","")+"#/cart";
+  box.innerHTML='<label class="pm-l">Your referral code</label>'+
+   '<div class="couprow"><input class="f" id="myRef" readonly value="'+esc(u.refCode)+'"><button class="btn btn-sm" data-copy-ref>Copy</button><button class="btn btn-sm" data-share-ref>Share</button></div>'+
+   '<p class="hint" style="margin-top:8px">Friends get <b>₹50 off</b> their first order when they enter your code at checkout. You earn <b>₹50</b> per completed order — paid as UPI cashback. Earned so far: <b class="t2l">'+inr(u.earned||0)+'</b> ('+(u.referrals||0)+' referral'+((u.referrals||0)===1?"":"s")+')</p>';
+}
+async function ensureRefCode(){
+  if(!(state.fbReady&&state.user)) return;
+  try{
+    const ref=firebase.firestore().collection("users").doc(state.user.uid);
+    const doc=await ref.get();
+    let u=doc.exists?doc.data():{};
+    if(!u.refCode){
+      const base=((state.user.displayName||state.user.email||"gamer").split("@")[0].replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,4)||"GAME");
+      for(let tries=0;tries<3;tries++){
+        const code=base+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
+        try{
+          await firebase.firestore().collection("refcodes").doc(code).set({uid:state.user.uid, name:(state.user.displayName||"Buyer").slice(0,20), createdAt:Date.now()});
+          await ref.set({refCode:code, earned:0, referrals:0, updatedAt:Date.now()},{merge:true});
+          u={...u, refCode:code, earned:0, referrals:0}; break;
+        }catch(e){ if(tries===2) throw e; }
+      }
+    }
+    window.__myRef=u; renderRefBox(u);
+  }catch(e){ renderRefBox(null); }
+}
 async function loadMyOrders(){
   if(!state.user) return;
+  try{ ensureRefCode(); }catch(e){}
   const box=$("#myOrders"); if(!box) return;
   try{
     const snap=await firebase.firestore().collection("orders").where("uid","==",state.user.uid).get();
@@ -2133,6 +2177,10 @@ function vReviews(){
 /* ---- order tracking ---- */
 const TK_STEPS=[["pending","Order placed"], ["paid","Payment verified"], ["delivered","Delivered — game on its way to your WhatsApp"]];
 function vTrack(){
+<<<<<<< Updated upstream
+=======
+  setTimeout(()=>{ const b=$("#trackGoBtn"); if(b) b.click(); },30);
+>>>>>>> Stashed changes
   return `<div class="sec-head rv" style="padding-top:26px;margin-bottom:6px"><div><h2>Track your order</h2><p class="sub">Real-time status — the same board our team works from.</p></div></div>
   <div class="panel" style="max-width:520px">
     <div class="couprow"><input class="f" id="trackGoInput" placeholder="HD-XXXXX" style="text-transform:uppercase" value="${esc((location.hash.split("?")[1]||"").replace("id=",""))}"><button class="btn btn-sm" id="trackGoBtn" data-track-go2>Track</button></div>
@@ -2186,10 +2234,10 @@ function searchLive(v){
 function openCheckout(){
   const ids=Object.keys(cart); if(!ids.length) return;
   const oid="HD-"+Math.random().toString(36).slice(2,7).toUpperCase();
-  const disc=discountAmount(); const total=cartTotal()-disc;
+  const disc=discountAmount(); const refOff=state.refBy?state.refOff:0; const total=Math.max(0,cartTotal()-disc-refOff);
   const lines=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return cart[k]+"× "+p.title+(opt==="p2"?" ("+optLabel(p,true)+")":"")+" — "+inr(priceOf(p,opt)*cart[k]);});
   const waMsg="New order "+oid+" on "+CONFIG.brand+"\n"+lines.join("\n")+
-    (disc?"\nCoupon: "+appliedCoupon+" (−"+inr(disc)+")":"")+"\nTotal: "+inr(total)+"\nName: \nWhatsApp: ";
+    (disc?"\nCoupon: "+appliedCoupon+" (−"+inr(disc)+")":"")+(refOff?"\nReferral: "+state.refBy+" (−"+inr(refOff)+")":"")+"\nTotal: "+inr(total)+"\nName: \nWhatsApp: ";
   const wa="https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(waMsg);
   const upi="upi://pay?pa="+encodeURIComponent(CONFIG.upiId)+"&pn="+encodeURIComponent(CONFIG.brand)+"&am="+total+"&cu=INR&tn="+encodeURIComponent(oid);
   const rows=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return '<div class="sumline"><span>'+cart[k]+'× '+esc(p.title)+(opt==="p2"?' <b class="t2l">'+optLabel(p,true)+'</b>':'')+'</span><span>'+inr(priceOf(p,opt)*cart[k])+'</span></div>';}).join("");
@@ -2199,6 +2247,7 @@ function openCheckout(){
    '<h3>Checkout</h3><div class="oid">Order '+oid+'</div>'+
    '<div style="margin-top:12px">'+rows+
    (disc?'<div class="sumline"><span>Coupon '+esc(appliedCoupon||"")+'</span><span>− '+inr(disc)+'</span></div>':'')+
+   (refOff?'<div class="sumline"><span>Referral '+esc(state.refBy||"")+'</span><span>− '+inr(refOff)+'</span></div>':'')+
    '<div class="sumline total"><span>Total</span><span>'+inr(total)+'</span></div></div>'+
    '<div class="tstrip"><span>\u2713 30-day warranty</span><span>\u2713 Guided setup till you play</span><span>\u2713 Replacement or refund</span></div>'+
    '<div class="paybtns">'+
@@ -2209,8 +2258,9 @@ function openCheckout(){
    '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Track this order anytime with ID <b>'+oid+'</b> on our Track page.</p>'+
    '</div></div>';
   if(state.user && window.firebase){
-    try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending"},{merge:true}).catch(()=>{}); }catch(e){}
+    try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending", refBy:state.refBy||null},{merge:true}).catch(()=>{}); }catch(e){}
   }
+  state.refBy=null; state.refOff=0;
   document.body.style.overflow="hidden";
   const ov=$("[data-overlay]"); if(ov) ov.addEventListener("click",e=>{if(e.target===ov) closeModal();});
 }
@@ -2477,6 +2527,33 @@ document.addEventListener("click", async function(e){
     else toast(url);
     return;
   }
+<<<<<<< Updated upstream
+=======
+  if((el=q("[data-ref-apply]")) && state.fbReady){
+    const code=($("#refCode")||{}).value.trim().toUpperCase();
+    const msg=()=>document.querySelector(".coup-ok, #couponMsg");
+    if(!/^[A-Z0-9-]{4,12}$/.test(code)){ toast("Codes look like NAME-XXXX"); return; }
+    firebase.firestore().collection("refcodes").doc(code).get().then(d=>{
+      if(!d.exists){ toast("Referral code not found"); return; }
+      if(state.user && d.data().uid===state.user.uid){ toast("That's your own code 🙂"); return; }
+      state.refBy=code; state.refOff=50; toast("₹50 referral discount applied 🎁"); route();
+    }).catch(()=>toast("Referral codes activate with store sync — WhatsApp us your code meanwhile"));
+    return;
+  }
+  if((el=q("[data-ref-remove]"))){ state.refBy=null; state.refOff=0; route(); return; }
+  if((el=q("[data-copy-ref]"))){
+    const v=($("#myRef")||{}).value||"";
+    if(navigator.clipboard) navigator.clipboard.writeText("₹50 off your first game on "+CONFIG.brand+" with my code "+v+" 🎮 "+location.origin+location.pathname.replace("index.html","")).then(()=>toast("Referral message copied — send it!"),()=>toast(v));
+    return;
+  }
+  if((el=q("[data-share-ref]"))){
+    const v=($("#myRef")||{}).value||"";
+    const text="₹50 off your first game on "+CONFIG.brand+" with my code "+v+" 🎮\n"+location.origin+location.pathname.replace("index.html","")+"\nEnter the code at checkout.";
+    if(navigator.share) navigator.share({title:CONFIG.brand+" — ₹50 for you",text:text}).catch(()=>{});
+    else if(navigator.clipboard) navigator.clipboard.writeText(text).then(()=>toast("Copied — paste it to a friend!"),()=>{});
+    return;
+  }
+>>>>>>> Stashed changes
   if((el=q("[data-load-orders]")) && state.fbReady && state.user){ state.ordersLoaded=false; await loadAdminOrders(); return; }
   if((el=q("[data-add-order]")) && state.fbReady && state.user){ openOrderModal(); return; }
   if((el=q("[data-mo-save]")) && state.fbReady && state.user){
@@ -2499,6 +2576,12 @@ document.addEventListener("click", async function(e){
     try{
       await firebase.firestore().collection("orders").doc(oid).set({status:st, updatedAt:Date.now()},{merge:true});
       const o=state.orders.find(x=>x.oid===oid); if(o) o.status=st;
+      if(st==="paid" && o && o.refBy){
+        try{
+          const rc=await firebase.firestore().collection("refcodes").doc(o.refBy).get();
+          if(rc.exists){ await firebase.firestore().collection("users").doc(rc.data().uid).set({earned:firebase.firestore.FieldValue.increment(50), referrals:firebase.firestore.FieldValue.increment(1), updatedAt:Date.now()},{merge:true}); toast("Referrer credited \u20B950 🎁"); }
+        }catch(e){}
+      }
       renderOrders(); toast(oid+" \u2192 "+st);
     }catch(err){ toast("Failed: "+err.message); }
     return;
@@ -2546,6 +2629,9 @@ document.addEventListener("click", async function(e){
       const a=$("#custCount"), b=$("#custOpt");
       if(a) a.textContent=arr.length; if(b) b.textContent=opt.length;
       if(m) m.innerHTML='<div class="ok-note">'+arr.length+' customer(s), '+opt.length+' opted in. Use "Copy opted-in emails" then paste into WhatsApp/email.</div>';
+      const top=arr.filter(u=>u.refCode&&(u.earned||u.referrals)).sort((a,b)=>(b.earned||0)-(a.earned||0)).slice(0,5);
+      const tr=$("#topRef");
+      if(tr) tr.innerHTML=top.length?'<h3 style="margin:14px 0 6px">Top referrers</h3>'+top.map(u=>'<div class="sumline"><span>'+esc(u.name||u.email||"")+' · <b class="t2l">'+esc(u.refCode)+'</b> · '+(u.referrals||0)+' referral(s)</span><span>'+inr(u.earned||0)+' earned</span></div>').join(""):'<p class="hint">No referrers yet — codes appear on each buyer\'s Account page.</p>';
     }catch(err){ if(m) m.innerHTML='<div class="err">'+esc(err.message)+' — reading all customers needs the updated rules + owner claim.</div>'; }
     return;
   }
