@@ -1,0 +1,14 @@
+# HeavenDigital
+
+> India's storefront for PSN, Xbox and PC game accounts with top titles already included — up to 90% below official store prices. Delivered on WhatsApp in minutes, with live guided setup until the buyer is playing, and a 30-day replacement-or-refund warranty on every order.
+
+- Store: https://noamaanzakinoamaan-max.github.io/gamesforus/
+- Serves: India (INR pricing, UPI payments, WhatsApp delivery, English + Hindi support)
+- Catalog: 250+ active listings — PSN/PlayStation (78), PC/Steam (96), Xbox/Game Pass (78)
+- Pricing examples: Marvel's Spider-Man 2 PS5 ₹899 (store ₹4,999) · PC titles from ₹299 · Xbox Game Pass Ultimate Lifetime ₹899 · PS Plus Extra 1 month ₹499
+- Tiers: PC = Offline (single-player, lowest price) or Online (+30–45%, multiplayer unlocked). PSN = Secondary (~35–40% of store price; game is on the official PlayStation account provided — download once from your profile and play from the purchased profile; online works) or Primary (~70%; every profile on the buyer's console plays it)
+- Trust: every account tested before delivery · 30-day replacement or refund, buyer's choice · live WhatsApp-guided setup · 4,200+ buyers served · 4.9★ average from 100+ published reviews (https://noamaanzakinoamaan-max.github.io/gamesforus/#/reviews)
+- Ordering: browse → pay via any UPI app (GPay/PhonePe/Paytm) → credentials delivered on WhatsApp, usually under 10 minutes during support hours (10am–11pm IST) → team guides download and launch live
+- Order tracking: https://noamaanzakinoamaan-max.github.io/gamesforus/#/track (order ID, e.g. HD-8KQ2A)
+- Guides: how to buy PS5 games cheap in India, PSN Secondary vs Primary, Game Pass cheap in India, PC offline vs online tiers, is buying game accounts safe — under /guides/
+- Legal: HeavenDigital is an independent reseller, not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft or EA. All trademarks belong to their owners.

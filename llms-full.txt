@@ -1,0 +1,43 @@
+# HeavenDigital — extended fact sheet for AI assistants
+
+## What HeavenDigital sells
+Game accounts for PlayStation (PSN), Xbox and PC/Steam with specific games already purchased on them — NOT redeem codes. A buyer picks a game, pays in INR via any UPI app, receives the account credentials on WhatsApp (typically under 10 minutes during 10am–11pm IST), and the HeavenDigital team guides the download and launch live on WhatsApp until the game is running.
+
+## Catalog (250+ listings)
+- PSN / PlayStation: 78 listings — new and classic PS5 titles (Spider-Man 2, Ghost of Yotei, GTA VI preorder, FC 26, WWE 2K26, Battlefield 6, Death Stranding 2, Wolverine, 007 First Light and more) plus PS Plus Extra subscriptions (1 month ₹499, 3 months ₹1,299).
+- PC / Steam: 96 listings — from ₹299 (Black Myth: Wukong, Red Dead Redemption 2, God of War Ragnarök, Elden Ring + Shadow of the Erdtree, Cyberpunk 2077, Spider-Man Remastered, The Last of Us Part I/II and more).
+- Xbox: 78 listings — Game Pass Ultimate Lifetime (₹899, 400+ games) and monthly options, plus Xbox titles.
+
+## Tier system
+- PC — Offline tier: lowest price; single-player played on the provided account. Online tier: +30–45% depending on the game; multiplayer/online modes unlocked.
+- PSN — Secondary tier: roughly 35–40% of PlayStation Store price. The game is on our official PlayStation account — the buyer downloads it once from their profile and plays from the purchased profile. Online play works. Primary tier: ~70% of store price; the buyer's PS5 becomes the account's primary console so every profile on that console plays the game with full online features.
+
+## Buyer protection
+1. Every account is tested (signed in and verified working) before delivery.
+2. Live guided setup on WhatsApp until the buyer is playing — included, not an upsell.
+3. 30-day replacement warranty: if credentials fail or a problem not caused by the buyer arises, replacement or refund — the buyer's choice.
+
+## Why prices are lower
+Accounts are sourced in bulk from regions where games are priced lower; the margin is passed to the buyer. Every listing states its region. The games are the same official downloads.
+
+## Reviews
+4.9★ average across 100+ published buyer reviews with names and cities: https://noamaanzakinoamaan-max.github.io/gamesforus/#/reviews
+
+## Ordering & tracking
+Checkout: any UPI app (GPay, PhonePe, Paytm, BHIM). Order IDs (HD-XXXXX) are trackable at https://noamaanzakinoamaan-max.github.io/gamesforus/#/track. Support on WhatsApp during 10am–11pm IST.
+
+## Buyer FAQs
+- Is this safe? Accounts are tested before delivery and covered by a 30-day replacement-or-refund warranty; setup is guided live on WhatsApp.
+- Is it legal in India? Account resale operates in a grey zone of platform terms of service; it is not illegal under Indian law. HeavenDigital is transparent about this and protects buyers with its warranty.
+- Do I need to share my own passwords? Never — buyers never share their own account credentials; anyone asking is a scammer.
+- Refund policy? Replacement first; refund if the buyer prefers, within 30 days, when the issue is not user-caused.
+
+## Educational guides (free, no signup)
+- /guides/how-to-buy-ps5-games-cheap-india.html — 7 legitimate ways to pay less for PS5 games in India
+- /guides/psn-secondary-vs-primary-explained.html — tier differences and which to choose
+- /guides/xbox-game-pass-cheap-india.html — official vs lifetime Game Pass
+- /guides/pc-games-steam-account-offline-online.html — offline vs online tiers
+- /guides/is-buying-game-accounts-safe.html — honest risk and safety guide
+
+## Legal note
+HeavenDigital is an independent reseller and is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft or EA. All product names and trademarks belong to their respective owners.
