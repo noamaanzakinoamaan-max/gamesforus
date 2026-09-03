@@ -531,6 +531,41 @@ details.acc summary:hover{color:var(--gold)}
 /* touch feedback for buttons (was hover-only) */
 .rm:active{color:var(--red)}
 .btn:active{transform:translateY(0) scale(.98)}
+
+/* ---- admin modal editor ---- */
+.pm-ov{position:fixed;inset:0;background:rgba(4,6,10,.74);backdrop-filter:blur(4px);z-index:95;display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .18s}
+.pm-dl{width:min(660px,100%);max-height:88dvh;display:flex;flex-direction:column;background:#12151d;border:1px solid rgba(245,192,68,.25);border-radius:18px;box-shadow:0 40px 100px rgba(0,0,0,.65);overflow:hidden;animation:pmIn .22s cubic-bezier(.2,.9,.3,1)}
+@keyframes pmIn{from{opacity:0;transform:translateY(18px) scale(.98)}}
+.pm-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line);background:linear-gradient(135deg,rgba(245,192,68,.13),transparent 60%)}
+.pm-hd b{font-size:16px;color:var(--tx)}
+.pm-hd span{display:block;font-size:11.5px;color:var(--mut);margin-top:1px}
+.pm-x{width:34px;height:34px;flex:0 0 34px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--mut);font-size:15px;cursor:pointer}
+.pm-bd{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+.pm-ft{display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:13px 18px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+.pm-ft .err{flex:1;font-size:12.5px}
+.pm-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.pm-3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:11px}
+.pm-full{grid-column:1/-1}
+label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);margin-bottom:5px}
+.pm-pricegrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.pm-tier{border:1px solid var(--line);border-radius:13px;padding:11px 12px 9px;background:rgba(255,255,255,.025);transition:border-color .15s}
+.pm-tier:focus-within{border-color:rgba(245,192,68,.55)}
+.pm-tier.t1{border-color:rgba(96,220,150,.45)}
+.pm-tier.t2{border-color:rgba(245,192,68,.5)}
+.pm-tier input{width:100%;font-family:var(--mono);font-size:17px;font-weight:800;color:var(--gold);background:transparent;border:0;outline:none;padding:2px 0}
+.pm-tier small{display:block;font-size:10.5px;color:var(--mut);margin-top:5px;line-height:1.45}
+.pm-sw{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer}
+.pm-sw b{font-size:13.5px;display:block}
+.pm-sw em{font-style:normal;font-size:11px;color:var(--mut)}
+.pm-sw input{width:20px;height:20px;accent-color:var(--gold);flex:0 0 20px}
+#pm-thumb{max-height:110px;border-radius:10px;border:1px solid var(--line);margin-top:2px;display:none}
+@media(max-width:700px){
+  .pm-ov{align-items:flex-end;padding:0}
+  .pm-dl{width:100%;max-height:92dvh;border-radius:18px 18px 0 0;border-bottom:0}
+  .pm-grid,.pm-3{grid-template-columns:1fr}
+  .pm-pricegrid{grid-template-columns:1fr}
+  .pm-ft{position:sticky;bottom:0;background:#12151d}
+}
 </style>
 </head>
 <body>
@@ -1562,7 +1597,6 @@ function vAdmin(){
   const low=all.filter(p=>p.stock>0&&p.stock<=2).length;
   const out=all.filter(p=>p.stock<=0).length;
   const value=all.reduce((a,p)=>a+p.price*Math.max(p.stock,0),0);
-  const e=state.editing||{};
   return `
   <div class="sec-head" style="padding-top:26px;margin-bottom:0"><div><h2>Dashboard</h2><p class="sub">Signed in as ${esc(state.user.email)} · catalog ${state.source==="firestore"?"live on Firestore":"local"}</p></div>
   <button class="btn btn-ghost btn-sm" data-logout>Log out</button></div>
@@ -1596,32 +1630,9 @@ function vAdmin(){
         <div class="paybtns"><button class="btn btn-sm" data-save-settings>Save offer settings</button></div>
         <div id="setMsg"></div>
       </div>
-      <div class="panel">
-        <h3>${state.editing?"Edit product":"Add product"}</h3>
-        <div class="form2">
-          <div class="full"><label for="f-title">Title</label><input class="f" id="f-title" value="${esc(e.title||"")}" placeholder="Black Myth: Wukong — PC"></div>
-          <div><label for="f-platform">Platform</label><select class="f" id="f-platform">${Object.entries(PLATFORMS).map(([k,v])=>'<option value="'+k+'"'+(e.platform===k?" selected":"")+'>'+esc(v.long)+'</option>').join("")}</select></div>
-          <div><label for="f-kind">Type</label><select class="f" id="f-kind">${["account","subscription","wallet"].map(k=>'<option value="'+k+'"'+(e.kind===k?" selected":"")+'>'+KINDS[k]+'</option>').join("")}</select></div>
-          <div><label for="f-region">Region</label><input class="f" id="f-region" value="${esc(e.region||"Global")}" placeholder="India / Global / US"></div>
-          <div><label for="f-tag">Badge</label><select class="f" id="f-tag">${["","Bestseller","Deal","New","Hot","Instant","Bundle","Limited","Preorder"].map(t=>'<option value="'+t+'"'+((e.tag||"")===t?" selected":"")+'>'+(t||"— none —")+'</option>').join("")}</select></div>
-          <div><label for="f-price">Sale price (₹)</label><input class="f" id="f-price" type="number" min="0" inputmode="numeric" value="${esc(e.price??"")}" placeholder="299"></div>
-          <div><label for="f-mrp">MRP (₹)</label><input class="f" id="f-mrp" type="number" min="0" inputmode="numeric" value="${esc(e.mrp??"")}" placeholder="3599"></div>
-          <div><label for="f-p2">Tier-2 price (₹) — Online (PC) / Primary (PSN). Blank = single price</label><input class="f" id="f-p2" type="number" min="0" inputmode="numeric" value="${esc(e.p2||"")}" placeholder="e.g. 599"></div>
-          <div><label for="f-stock">Stock</label><input class="f" id="f-stock" type="number" min="0" inputmode="numeric" value="${esc(e.stock??1)}"></div>
-          <div class="full"><label for="f-games">Games included (comma-separated)</label><input class="f" id="f-games" value="${esc((e.games||[]).join(", "))}" placeholder="Black Myth: Wukong"></div>
-          <div class="full"><label for="f-img">Poster image URL (optional)</label><input class="f" id="f-img" inputmode="url" value="${esc(e.img||"")}" placeholder="https://…/poster.png"></div>
-        </div>
-        <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="f-featured" ${e.featured?"checked":""}> Featured on homepage</label>
-        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-active" ${(e.active!==false)?"checked":""}> Visible on site</label>
-        <div class="paybtns">
-          <button class="btn btn-sm" data-save-product>${state.editing?"Save changes":"Add product"}</button>
-          ${state.editing?'<button class="btn btn-ghost btn-sm" data-cancel-edit>Cancel edit</button>':''}
-        </div>
-        <div id="pMsg"></div>
-      </div>
     </div>
     <div class="panel">
-      <h3>Products (${all.length})</h3>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Products (${all.length})</h3><button class="btn btn-sm" data-add-product>＋ Add product</button></div>
       <label for="ad-search" style="margin-top:0">Search</label>
       <input class="f" id="ad-search" placeholder="Filter by title…" oninput="renderAdminTable()">
       <div class="tblwrap"><table class="ptable"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
@@ -1642,6 +1653,77 @@ function renderAdminTable(){
     '<button class="btn btn-ghost btn-sm" data-toggle-active="'+p.id+'">'+(p.active!==false?"Hide":"Show")+'</button>'+
     '<button class="btn btn-ghost btn-sm" data-toggle-feat="'+p.id+'">'+(p.featured?"Unfeature":"Feature")+'</button>'+
     '<button class="btn btn-danger btn-sm" data-del="'+p.id+'">Delete</button></div></td></tr>').join("");
+}
+
+
+/* ---- product modal editor ---- */
+function pmTierLabels(){
+  const pl=($("#pm-platform")||{}).value||"pc";
+  const lb=$("#pm-l-base"),hb=$("#pm-h-base"),lp=$("#pm-l-p2"),hp=$("#pm-h-p2"),w=$("#pm-t2wrap");
+  if(!lb) return;
+  if(pl==="psn"){
+    lb.textContent="Secondary price (\u20B9)"; hb.textContent="Game plays offline on the provided account \u2014 your volume tier";
+    lp.textContent="Primary price (\u20B9)"; hp.textContent="\u224870% of PS Store price \u2014 all profiles on the buyer's PS5, online works";
+    if(w) w.style.display="";
+  }else if(pl==="pc"){
+    lb.textContent="Offline price (\u20B9)"; hb.textContent="Single-player on the provided account \u2014 your volume tier";
+    lp.textContent="Online price (\u20B9)"; hp.textContent="Multiplayer unlocked \u2014 usually 30\u201345% above offline";
+    if(w) w.style.display="";
+  }else{
+    lb.textContent="Price (\u20B9)"; hb.textContent="What the buyer pays";
+    if(w) w.style.display="none";
+  }
+}
+function pmThumb(){ const u=($("#pm-img")||{}).value||""; const t=$("#pm-thumb"); if(t){ if(u){ t.src=u; t.style.display="block"; } else { t.style.display="none"; } } }
+function pmClose(){ const ov=$("#pmOv"); if(ov) ov.remove(); document.body.style.overflow=""; }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") pmClose(); });
+function openProdModal(id){
+  const p=id?byId(id):null;
+  const tags=["","Bestseller","Deal","New","Hot","Instant","Bundle","Limited","Preorder"];
+  $("#modalRoot").innerHTML=
+  '<div class="pm-ov" id="pmOv" onclick="if(event.target===this)pmClose()">'+
+  '<div class="pm-dl" role="dialog" aria-modal="true" aria-label="'+(p?"Edit product":"Add product")+'">'+
+  '<div class="pm-hd"><div><b>'+(p?"Edit product":"Add product")+'</b><span>'+(p?esc(p.id)+" \u00B7 changes go live instantly":"New listing goes live immediately after saving")+'</span></div>'+
+  '<button class="pm-x" onclick="pmClose()" aria-label="Close">\u2715</button></div>'+
+  '<div class="pm-bd">'+
+  '<div class="pm-full"><label class="pm-l" for="pm-title">Title</label><input class="f" id="pm-title" value="'+(p?esc(p.title):"")+'" placeholder="Black Myth: Wukong \u2014 PC"></div>'+
+  '<div class="pm-grid">'+
+  '<div><label class="pm-l" for="pm-platform">Platform</label><select class="f" id="pm-platform" onchange="pmTierLabels()">'+Object.entries(PLATFORMS).map(([k,v])=>'<option value="'+k+'"'+((p?p.platform:"pc")===k?" selected":"")+'>'+esc(v.long)+'</option>').join("")+'</select></div>'+
+  '<div><label class="pm-l" for="pm-kind">Type</label><select class="f" id="pm-kind">'+["account","subscription","wallet"].map(k=>'<option value="'+k+'"'+((p?p.kind:"account")===k?" selected":"")+'>'+KINDS[k]+'</option>').join("")+'</select></div>'+
+  '<div><label class="pm-l" for="pm-region">Region</label><input class="f" id="pm-region" value="'+esc(p?(p.region||"Global"):"Global")+'" placeholder="India / Global / US"></div>'+
+  '<div><label class="pm-l" for="pm-tag">Badge</label><select class="f" id="pm-tag">'+tags.map(t=>'<option value="'+t+'"'+((p?(p.tag||""):"")==t?" selected":"")+'>'+(t||"\u2014 none \u2014")+'</option>').join("")+'</select></div>'+
+  '</div>'+
+  '<div class="pm-full"><label class="pm-l">Pricing \u2014 labels follow the platform</label><div class="pm-pricegrid">'+
+  '<div class="pm-tier t1"><label class="pm-l" id="pm-l-base" for="pm-price">Offline price (\u20B9)</label><input id="pm-price" type="number" min="0" inputmode="numeric" value="'+(p?p.price:"")+'" placeholder="299"><small id="pm-h-base">Single-player on the provided account</small></div>'+
+  '<div class="pm-tier t2" id="pm-t2wrap"><label class="pm-l" id="pm-l-p2" for="pm-p2">Online price (\u20B9)</label><input id="pm-p2" type="number" min="0" inputmode="numeric" value="'+(p&&p.p2?p.p2:"")+'" placeholder="439"><small id="pm-h-p2">Multiplayer unlocked \u2014 30\u201345% above offline</small></div>'+
+  '<div class="pm-tier"><label class="pm-l" for="pm-mrp">Store MRP (\u20B9)</label><input id="pm-mrp" type="number" min="0" inputmode="numeric" value="'+(p?p.mrp:"")+'" placeholder="3599"><small>Drives the save-\u2009% badge on cards</small></div>'+
+  '</div></div>'+
+  '<div class="pm-3">'+
+  '<div><label class="pm-l" for="pm-stock">Stock</label><input class="f" id="pm-stock" type="number" min="0" inputmode="numeric" value="'+(p?(p.stock??1):1)+'"></div>'+
+  '<div class="pm-full" style="grid-column:span 2"><label class="pm-l" for="pm-games">Games included (comma-separated)</label><input class="f" id="pm-games" value="'+esc(p?(p.games||[]).join(", "):"")+'" placeholder="Black Myth: Wukong"></div>'+
+  '</div>'+
+  '<div class="pm-full"><label class="pm-l" for="pm-img">Poster image</label><input class="f" id="pm-img" inputmode="url" value="'+esc(p?(p.img||""):"")+'" placeholder="img/xxx.jpg or https://\u2026" oninput="pmThumb()"><img id="pm-thumb" alt=""></div>'+
+  '<div class="pm-grid">'+
+  '<label class="pm-sw"><span><b>Featured on homepage</b><em>Shows in the Bestsellers rail</em></span><input type="checkbox" id="pm-featured" '+(p&&p.featured?"checked":"")+'></label>'+
+  '<label class="pm-sw"><span><b>Visible on site</b><em>Hidden products stay saved</em></span><input type="checkbox" id="pm-active" '+(p&&p.active===false?"":"checked")+'></label>'+
+  '</div>'+
+  '</div>'+
+  '<div class="pm-ft"><div id="pm-msg" class="err"></div><button class="btn btn-ghost btn-sm" onclick="pmClose()">Cancel</button><button class="btn btn-sm" data-pm-save="'+(p?esc(p.id):"")+'">'+(p?"Save changes":"Add product")+'</button></div>'+
+  '</div></div>';
+  document.body.style.overflow="hidden";
+  pmTierLabels(); pmThumb();
+  const t=$("#pm-title"); if(t) t.focus();
+}
+function openConfirm(title,sub,yesLabel,cb){
+  $("#modalRoot").innerHTML=
+  '<div class="pm-ov" id="pmOv" onclick="if(event.target===this)pmClose()">'+
+  '<div class="pm-dl" style="width:min(430px,100%)" role="alertdialog" aria-modal="true">'+
+  '<div class="pm-hd"><div><b>'+esc(title)+'</b><span>This action cannot be undone</span></div><button class="pm-x" onclick="pmClose()" aria-label="Close">\u2715</button></div>'+
+  '<div class="pm-bd"><p style="margin:0;color:var(--mut);font-size:14px;line-height:1.6;word-break:break-word">'+esc(sub||"")+'</p></div>'+
+  '<div class="pm-ft"><button class="btn btn-ghost btn-sm" onclick="pmClose()">Keep it</button><button class="btn btn-danger btn-sm" id="pmYes">'+esc(yesLabel||"Delete")+'</button></div>'+
+  '</div></div>';
+  document.body.style.overflow="hidden";
+  $("#pmYes").onclick=async()=>{ $("#pmYes").disabled=true; await cb(); pmClose(); };
 }
 
 /* ============ checkout ============ */
@@ -1903,32 +1985,33 @@ document.addEventListener("click", async function(e){
     catch(err){ const m=$("#setMsg"); if(m) m.innerHTML='<div class="err">Save failed: '+esc(err.message)+'</div>'; }
     return;
   }
-  if(q("[data-save-product]") && state.fbReady && state.user){
+  if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
+  if((el=q("[data-pm-save]")) && state.fbReady && state.user){
     const g=v=>($(v)||{}).value;
+    const id=el.dataset.pmSave||null;
+    const plat=g("#pm-platform")||"pc";
     const data={
-      title:(g("#f-title")||"").trim(), platform:g("#f-platform")||"pc", kind:g("#f-kind")||"account",
-      region:(g("#f-region")||"Global").trim(), tag:g("#f-tag")||"",
-      price:Math.max(0,parseInt(g("#f-price"),10)||0), mrp:Math.max(0,parseInt(g("#f-mrp"),10)||0),
-      p2:Math.max(0,parseInt(g("#f-p2"),10)||0),
-      stock:Math.max(0,parseInt(g("#f-stock"),10)||0),
-      games:(g("#f-games")||"").split(",").map(x=>x.trim()).filter(Boolean),
-      img:(g("#f-img")||"").trim(),
-      featured:!!g("#f-featured"), active:!!g("#f-active")
+      title:(g("#pm-title")||"").trim(), platform:plat, kind:g("#pm-kind")||"account",
+      region:(g("#pm-region")||"Global").trim(), tag:g("#pm-tag")||"",
+      price:Math.max(0,parseInt(g("#pm-price"),10)||0),
+      mrp:Math.max(0,parseInt(g("#pm-mrp"),10)||0),
+      p2:plat==="xbox"?0:Math.max(0,parseInt(g("#pm-p2"),10)||0),
+      stock:Math.max(0,parseInt(g("#pm-stock"),10)||0),
+      games:(g("#pm-games")||"").split(",").map(x=>x.trim()).filter(Boolean),
+      img:(g("#pm-img")||"").trim(),
+      featured:!!g("#pm-featured"), active:!!g("#pm-active")
     };
-    const msg=$("#pMsg");
-    if(!data.title||!data.price){ if(msg) msg.innerHTML='<div class="err">Title and sale price are required.</div>'; return; }
+    const msg=$("#pm-msg");
+    if(!data.title||!data.price){ if(msg) msg.textContent="Title and the main price are required."; return; }
+    el.disabled=true;
     try{
-      if(state.editing){ await fsAdd({...state.editingObj,...data, id:state.editing}); toast("Product updated"); }
+      if(id){ const p=byId(id); await fsAdd({...p,...data,id:id}); toast("Product updated — live"); }
       else{ await fsAdd(data); toast("Product added — live on site"); }
-      state.editing=null; state.editingObj=null; route();
-    }catch(err){ if(msg) msg.innerHTML='<div class="err">Save failed: '+esc(err.message)+'</div>'; }
+      pmClose(); route();
+    }catch(err){ if(msg) msg.textContent="Save failed: "+err.message; el.disabled=false; }
     return;
   }
-  if(q("[data-cancel-edit]")){ state.editing=null; state.editingObj=null; route(); return; }
-  if((el=q("[data-edit]")) && state.fbReady && state.user){
-    const p=byId(el.dataset.edit); if(!p) return;
-    state.editing=p.id; state.editingObj={...p}; route(); return;
-  }
+  if((el=q("[data-edit]")) && state.fbReady && state.user){ openProdModal(el.dataset.edit); return; }
   if((el=q("[data-toggle-active]")) && state.fbReady && state.user){
     const p=byId(el.dataset.toggleActive); if(!p) return;
     try{ await fsAdd({...p, active:p.active===false}); toast(p.active===false?"Shown":"Hidden"); }catch(err){ toast("Failed: "+err.message); }
@@ -1946,13 +2029,14 @@ document.addEventListener("click", async function(e){
   }
   if((el=q("[data-del]")) && state.fbReady && state.user){
     const p=byId(el.dataset.del); if(!p) return;
-    if(!confirm("Delete '"+p.title+"' permanently?")) return;
-    try{
-      markDeleted(p.id);
-      await firebase.firestore().collection("products").doc(p.id).delete();
-      delete state._seedProducts[p.id]; delete state.products[p.id];
-      toast("Deleted"); state.editing=null; route();
-    }catch(err){ toast("Failed: "+err.message); }
+    openConfirm("Delete this product?", p.title+" will be removed from the store and Firestore.", "Delete", async()=>{
+      try{
+        markDeleted(p.id);
+        await firebase.firestore().collection("products").doc(p.id).delete();
+        delete state._seedProducts[p.id]; delete state.products[p.id];
+        toast("Deleted"); route();
+      }catch(err){ toast("Failed: "+err.message); }
+    });
     return;
   }
   if((el=q("[data-sync-up]"))){ syncCatalog(el); return; }
