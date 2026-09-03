@@ -1511,7 +1511,7 @@ function vHome(){
 let catFilter="all";
 function vCatalog(pl){
   const P=PLATFORMS[pl];
-  const all=Object.values(state.products).filter(p=>p.active!==false && p.platform===pl);
+  const all=Object.values(state.products).filter(p=>p.active!==false && (pl==="subs" ? p.kind==="subscription" : p.platform===pl));
   const kinds=[...new Set(all.map(p=>p.kind))];
   const items=all.filter(p=>catFilter==="all"||p.kind===catFilter);
   const fb=(k,l)=>'<button class="fbtn'+(catFilter===k?" on":"")+'" data-filter="'+k+'">'+l+'</button>';
