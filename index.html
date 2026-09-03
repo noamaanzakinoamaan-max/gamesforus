@@ -1263,11 +1263,32 @@ window.REVIEWS=window.REVIEWS||[];
 const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
 const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true,
   brand:CONFIG.brand, whatsapp:CONFIG.whatsapp, upiId:CONFIG.upiId, email:CONFIG.email, instagram:CONFIG.instagram, hours:CONFIG.hours,
-  chatIntro:"", chatQA:"", adminUid:"", ownerEmail:""};
+  chatIntro:"", chatQA:"", adminUid:"", ownerEmail:"", gaId:"", cfToken:""};
 function applySettings(){
   const s=state.settings||{};
   ["brand","whatsapp","upiId","email","instagram","hours"].forEach(k=>{ if(s[k]) CONFIG[k]=s[k]; });
   document.title=CONFIG.brand+" — PSN, Xbox & PC game accounts at up to 90% off";
+  initAnalytics();
+}
+function initAnalytics(){
+  const s=state.settings||{};
+  try{
+    if(s.gaId && !window.__gaInit){
+      window.__gaInit=true;
+      const sc=document.createElement("script"); sc.async=true; sc.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(s.gaId); document.head.appendChild(sc);
+      window.dataLayer=window.dataLayer||[];
+      window.gtag=function(){ window.dataLayer.push(arguments); };
+      window.gtag("js",new Date());
+      window.gtag("config",s.gaId,{send_page_view:false});
+    }
+    if(s.cfToken && !window.__cfInit){
+      window.__cfInit=true;
+      const b=document.createElement("script"); b.defer=true; b.src="https://static.cloudflareinsights.com/beacon.min.js";
+      b.setAttribute("data-cf-beacon", JSON.stringify({token:s.cfToken}));
+      document.body.appendChild(b);
+    }
+    if(window.gtag){ window.gtag("event","page_view",{page_path:location.pathname+location.search+location.hash, page_title:document.title}); }
+  }catch(e){}
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all" };
 function loadLocal(){
@@ -1774,6 +1795,16 @@ function vAdmin(){
         <div id="chatMsg2"></div>
       </div>
       <div class="panel" style="margin-bottom:18px">
+        <h3>Analytics</h3>
+        <p class="hint" style="margin-top:0">Paste an ID and visitors are tracked automatically — see traffic in Google Analytics or Cloudflare. Optional; works once Firestore is live.</p>
+        <div class="form2">
+          <div><label for="st-ga">Google Analytics 4 ID</label><input class="f" id="st-ga" value="${esc(state.settings.gaId||"")}" placeholder="G-XXXXXXXXXX"></div>
+          <div><label for="st-cf">Cloudflare Web Analytics token</label><input class="f" id="st-cf" value="${esc(state.settings.cfToken||"")}" placeholder="abc123…"></div>
+        </div>
+        <div class="paybtns"><button class="btn btn-sm" data-save-analytics>Save analytics</button></div>
+        <div id="anMsg"></div>
+      </div>
+      <div class="panel" style="margin-bottom:18px">
         <h3>Customers &amp; offers list</h3>
         <p class="hint" style="margin-top:0">Buyers who create an account land here. Export the opted-in list to ping them on WhatsApp about new offers.</p>
         <div class="stats"><div class="stat"><b id="custCount">–</b><span>Registered buyers</span></div><div class="stat"><b id="custOpt">–</b><span>Want offers</span></div></div>
@@ -2080,6 +2111,7 @@ function metaSet(name,val,attr){ let el=document.head.querySelector((attr?"prope
 function canonicalSet(u){ let el=document.head.querySelector('link[rel="canonical"]'); if(el) el.href=u; }
 function route(){
   const h=routeNow();
+  try{ initAnalytics(); }catch(e){}
   const app=$("#app");
   window.scrollTo(0,0);
   let base=h;
@@ -2351,6 +2383,13 @@ document.addEventListener("click", async function(e){
     }catch(err){
       const m=$("#claimMsg"); if(m) m.innerHTML='<div class="err">Claim blocked: '+esc(err.message)+' — publish the updated firestore.rules first (SETUP-FIREBASE.md), then retry.</div>';
     }
+    return;
+  }
+  if((el=q("[data-save-analytics]")) && state.fbReady && state.user){
+    const s={gaId:($("#st-ga")||{}).value.trim()||"", cfToken:($("#st-cf")||{}).value.trim()||""};
+    try{ await firebase.firestore().collection("settings").doc("store").set(s,{merge:true}); state.settings={...state.settings,...s}; window.__gaInit=false; window.__cfInit=false; initAnalytics();
+      const m=$("#anMsg"); if(m) m.innerHTML='<div class="ok-note">Saved — tracking is live.</div>'; toast("Analytics updated");
+    }catch(err){ const m=$("#anMsg"); if(m) m.innerHTML='<div class="err">'+esc(err.message)+'</div>'; }
     return;
   }
   if((el=q("[data-load-customers]")) && state.fbReady && state.user){
