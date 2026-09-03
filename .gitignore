@@ -1,0 +1,8 @@
+# competitor research data — never publish
+data/
+# local/dev noise
+node_modules/
+.firebase/
+.firebaserc
+*.log
+.DS_Store

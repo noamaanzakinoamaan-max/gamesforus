@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Catalog: anyone can READ products (needed for the storefront),
+    // ONLY the admin UID can create/update/delete.
+    match /products/{id} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == "PASTE_YOUR_ADMIN_UID_HERE";
+    }
+
+    // Store settings (announcement bar, coupon): public read, admin-only write.
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == "PASTE_YOUR_ADMIN_UID_HERE";
+    }
+
+    // Everything else: locked.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

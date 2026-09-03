@@ -1,0 +1,1994 @@
+<!doctype html>
+<!--
+  HeavenDigital v3 — MOBILE-FIRST storefront + owner admin (Firebase Auth + Firestore)
+  ------------------------------------------------------------------------------------
+  Mobile UX: bottom tab bar, 2-column catalog grid, sticky product buy-bar,
+  bottom-sheet checkout, 44px+ tap targets, iOS safe-area insets, no-zoom inputs,
+  auto-tilting 3D hero on touch devices. Desktop keeps pointer parallax/tilt.
+  All motion respects prefers-reduced-motion.
+  SETUP (see SETUP-FIREBASE.md): paste Firebase config into firebase-config.js,
+  publish firestore.rules with YOUR admin UID, `firebase deploy`.
+  Until then the site runs in DEMO MODE (storefront fully works locally).
+  Catalog = real products imported from the old ArcadeHeaven Wix store (edit freely in admin).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HeavenDigital — PSN, Xbox & PC game accounts at up to 90% off</title>
+<meta name="description" content="Buy PSN, Xbox and PC game accounts with top titles — Until Dawn, Spider-Man 2, Game Pass and more. Delivered on WhatsApp in minutes, 30-day warranty, UPI accepted.">
+<meta name="theme-color" content="#0b0d12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta property="og:title" content="HeavenDigital — game accounts at up to 90% off">
+<meta property="og:description" content="PSN, Xbox & PC accounts with top games included. WhatsApp delivery, 30-day warranty, UPI accepted.">
+<meta property="og:type" content="website">
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="%23f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="%230b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="%230b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="%23f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="%23f5c044"/></svg>'>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Organization","name":"HeavenDigital","url":"https://heavendigital.in","description":"PSN, Xbox and PC game accounts with top titles included, delivered on WhatsApp in India.","contactPoint":{"@type":"ContactPoint","contactType":"customer support","areaServed":"IN","availableLanguage":"en"}}
+</script>
+<style>
+/* ============ tokens & base ============ */
+:root{--bg:#0b0d12;--srf:rgba(18,21,29,.72);--srf-solid:#12151d;--srf2:#0e1117;--line:rgba(120,140,190,.16);--tx:#ece9e2;--mut:#98a0b3;--gold:#f5c044;--gold2:#ffdf8e;--gold-d:#231a05;--red:#f87171;--green:#4ade80;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--rad:16px;--bnh:62px}
+*{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}button{font-family:inherit}
+a,button,input,select,textarea{-webkit-tap-highlight-color:transparent}
+a,button{touch-action:manipulation}
+::selection{background:rgba(245,192,68,.85);color:#1c1506}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px;position:relative}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.skip{position:absolute;left:-9999px}.skip:focus{left:12px;top:12px;background:var(--gold);color:var(--gold-d);padding:8px 14px;border-radius:8px;z-index:200}
+/* ============ ambient background ============ */
+#stars{position:fixed;inset:0;z-index:0;pointer-events:none}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.16;will-change:transform}
+.aurora i:nth-child(1){width:520px;height:520px;background:#f5c044;top:-160px;right:-80px;animation:drift1 26s ease-in-out infinite alternate}
+.aurora i:nth-child(2){width:460px;height:460px;background:#3b82f6;bottom:-180px;left:-120px;opacity:.10;animation:drift2 32s ease-in-out infinite alternate}
+.aurora i:nth-child(3){width:340px;height:340px;background:#8b5cf6;top:38%;left:52%;opacity:.07;animation:drift3 38s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(-90px,60px) scale(1.15)}}
+@keyframes drift2{to{transform:translate(110px,-70px) scale(1.1)}}
+@keyframes drift3{to{transform:translate(-70px,-60px) scale(1.2)}}
+#glow{position:fixed;left:0;top:0;width:340px;height:340px;margin:-170px 0 0 -170px;border-radius:50%;background:radial-gradient(circle,rgba(245,192,68,.10),transparent 60%);pointer-events:none;z-index:1;opacity:0;transition:opacity .4s;will-change:transform}
+body.pointer-fine #glow{opacity:1}
+/* ============ splash ============ */
+#splash{position:fixed;inset:0;background:var(--bg);z-index:150;display:grid;place-items:center;transition:opacity .5s,visibility .5s}
+#splash.gone{opacity:0;visibility:hidden}
+.splash-in{display:flex;flex-direction:column;align-items:center;gap:14px;animation:pop .7s cubic-bezier(.2,1.4,.3,1)}
+.splash-in .logo{width:64px;height:64px;filter:drop-shadow(0 0 24px rgba(245,192,68,.5))}
+.splash-in b{font-size:22px;letter-spacing:-.02em}
+.splash-in small{color:var(--mut);letter-spacing:.28em;text-transform:uppercase;font-size:10.5px}
+.splash-bar{width:130px;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.splash-bar i{display:block;height:100%;width:40%;background:var(--gold);border-radius:2px;animation:load 1s ease-in-out infinite}
+@keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(330%)}}
+@keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+/* ============ announce + header ============ */
+.announce{background:linear-gradient(90deg,#2a2109,#1c1506);border-bottom:1px solid #3a2f12;color:#f0d68a;font-weight:700;font-size:12.5px;text-align:center;padding:8px 12px;position:relative;z-index:2}
+.announce b{color:var(--gold)}
+.site-head{position:sticky;top:0;z-index:50;background:rgba(11,13,18,.72);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:.3s}
+.site-head.scrolled{background:rgba(11,13,18,.92);border-bottom-color:var(--line);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.head-in{display:flex;align-items:center;gap:14px;height:60px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em;font-size:18px;flex:none}
+.logo{width:30px;height:30px}
+.nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{padding:9px 13px;border-radius:999px;color:var(--mut);font-size:14.5px;font-weight:600;white-space:nowrap;transition:color .2s;min-height:40px;display:inline-flex;align-items:center}
+.nav a:hover{color:var(--tx)}
+.nav a.on{color:var(--gold-d);background:linear-gradient(135deg,var(--gold),var(--gold2));box-shadow:0 4px 18px rgba(245,192,68,.35)}
+.cart-btn{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--srf);padding:9px 14px;border-radius:999px;font-weight:700;font-size:14px;flex:none;cursor:pointer;color:var(--tx);backdrop-filter:blur(6px);transition:border-color .2s;min-height:40px}
+.cart-btn:hover{border-color:var(--gold)}
+.cart-btn svg{width:17px;height:17px}
+.count{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-d);border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:12.5px;font-weight:800;padding:0 6px}
+.count.pop{animation:cpop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes cpop{40%{transform:scale(1.45)}}
+/* ============ bottom tab bar (mobile) ============ */
+.bottomnav{display:none}
+/* ============ buttons ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,var(--gold),#eab308);color:var(--gold-d);border:0;padding:13px 22px;border-radius:12px;font-weight:800;font-size:15px;cursor:pointer;transition:filter .15s,transform .15s,box-shadow .2s;box-shadow:0 6px 22px rgba(245,192,68,.22);position:relative;overflow:hidden;min-height:46px}
+.btn:hover{filter:brightness(1.07);transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,192,68,.32)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-120%);transition:transform .6s}
+.btn:hover::after{transform:translateX(120%)}
+.btn-ghost{background:rgba(255,255,255,.03);color:var(--tx);border:1px solid var(--line);box-shadow:none;backdrop-filter:blur(6px)}
+.btn-ghost:hover{border-color:var(--gold);box-shadow:0 8px 26px rgba(245,192,68,.14)}
+.btn-sm{padding:9px 14px;font-size:13px;border-radius:10px;min-height:40px}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(248,113,113,.35);box-shadow:none}.btn-danger:hover{border-color:var(--red);box-shadow:none}
+.btn-block{width:100%}.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+/* ============ hero ============ */
+.hero{padding:38px 0 26px;display:grid;grid-template-columns:1.08fr .92fr;gap:36px;align-items:center;position:relative;z-index:2}
+.kicker{display:inline-flex;gap:8px;align-items:center;color:var(--gold);font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase;animation:fadeUp .7s .1s both}
+.kicker .dotpulse{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+h1{font-size:clamp(30px,7.6vw,50px);line-height:1.08;letter-spacing:-.03em;margin:12px 0;font-weight:800;animation:fadeUp .7s .2s both}
+h1 .shine{background:linear-gradient(100deg,var(--gold) 20%,#fff8e1 40%,var(--gold) 60%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shineText 4s linear infinite}
+@keyframes shineText{to{background-position:200% center}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.lead{color:var(--mut);font-size:16.5px;max-width:52ch;margin:0 0 22px;animation:fadeUp .7s .3s both}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .7s .4s both}
+.hero-cta .btn{flex:1;min-width:150px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;animation:fadeUp .7s .5s both}
+.chip{display:inline-flex;gap:7px;align-items:center;border:1px solid var(--line);background:rgba(14,17,23,.6);color:var(--mut);border-radius:999px;padding:8px 13px;font-size:12.5px;font-weight:600;backdrop-filter:blur(6px)}
+.chip svg{width:13px;height:13px;color:var(--gold);flex:none}
+.statsrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px;animation:fadeUp .7s .6s both}
+@media(min-width:941px){.statsrow{grid-template-columns:repeat(4,1fr)}}
+.stat2{background:var(--srf);border:1px solid var(--line);border-radius:14px;padding:14px 16px;backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:2px}
+.stat2 b{font-size:20px;font-family:var(--mono);color:var(--gold);line-height:1.2;white-space:nowrap;font-weight:800}
+.stat2 span{color:var(--mut);font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 3D scene */
+.hero-visual{perspective:1100px;z-index:2}
+.scene{position:relative;height:400px;transform-style:preserve-3d;will-change:transform}
+.layer{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.orb{position:absolute;top:50%;left:50%;width:300px;height:300px;margin:-150px;border-radius:50%;background:radial-gradient(circle,rgba(245,192,68,.22),rgba(245,192,68,.05) 55%,transparent 70%);filter:blur(6px);animation:orbPulse 5s ease-in-out infinite}
+@keyframes orbPulse{50%{transform:scale(1.12)}}
+.ring{position:absolute;top:50%;left:50%;width:380px;height:380px;margin:-190px;border-radius:50%;border:1px dashed rgba(245,192,68,.25);animation:spin 40s linear infinite}
+.ring::before{content:"";position:absolute;top:-5px;left:50%;width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.gcard{position:absolute;width:74%;aspect-ratio:16/10;border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.16);box-shadow:0 24px 60px rgba(0,0,0,.55),0 0 40px rgba(245,192,68,.06);overflow:hidden}
+.gcard .gimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.gcard .gov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,14,.15),rgba(5,8,14,.84) 80%);z-index:1}
+.gcard::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.14) 50%,transparent 65%);transform:translateX(-130%);animation:sweep 5.5s ease-in-out infinite;z-index:2}
+.gc1::after{animation-delay:1s}.gc2::after{animation-delay:3s}.gc3::after{animation-delay:4.4s}
+@keyframes sweep{0%,55%{transform:translateX(-130%)}75%,100%{transform:translateX(130%)}}
+.gcard .row{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85);position:relative;z-index:3}
+.gcard .gbot{position:relative;z-index:3}
+.gcard .g{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.01em}
+.gcard .p{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--gold)}
+.gc1{background:linear-gradient(135deg,#1e3a8a,#0b1e4b);top:2%;right:0;--r:4deg}
+.gc2{background:linear-gradient(135deg,#14532d,#052e16);top:37%;left:-3%;--r:-3.5deg}
+.gc3{background:linear-gradient(135deg,#313d54,#0f172a);bottom:0;right:5%;--r:2deg}
+.floaty{animation:bob 6s ease-in-out infinite;transform:rotate(var(--r,0deg))}
+.gc2.floaty{animation-delay:1.2s}.gc3.floaty{animation-delay:2.4s}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(var(--r,0deg))}50%{transform:translateY(-12px) rotate(var(--r,0deg))}}
+.floaty2{animation:bob2 7s ease-in-out infinite}
+@keyframes bob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+/* auto-tilt the 3D scene on touch devices (no pointer needed) */
+@media (hover:none) and (prefers-reduced-motion:no-preference){
+ .scene{animation:autoTilt 14s ease-in-out infinite}
+ @keyframes autoTilt{0%,100%{transform:rotateY(9deg) rotateX(4deg)}50%{transform:rotateY(-9deg) rotateX(-3deg)}}
+}
+/* ============ ticker ============ */
+.ticker-wrap{border-block:1px solid var(--line);background:rgba(14,17,23,.55);backdrop-filter:blur(6px);overflow:hidden;position:relative;z-index:2;padding:11px 0;margin-top:8px}
+.ticker{display:flex;gap:0;width:max-content;animation:tick 36s linear infinite;will-change:transform}
+.ticker-wrap:hover .ticker{animation-play-state:paused}
+.ticker span{display:inline-flex;align-items:center;gap:14px;padding:0 14px;font-weight:800;letter-spacing:.12em;font-size:12px;color:#cbb26a;white-space:nowrap;text-transform:uppercase}
+.ticker span::after{content:"◆";color:var(--gold);font-size:9px}
+@keyframes tick{to{transform:translateX(-50%)}}
+/* ============ sections ============ */
+main{position:relative;z-index:2}
+.sec{padding:38px 0 6px}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+h2{font-size:clamp(20px,5.4vw,30px);letter-spacing:-.02em;margin:0;font-weight:800}
+h3{font-weight:800}
+.sub{color:var(--mut);font-size:14px;margin:5px 0 0}
+.see-all{color:var(--gold);font-weight:700;font-size:13.5px;white-space:nowrap;display:inline-block;min-height:40px;line-height:40px;transition:transform .2s}
+.see-all:hover{transform:translateX(4px)}
+.timer{color:var(--gold);font-family:var(--mono);font-weight:700;font-size:12px;background:rgba(245,192,68,.1);border:1px solid rgba(245,192,68,.3);padding:5px 10px;border-radius:999px;white-space:nowrap}
+/* reveal */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+.rv.in{opacity:1;transform:none}
+/* ============ collections ============ */
+.collections{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.colcard{border:1px solid var(--line);border-radius:var(--rad);background:var(--srf);padding:16px;display:flex;flex-direction:column;gap:3px;transition:transform .25s,border-color .25s,box-shadow .25s;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.colcard::before{content:"";position:absolute;inset:0;background:radial-gradient(240px 120px at 50% -20%,rgba(245,192,68,.12),transparent);opacity:0;transition:opacity .3s}
+.colcard:active{transform:scale(.98)}
+.colcard:hover{transform:translateY(-5px);border-color:rgba(245,192,68,.5);box-shadow:0 18px 44px rgba(0,0,0,.4)}
+.colcard:hover::before{opacity:1}
+.colcard .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;margin-bottom:8px;transition:transform .3s}
+.colcard:hover .ic{transform:scale(1.12) rotate(-6deg)}
+.colcard .ic svg{width:21px;height:21px}
+.colcard b{font-size:15px;position:relative}
+.colcard span{color:var(--mut);font-size:12px;font-weight:600;position:relative}
+.ic-ps{background:rgba(59,130,246,.14);color:#7cb0f9}.ic-xb{background:rgba(74,222,128,.12);color:#6ee7a0}.ic-pc{background:rgba(148,163,184,.14);color:#b7c1d4}.ic-sub{background:rgba(245,192,68,.13);color:var(--gold)}
+/* ============ product cards ============ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--srf);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .25s;position:relative;backdrop-filter:blur(8px);transform-style:preserve-3d;will-change:transform}
+.card:active{transform:scale(.985)}
+.card:hover{border-color:rgba(245,192,68,.45);box-shadow:0 22px 50px rgba(0,0,0,.45),0 0 0 1px rgba(245,192,68,.15)}
+.card .glare{position:absolute;inset:0;background:radial-gradient(420px 300px at var(--gx,50%) var(--gy,-20%),rgba(255,255,255,.08),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none;z-index:3}
+.card:hover .glare{opacity:1}
+.art{position:relative;aspect-ratio:16/10;display:block;border-radius:0;overflow:hidden}
+.art .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,14,.05),rgba(5,8,14,.45) 82%);z-index:2}
+.art .mono{position:absolute;left:14px;top:0;font-size:56px;font-weight:900;opacity:.2;letter-spacing:-.05em;color:#fff;transition:transform .35s}
+.card:hover .art .mono{transform:translateY(-4px) scale(1.06)}
+.art .sheen{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.04) 0 2px,transparent 2px 9px)}
+.art .off{position:absolute;right:10px;top:10px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-d);font-weight:800;font-size:11px;padding:4px 8px;border-radius:8px;box-shadow:0 6px 18px rgba(245,192,68,.4);animation:badgeBob 3.5s ease-in-out infinite;z-index:4}
+@keyframes badgeBob{50%{transform:translateY(-3px)}}
+.art .ptag{position:absolute;left:10px;bottom:10px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.18);padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;backdrop-filter:blur(4px);z-index:4}
+.art-ps{background:linear-gradient(135deg,#1e40af,#0b1e4b)}
+.art-xb{background:linear-gradient(135deg,#166534,#052e16)}
+.art-pc{background:linear-gradient(135deg,#334155,#0f172a)}
+.card-body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tag{color:var(--gold);font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.card-title{margin:0;font-size:14.5px;font-weight:700;line-height:1.4}
+.card-title a:hover{color:var(--gold)}
+.gchips{display:flex;flex-wrap:wrap;gap:5px}
+.gchip{border:1px solid var(--line);background:rgba(14,17,23,.7);color:#b9c2d4;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px}
+.save{color:var(--green);font-size:11.5px;font-weight:700}
+.stock-low{color:var(--red);font-size:11.5px;font-weight:700}
+.stock-ok{color:var(--mut);font-size:11.5px;font-weight:600}
+.card-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:6px}
+.price{font-family:var(--mono);font-weight:700;font-size:15.5px}
+.mrp{color:var(--mut);font-size:11.5px;font-weight:500;margin-left:4px;text-decoration:line-through}
+/* ============ how it works / quotes ============ */
+.hiw{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.hiw .step{background:var(--srf);border:1px solid var(--line);border-radius:var(--rad);padding:18px;backdrop-filter:blur(8px);transition:transform .25s,border-color .25s}
+.hiw .step:hover{transform:translateY(-4px);border-color:rgba(245,192,68,.4)}
+.step .n{width:34px;height:34px;border-radius:10px;background:rgba(245,192,68,.12);color:var(--gold);display:grid;place-items:center;font-weight:800;margin-bottom:12px}
+.step h3{margin:0 0 6px;font-size:15.5px}.step p{margin:0;color:var(--mut);font-size:14px}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.quote{background:var(--srf);border:1px solid var(--line);border-radius:var(--rad);padding:18px;font-size:14px;color:#c9cfdd;margin:0;backdrop-filter:blur(8px)}
+.stars{color:var(--gold);letter-spacing:2px;font-size:13px;margin-bottom:10px}
+.who{display:flex;gap:10px;align-items:center;margin-top:16px}
+.avatar{width:34px;height:34px;border-radius:999px;background:linear-gradient(135deg,#3b2f10,#1c1506);display:grid;place-items:center;font-weight:800;font-size:13px;color:var(--gold);flex:none}
+.who b{font-size:13.5px}.who span{display:block;color:var(--mut);font-size:12px}
+details.acc{border:1px solid var(--line);border-radius:12px;background:var(--srf2);margin-top:10px}
+details.acc summary{cursor:pointer;padding:15px 16px;font-weight:700;font-size:14.5px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:48px;transition:color .2s}
+details.acc summary:hover{color:var(--gold)}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";color:var(--gold);font-size:19px;font-weight:700;transition:transform .25s}
+details.acc[open] summary::after{transform:rotate(45deg)}
+.acc-body{padding:0 16px 15px;color:var(--mut);font-size:14.5px;line-height:1.65}
+.acc-body ol,.acc-body ul{margin:8px 0;padding-left:20px}
+/* ============ product page ============ */
+.crumb{color:var(--mut);font-size:12.5px;padding-top:20px;display:flex;gap:6px;flex-wrap:wrap}.crumb a:hover{color:var(--gold)}
+.pd{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding:18px 0 10px}
+.pd .art{border-radius:18px;aspect-ratio:16/11}
+.pd .art .mono{font-size:84px;top:6px}
+.pd h1{font-size:clamp(22px,6vw,32px);animation:none}
+.pd-price{display:flex;align-items:baseline;gap:10px;font-family:var(--mono);font-size:26px;font-weight:700;margin:12px 0 4px;flex-wrap:wrap}
+.pd-price s{color:var(--mut);font-size:15px;font-weight:500}
+.pd-price .saveb{font-family:inherit;background:rgba(74,222,128,.12);color:var(--green);font-size:12px;font-weight:800;padding:4px 10px;border-radius:8px}
+.qtyrow{display:flex;gap:10px;align-items:center;margin:18px 0 12px;flex-wrap:wrap}
+.qtyrow .btn{flex:1;min-width:130px}
+.qty{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.qty button{background:var(--srf);color:var(--tx);border:0;width:46px;height:46px;font-size:20px;cursor:pointer;transition:color .15s}
+.qty button:hover{color:var(--gold)}
+.qty input{width:52px;text-align:center;background:var(--srf2);border:0;border-left:1px solid var(--line);border-right:1px solid var(--line);color:var(--tx);font-size:16px;font-weight:700;height:46px}
+.dlv{display:flex;gap:9px;align-items:center;color:var(--mut);font-size:13px;margin-top:11px}
+.dlv svg{width:15px;height:15px;color:var(--gold);flex:none}
+.gamehead{margin:20px 0 10px;font-size:15px}
+/* sticky mobile buy bar */
+.pd-sticky{display:none}
+/* ============ filters / cart ============ */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.fbtn{border:1px solid var(--line);background:var(--srf2);color:var(--mut);padding:10px 16px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer;transition:.2s;min-height:42px}
+.fbtn:active{transform:scale(.96)}
+.fbtn.on{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-d);border-color:var(--gold);box-shadow:0 4px 16px rgba(245,192,68,.3)}
+.cartlay{display:grid;grid-template-columns:1.5fr 1fr;gap:20px;padding:24px 0 10px;align-items:start}
+.panel{background:var(--srf);border:1px solid var(--line);border-radius:var(--rad);padding:18px;backdrop-filter:blur(8px)}
+.citem{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px dashed var(--line);animation:fadeUp .4s both}
+.citem:last-child{border-bottom:0}
+.citem .art{width:88px;border-radius:10px;flex:none;aspect-ratio:16/10}
+.citem .art .mono{font-size:26px;top:2px;left:8px}
+.citem .art .ptag,.citem .art .off,.citem .art .sheen{display:none}
+.ci-t{flex:1;min-width:0}.ci-t b{font-size:13.5px;display:block;line-height:1.4}.ci-t span{color:var(--mut);font-size:12px}
+.ci-r{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.ci-r .price{font-size:14px}
+.rm{background:none;border:0;color:var(--mut);font-size:12.5px;cursor:pointer;text-decoration:underline;padding:6px 0;min-height:32px}.rm:hover,.rm:active{color:var(--red)}
+.sumline{display:flex;justify-content:space-between;font-size:14.5px;color:#c9cfdd;padding:7px 0;gap:10px}
+.sumline.total{font-weight:800;color:var(--tx);font-size:16.5px;border-top:1px solid var(--line);margin-top:6px;padding-top:14px}
+label{display:block;font-size:13px;font-weight:700;color:var(--mut);margin:12px 0 6px}
+input.f,textarea.f,select.f{width:100%;background:var(--srf2);border:1px solid var(--line);border-radius:12px;color:var(--tx);padding:13px 14px;font:inherit;font-size:16px;transition:border-color .2s,box-shadow .2s}
+input.f:focus,textarea.f:focus,select.f:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,192,68,.12)}
+.couprow{display:flex;gap:10px;margin:14px 0 4px}
+.couprow input{text-transform:uppercase;flex:1}
+.couprow .btn{flex:0 0 auto}
+.coup-ok{color:var(--green);font-size:13px;font-weight:700;margin:4px 0;animation:fadeUp .3s both}
+.coup-no{color:var(--red);font-size:13px;font-weight:700;margin:4px 0;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+/* ============ footer ============ */
+.site-foot{border-top:1px solid var(--line);margin-top:48px;background:rgba(14,17,23,.8);backdrop-filter:blur(8px);position:relative;z-index:2}
+.site-foot::before{content:"";position:absolute;top:-1px;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(245,192,68,.5),transparent)}
+.foot-in{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;padding:36px 0 26px}
+.foot-in h4{margin:0 0 10px;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.foot-in a{display:flex;align-items:center;min-height:36px;color:#b9c2d4;font-size:14px;transition:transform .2s,color .2s}
+.foot-in a:hover{color:var(--gold);transform:translateX(3px)}
+.foot-blurb{color:var(--mut);font-size:13.5px;margin:10px 0 14px;max-width:38ch}
+.paychips{display:flex;gap:8px;flex-wrap:wrap}
+.pay{border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:11.5px;font-weight:700;color:#cbd5e1;background:var(--srf2)}
+.foot-base{border-top:1px solid var(--line);padding:14px 0 20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;color:var(--mut);font-size:12px}
+.foot-brand{grid-column:1/-1}
+.cta-band{margin:40px 0 8px;background:linear-gradient(120deg,rgba(42,33,9,.8),rgba(28,21,6,.8));border:1px solid #3a2f12;border-radius:20px;padding:26px;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.cta-band::before{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at 85% 50%,rgba(245,192,68,.14),transparent)}
+.cta-band h2{margin:0 0 4px;position:relative}.cta-band p{margin:0;color:#d9c58a;font-size:14px;position:relative}
+/* ============ modal / toast ============ */
+.overlay{position:fixed;inset:0;background:rgba(4,6,10,.75);backdrop-filter:blur(6px);display:grid;place-items:center;z-index:80;padding:18px;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}}
+.modal{background:var(--srf-solid);border:1px solid var(--line);border-radius:20px;max-width:520px;width:100%;max-height:86vh;overflow:auto;padding:22px;animation:zoomIn .3s cubic-bezier(.2,1.2,.3,1);box-shadow:0 40px 100px rgba(0,0,0,.6)}
+@keyframes zoomIn{from{transform:scale(.92) translateY(12px);opacity:0}}
+.modal h3{margin:2px 0 2px;font-size:19px}
+.modal .oid{color:var(--mut);font-size:13px;font-family:var(--mono)}
+.x{float:right;background:var(--srf2);border:1px solid var(--line);color:var(--mut);width:38px;height:38px;border-radius:12px;cursor:pointer;font-size:15px;transition:.2s}.x:hover{color:var(--tx);border-color:var(--gold);transform:rotate(90deg)}
+.paybtns{display:grid;gap:10px;margin-top:16px}
+.hint{color:var(--mut);font-size:13px;margin-top:14px;line-height:1.6}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,90px);background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-d);font-weight:800;padding:13px 20px;border-radius:12px;opacity:0;transition:.3s cubic-bezier(.2,1.2,.3,1);z-index:99;box-shadow:0 14px 40px rgba(245,192,68,.35);font-size:14px;max-width:88vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.prose{max-width:76ch;padding:30px 0 10px}
+.prose h1{font-size:clamp(22px,6vw,32px)}.prose h3{margin:24px 0 8px;font-size:17.5px}
+.prose p,.prose li{color:#c9cfdd;font-size:15px}.prose ul,.prose ol{padding-left:22px}
+.empty{text-align:center;padding:60px 0;color:var(--mut)}
+.empty b{display:block;color:var(--tx);font-size:20px;margin-bottom:6px}
+.empty .btn{margin-top:14px}
+/* ============ admin ============ */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
+.stat{background:var(--srf);border:1px solid var(--line);border-radius:14px;padding:14px;backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:21px;font-family:var(--mono)}
+.stat span{color:var(--mut);font-size:12px;font-weight:600}
+.admin-grid{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;margin-bottom:24px}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:12px}
+.ptable{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.ptable th{text-align:left;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:8px 10px;border-bottom:1px solid var(--line)}
+.ptable td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.ptable tr:hover td{background:rgba(255,255,255,.02)}
+.ttl{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.rowbtns{display:flex;gap:6px;flex-wrap:wrap}
+.pill{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;letter-spacing:.04em}
+.pill.on{background:rgba(74,222,128,.13);color:var(--green)}
+.pill.off{background:rgba(148,163,184,.14);color:var(--mut)}
+.pill.feat{background:rgba(245,192,68,.14);color:var(--gold)}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.form2 .full{grid-column:1/-1}
+.err{color:var(--red);font-size:13.5px;font-weight:600;margin-top:10px}
+.ok-note{color:var(--green);font-size:13.5px;font-weight:600;margin-top:10px}
+.demo-note{background:rgba(245,192,68,.08);border:1px solid rgba(245,192,68,.3);border-radius:14px;padding:16px;font-size:14px;color:#e8d9ab;margin:18px 0;line-height:1.7}
+.demo-note b{color:var(--gold)}
+#toTop{position:fixed;right:14px;bottom:14px;z-index:60;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--srf);color:var(--gold);font-size:18px;cursor:pointer;opacity:0;transform:translateY(14px);transition:.3s;backdrop-filter:blur(8px)}
+#toTop.show{opacity:1;transform:none}
+#toTop:hover{border-color:var(--gold)}
+/* ============================================================
+   MOBILE — tablets & down: bottom nav takes over
+   ============================================================ */
+@media(max-width:940px){
+ .nav{display:none}
+ .head-in{height:56px}
+ .bottomnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(11,13,18,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 8px calc(8px + env(safe-area-inset-bottom));gap:2px}
+ .bottomnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 0 5px;font-size:10.5px;font-weight:700;color:var(--mut);border-radius:12px;min-height:50px;position:relative}
+ .bottomnav a svg{width:22px;height:22px}
+ .bottomnav a.on{color:var(--gold);background:rgba(245,192,68,.09)}
+ .bottomnav .count{position:absolute;top:2px;right:calc(50% - 24px);min-width:17px;height:17px;font-size:10px}
+ main{padding-bottom:calc(var(--bnh) + env(safe-area-inset-bottom) + 10px)}
+ #toast{bottom:calc(var(--bnh) + env(safe-area-inset-bottom) + 12px)}
+ #toTop{bottom:calc(var(--bnh) + env(safe-area-inset-bottom) + 12px);right:12px}
+ .hero{padding:26px 0 18px}
+ .hero-visual{order:-1;margin-bottom:4px}
+ .scene{height:250px}
+ .gcard{width:80%;padding:12px 14px;border-radius:14px}
+ .gcard .g{font-size:13px}
+ .hero{grid-template-columns:1fr}
+ .collections{grid-template-columns:1fr 1fr}
+ .hiw{grid-template-columns:1fr}
+ .quotes{grid-template-columns:1fr}
+ .pd{grid-template-columns:1fr;gap:18px;padding-bottom:96px}
+ .cartlay{grid-template-columns:1fr}
+ .foot-in{grid-template-columns:1fr 1fr}
+ .foot-brand{grid-column:1/-1}
+ /* sticky buy bar on product pages */
+ .pd-sticky{display:flex;position:fixed;left:0;right:0;bottom:calc(var(--bnh) + env(safe-area-inset-bottom));z-index:65;background:rgba(14,17,23,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:10px 14px;gap:12px;align-items:center;justify-content:space-between}
+ .pd-sticky .price{font-size:18px}
+ .pd-sticky .btn{flex:0 0 auto;min-width:150px}
+}
+/* ============ phones ============ */
+@media(max-width:640px){
+ .wrap{padding:0 14px}
+ .announce{font-size:11.5px;padding:7px 10px}
+ .grid{grid-template-columns:1fr 1fr;gap:10px}
+ .card-body{padding:10px 11px 11px;gap:5px}
+ .card-title{font-size:12.5px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .gchips{display:none}
+ .save,.stock-low,.stock-ok{font-size:10.5px}
+ .price{font-size:14px}
+ .mrp{font-size:10.5px;margin-left:3px}
+ .btn-sm{padding:8px 10px;font-size:12px;min-height:38px}
+ .art .mono{font-size:42px;left:10px}
+ .art .off{font-size:10px;padding:3px 7px;right:8px;top:8px}
+ .art .ptag{font-size:9px;padding:3px 8px;left:8px;bottom:8px}
+ .colcard{padding:13px}
+ .colcard b{font-size:13.5px}.colcard span{font-size:11px}
+ .colcard .ic{width:34px;height:34px;margin-bottom:6px}
+ .stat2 b{font-size:19px}
+ .sec{padding:30px 0 4px}
+ .lead{font-size:15px}
+ .filters{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+ .filters::-webkit-scrollbar{display:none}
+ .fbtn{white-space:nowrap;flex:0 0 auto}
+ .qtyrow{gap:8px}
+ .qtyrow .btn{min-width:0}
+ .couprow{flex-wrap:nowrap}
+ .cta-band{padding:22px}
+ .cta-band .btn{width:100%}
+ .hero-cta .btn{min-width:0}
+ .modal{border-radius:22px 22px 0 0;max-width:100%;padding:20px 18px calc(18px + env(safe-area-inset-bottom))}
+ .overlay{place-items:end stretch;padding:0;align-items:end}
+ .overlay .modal{animation:sheetUp .34s cubic-bezier(.2,1,.3,1)}
+ @keyframes sheetUp{from{transform:translateY(70px);opacity:.4}}
+ .form2{grid-template-columns:1fr}
+ .stats{grid-template-columns:1fr 1fr}
+ .foot-base{font-size:11px}
+}
+@media(max-width:380px){
+ .brand{font-size:16px}.cart-btn{padding:8px 11px}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important;transition:none!important}
+ html{scroll-behavior:auto}
+ .rv{opacity:1;transform:none}
+ #stars,.aurora,#glow,.hero-visual{display:none}
+ #splash{display:none}
+}
+
+/* ---- v3.3 design polish ---- */
+.card:hover{border-color:rgba(245,192,68,.38);box-shadow:0 16px 40px rgba(0,0,0,.55),0 0 24px rgba(245,192,68,.09)}
+.art .pimg{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.card:hover .pimg{transform:scale(1.07)}
+.sec-head h2{letter-spacing:-.02em}
+.announce{background-image:linear-gradient(90deg,rgba(245,192,68,.16),rgba(245,192,68,.03) 40%,rgba(245,192,68,.16));background-size:200% 100%;animation:annshine 8s linear infinite}
+@keyframes annshine{to{background-position:-200% 0}}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.eyebrow::before{content:"";width:18px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);border-radius:2px}
+/* bestsellers rail */
+.bests{padding-top:8px}
+.bestrail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(245,192,68,.35) transparent}
+.bestrail::-webkit-scrollbar{height:6px}
+.bestrail::-webkit-scrollbar-thumb{background:rgba(245,192,68,.3);border-radius:99px}
+.bscard{position:relative;flex:0 0 46%;min-width:46%;scroll-snap-align:start;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;overflow:hidden;text-decoration:none;color:var(--tx);transition:border-color .2s,box-shadow .25s}
+.bscard:hover{border-color:rgba(245,192,68,.4);box-shadow:0 14px 36px rgba(0,0,0,.5)}
+.bs-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#0a0d13}
+.bs-fallback{display:grid;place-items:center;font-family:var(--mono);font-size:30px;color:var(--gold)}
+.bs-rank{position:absolute;top:10px;left:10px;z-index:2;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#151005;font-weight:900;font-size:11px;padding:4px 9px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.bs-body{display:flex;flex-direction:column;gap:3px;padding:11px 13px 13px}
+.bs-body>b{font-size:13.5px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bs-meta{font-size:11px;color:var(--mut)}
+.bs-price{font-family:var(--mono);font-size:13px;font-weight:800;color:var(--gold);margin-top:2px}
+.bs-price em{font-style:normal;color:var(--green);font-size:11px;margin-left:5px}
+@media(min-width:941px){.bscard{flex-basis:23%;min-width:23%}}
+/* tier options */
+.vopts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 6px}
+.vopt{position:relative;text-align:left;background:var(--srf);border:1.5px solid var(--line);border-radius:14px;padding:11px 13px;cursor:pointer;color:var(--tx);transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:2px}
+.vopt span{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.vopt b{font-family:var(--mono);font-size:17px;color:var(--gold)}
+.vopt i{font-style:normal;font-size:11px;color:var(--mut);line-height:1.35}
+.vopt.on{border-color:var(--gold);background:rgba(245,192,68,.07)}
+.vopt.on span{color:var(--gold)}
+.vhint{font-size:12px;color:var(--mut);margin:2px 0 10px;padding:9px 12px;border:1px dashed var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
+.t2l{color:var(--gold);font-weight:800}
+/* chat widget */
+#chatFab{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:88;width:54px;height:54px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#151005;font-size:22px;cursor:pointer;box-shadow:0 10px 30px rgba(245,192,68,.35);display:grid;place-items:center;transition:transform .15s}
+#chatFab:hover{transform:scale(1.06)}
+#chatFab.pulse{animation:chatpulse 1.6s ease-in-out infinite}
+@keyframes chatpulse{0%,100%{box-shadow:0 10px 30px rgba(245,192,68,.35)}50%{box-shadow:0 10px 42px rgba(245,192,68,.65)}}
+#chatDot{position:absolute;top:-3px;right:-3px;min-width:20px;height:20px;border-radius:99px;background:var(--red);color:#fff;font-size:11px;font-weight:900;display:none;place-items:center;padding:0 5px;border:2px solid var(--bg)}
+#chatDot.show{display:grid}
+#chatPanel{position:fixed;right:12px;bottom:calc(142px + env(safe-area-inset-bottom));z-index:89;width:min(372px,calc(100vw - 24px));height:min(500px,64vh);background:rgba(13,16,23,.97);backdrop-filter:blur(18px);border:1px solid rgba(245,192,68,.22);border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateY(16px) scale(.98);pointer-events:none;transition:opacity .22s,transform .22s}
+#chatPanel.open{opacity:1;transform:none;pointer-events:auto}
+.chat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;background:linear-gradient(135deg,rgba(245,192,68,.16),rgba(245,192,68,.05));border-bottom:1px solid var(--line)}
+.chat-head b{display:block;font-size:14.5px;color:var(--gold)}
+.chat-head span{font-size:11px;color:var(--mut)}
+#chatClose{background:none;border:0;color:var(--mut);font-size:16px;cursor:pointer;padding:4px}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin}
+.chat-msgs::-webkit-scrollbar{width:5px}
+.chat-msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
+.bub{max-width:86%;padding:10px 13px;border-radius:14px;font-size:13px;line-height:1.5;white-space:pre-line;animation:fadeIn .2s}
+.bub.bot{background:var(--srf);border:1px solid var(--line);border-bottom-left-radius:5px;align-self:flex-start}
+.bub.user{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#151005;font-weight:600;border-bottom-right-radius:5px;align-self:flex-end}
+.chat-ctas{display:flex;flex-wrap:wrap;gap:7px;align-self:flex-start;max-width:92%}
+.chat-ctas a{font-size:11.5px;font-weight:800;padding:7px 11px;border-radius:99px;border:1px solid rgba(245,192,68,.4);color:var(--gold);text-decoration:none;background:rgba(245,192,68,.06)}
+.chat-ctas a:hover{background:rgba(245,192,68,.15)}
+.chat-chips{display:flex;gap:7px;flex-wrap:wrap;padding:4px 12px 10px}
+.chat-chips button{font-size:11.5px;font-weight:700;padding:7px 11px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--tx);cursor:pointer}
+.chat-chips button:hover{border-color:var(--gold);color:var(--gold)}
+.chat-inrow{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line);background:rgba(255,255,255,.02)}
+#chatIn{flex:1;background:var(--srf);border:1px solid var(--line);border-radius:11px;padding:10px 13px;color:var(--tx);font-size:13px;outline:none}
+#chatIn:focus{border-color:rgba(245,192,68,.5)}
+.chat-send{width:42px;border:0;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#151005;font-size:15px;cursor:pointer}
+</style>
+</head>
+<body>
+<a class="skip" href="#app">Skip to content</a>
+
+<div id="splash" aria-hidden="true">
+  <div class="splash-in">
+    <svg class="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg>
+    <b>HeavenDigital</b>
+    <small>loading heaven</small>
+    <div class="splash-bar"><i></i></div>
+  </div>
+</div>
+
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div id="glow" aria-hidden="true"></div>
+
+<div class="announce" id="announceBar">Buy any 2 accounts and get flat 10% OFF — use coupon <b>HEAVEN10</b> at checkout</div>
+
+<header class="site-head" id="siteHead">
+  <div class="wrap head-in">
+    <a class="brand" href="#/" aria-label="HeavenDigital home">
+      <svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg>
+      <span>HeavenDigital</span>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#/" data-nav="/">Home</a>
+      <a href="#/pc" data-nav="/pc">PC</a>
+      <a href="#/psn" data-nav="/psn">PSN</a>
+      <a href="#/xbox" data-nav="/xbox">Xbox</a>
+      <a href="#/how" data-nav="/how">How it works</a>
+      <a href="#/faq" data-nav="/faq">FAQ</a>
+      <a href="#/contact" data-nav="/contact">Contact</a>
+    </nav>
+    <a class="cart-btn" href="#/cart" aria-label="View cart" style="margin-left:auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1.2 12H7.2L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
+      <span class="count" id="cartCount">0</span>
+    </a>
+  </div>
+</header>
+
+<main id="app" class="wrap" tabindex="-1"></main>
+
+<!-- mobile bottom tab bar -->
+<nav class="bottomnav" aria-label="Mobile navigation">
+  <a href="#/" data-bnav="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Home</span></a>
+  <a href="#/pc" data-bnav="/pc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M8 20h8"/></svg><span>PC</span></a>
+  <a href="#/psn" data-bnav="/psn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12h10M12 7v10"/></svg><span>PSN</span></a>
+  <a href="#/xbox" data-bnav="/xbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M8 16c2-4 6-4 8-8M16 16c-2-4-6-4-8-8"/></svg><span>Xbox</span></a>
+  <a href="#/cart" data-bnav="/cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1.2 12H7.2L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Cart</span><span class="count" id="cartCountM">0</span></a>
+</nav>
+
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-in">
+      <div class="foot-brand">
+        <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
+        <p class="foot-blurb">Level up your gaming experience — PSN, Xbox and PC accounts with the titles you actually want, priced for India, delivered on WhatsApp, backed by a 30-day warranty.</p>
+        <div class="paychips"><span class="pay">UPI</span><span class="pay">GPay</span><span class="pay">PhonePe</span><span class="pay">Paytm</span><span class="pay">Cards</span></div>
+      </div>
+      <div><h4>Shop</h4><a href="#/pc">PC accounts</a><a href="#/psn">PSN accounts</a><a href="#/xbox">Xbox accounts</a><a href="#/how">How it works</a></div>
+      <div><h4>Company</h4><a href="#/about">About us</a><a href="#/contact">Contact</a><a href="#/faq">FAQ</a></div>
+      <div><h4>Legal</h4><a href="#/refund-policy">Refund &amp; warranty</a><a href="#/terms">Terms of service</a><a href="#/privacy">Privacy policy</a></div>
+    </div>
+    <div class="foot-base">
+      <span>© <span id="yr">2026</span> HeavenDigital. All prices in INR.</span>
+      <span>Independent reseller. Not affiliated with Sony, Microsoft, Valve, Ubisoft or EA. All trademarks belong to their respective owners.</span>
+    </div>
+  </div>
+</footer>
+
+<div id="modalRoot"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<button id="toTop" aria-label="Back to top">↑</button>
+<noscript><div style="padding:40px 20px;text-align:center;color:#98a0b3;position:relative;z-index:2">HeavenDigital needs JavaScript enabled to browse the catalog.</div></noscript>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
+<script src="firebase-config.js" defer></script>
+
+<script>
+"use strict";
+/* ============================================================
+   EDIT ME — store contact details
+   ============================================================ */
+const CONFIG = {
+  brand: "HeavenDigital",
+  whatsapp: "919000000000",
+  upiId: "heavendigital@upi",
+  email: "support@heavendigital.in",
+  instagram: "https://instagram.com/heavendigital",
+  hours: "10am–11pm IST",
+  currency: "INR"
+};
+
+/* ============================================================
+   Starter catalog — imported from the old ArcadeHeaven store.
+   Stock counts are placeholders: set real ones in the admin panel.
+   kind: account | subscription | wallet
+   ============================================================ */
+const SEED = [
+ /* ---- PSN ---- (img = poster; remove/replace freely in admin) */
+ {id:"psn-psplus-extra-1m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 1 Month", region:"India", games:["PS Plus Extra · 1 Month"], price:499, mrp:3999, stock:9, tag:"New Arrival", featured:true, active:true, img:"img/17e93c0ec4b0.webp"},
+ {id:"psn-psplus-extra-3m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 3 Months", region:"India", games:["PS Plus Extra · 3 Months"], price:1299, mrp:3999, stock:6, tag:"", featured:false, active:true, img:"img/17e93c0ec4b0.webp"},
+ {id:"psn-spiderman-2", platform:"psn", kind:"account", title:"Marvel's Spider-Man 2 — PS5", region:"India", games:["Marvel's Spider-Man 2"], price:899, mrp:4999, stock:3, tag:"Bestseller", p2:1799, featured:true, active:true, img:"img/423ba8c9e4b7.png"},
+ {id:"psn-until-dawn", img:"img/022b38eb3cf4.jpg", platform:"psn", kind:"account", title:"Until Dawn — PS4/PS5", region:"India", games:["Until Dawn"], price:1499, mrp:3999, stock:3, tag:"", p2:2849, featured:false, active:true},
+ {id:"psn-silent-hill-2", img:"img/35eefe7c632e.png", platform:"psn", kind:"account", title:"Silent Hill 2 — PS5/PS4", region:"India", games:["Silent Hill 2"], price:1499, mrp:3999, stock:3, tag:"", p2:2999, featured:false, active:true},
+ {id:"psn-wwe-2k24", img:"img/b0c3e99cff39.png", platform:"psn", kind:"account", title:"WWE 2K24 — PS5", region:"India", games:["WWE 2K24"], price:1499, mrp:7999, stock:2, tag:"Deal", p2:2849, featured:false, active:true},
+ {id:"psn-dbz-sparking-zero", img:"img/6402b0f76689.png", platform:"psn", kind:"account", title:"Dragon Ball: Sparking Zero Ultimate — PS5/PS4", region:"India", games:["Dragon Ball: Sparking Zero Ultimate"], price:1999, mrp:8999, stock:2, tag:"Hot", p2:3799, featured:true, active:true},
+ {id:"psn-fc26", platform:"psn", kind:"account", title:"EA SPORTS FC 26 — PS5 & PS4", region:"India", games:["EA SPORTS FC 26"], price:1499, mrp:7999, stock:3, tag:"Trending", p2:2699, featured:true, active:true, img:"img/e417d484d820.png"},
+ {id:"psn-ff16", img:"img/4666f4386f6d.jpg", platform:"psn", kind:"account", title:"Final Fantasy XVI — PS5", region:"India", games:["Final Fantasy XVI"], price:999, mrp:5999, stock:3, tag:"Deal", p2:1999, featured:false, active:true},
+ {id:"psn-wolverine", platform:"psn", kind:"account", title:"Marvel's Wolverine — PS5", region:"India", games:["Marvel's Wolverine"], price:1399, mrp:4999, stock:2, tag:"New Release", p2:2519, featured:true, active:true, img:"img/5bc87779b227.jpg"},
+ {id:"psn-gta-6", platform:"psn", kind:"account", title:"Grand Theft Auto VI — PS5 (Preorder)", region:"India", games:["Grand Theft Auto VI"], price:1999, mrp:7999, stock:5, tag:"Preorder", featured:false, active:true, img:"img/236e8dfe7df7.webp"},
+ {id:"psn-007-first-light", platform:"psn", kind:"account", title:"007 First Light — PS5", region:"India", games:["007 First Light"], price:2699, mrp:6999, stock:2, tag:"New Release", p2:4859, featured:false, active:true, img:"img/585a355a3599.png"},
+ {id:"psn-ac-black-flag", platform:"psn", kind:"account", title:"Assassin's Creed Black Flag Resynced — PS5", region:"India", games:["AC Black Flag Resynced"], price:1799, mrp:6999, stock:3, tag:"Trending", p2:3599, featured:false, active:true, img:"img/eba96f66a04c.webp"},
+ {id:"psn-ghost-of-yotei", platform:"psn", kind:"account", title:"Ghost of Yotei — PS5", region:"India", games:["Ghost of Yotei"], price:2499, mrp:6999, stock:2, tag:"New Release", p2:4999, featured:true, active:true, img:"img/9524759650d5.png"},
+ {id:"psn-battlefield-6", platform:"psn", kind:"account", title:"Battlefield 6 — PS5", region:"India", games:["Battlefield 6"], price:1999, mrp:6999, stock:3, tag:"Trending", p2:3599, featured:false, active:true, img:"img/5619835a90cb.png"},
+ {id:"psn-death-stranding-2", platform:"psn", kind:"account", title:"Death Stranding 2: On the Beach — PS5", region:"India", games:["Death Stranding 2"], price:1499, mrp:6999, stock:2, tag:"", p2:2849, featured:false, active:true, img:"img/41c49c8ff070.png"},
+ {id:"psn-wwe-2k26", platform:"psn", kind:"account", title:"WWE 2K26 — PS5", region:"India", games:["WWE 2K26"], price:1499, mrp:7999, stock:2, tag:"New Release", p2:2699, featured:false, active:true, img:"img/daeb008e1075.webp"},
+ /* ---- PC ---- */
+ {id:"pc-black-myth-wukong", platform:"pc", kind:"account", title:"Black Myth: Wukong — PC", region:"Global", games:["Black Myth: Wukong"], price:299, mrp:3599, stock:5, tag:"Steal", p2:439, featured:true, active:true, img:"img/772a825415ac.png"},
+ {id:"pc-ghost-of-tsushima", platform:"pc", kind:"account", title:"Ghost of Tsushima Director's Cut — PC", region:"Global", games:["Ghost of Tsushima DC"], price:299, mrp:3599, stock:4, tag:"Steal", p2:409, featured:true, active:true, img:"img/19ebc8d917c5.png"},
+ {id:"pc-gow-ragnarok", platform:"pc", kind:"account", title:"God of War Ragnarök — PC", region:"Global", games:["God of War Ragnarök"], price:349, mrp:3599, stock:4, tag:"", p2:489, featured:false, active:true, img:"img/03087c5a30f2.webp"},
+ {id:"pc-rdr2", platform:"pc", kind:"account", title:"Red Dead Redemption 2 — PC", region:"Global", games:["Red Dead Redemption 2"], price:299, mrp:3499, stock:5, tag:"", p2:419, featured:true, active:true, img:"img/603b1a4573fb.png"},
+ {id:"pc-hades-2", img:"img/ccdb2922c807.jpeg", platform:"pc", kind:"account", title:"Hades II — PC", region:"Global", games:["Hades II"], price:299, mrp:3599, stock:4, tag:"", p2:389, featured:false, active:true},
+ {id:"pc-until-dawn", img:"img/022b38eb3cf4.jpg", platform:"pc", kind:"account", title:"Until Dawn — PC", region:"Global", games:["Until Dawn"], price:349, mrp:3999, stock:3, tag:"", p2:489, featured:false, active:true},
+ {id:"pc-silent-hill-2", img:"img/35eefe7c632e.png", platform:"pc", kind:"account", title:"Silent Hill 2 — PC", region:"Global", games:["Silent Hill 2"], price:349, mrp:3999, stock:3, tag:"", p2:509, featured:false, active:true},
+ {id:"pc-fc25", platform:"pc", kind:"account", title:"EA SPORTS FC 25 — PC", region:"Global", games:["EA SPORTS FC 25"], price:349, mrp:3599, stock:3, tag:"", p2:459, featured:false, active:true, img:"img/015e9977ccfd.png"},
+ {id:"pc-spiderman-remastered", platform:"pc", kind:"account", title:"Marvel's Spider-Man Remastered — PC", region:"Global", games:["Marvel's Spider-Man Remastered"], price:299, mrp:2999, stock:4, tag:"Steal", p2:419, featured:false, active:true, img:"img/e695ad634c53.png"},
+ {id:"pc-spiderman-2", platform:"pc", kind:"account", title:"Marvel's Spider-Man 2 — PC", region:"Global", games:["Marvel's Spider-Man 2"], price:749, mrp:4999, stock:3, tag:"Bestseller", p2:1019, featured:true, active:true, img:"img/10e6028a2cab.webp"},
+ {id:"pc-tlou-1", platform:"pc", kind:"account", title:"The Last of Us Part I — PC", region:"Global", games:["The Last of Us Part I"], price:299, mrp:2999, stock:4, tag:"", p2:419, featured:false, active:true, img:"img/4ca2d042c191.png"},
+ {id:"pc-tlou-2", platform:"pc", kind:"account", title:"The Last of Us Part II Remastered — PC", region:"Global", games:["TLOU Part II Remastered"], price:499, mrp:3999, stock:3, tag:"", p2:729, featured:false, active:true, img:"img/74d392f1f770.png"},
+ {id:"pc-elden-ring-erdtree", platform:"pc", kind:"account", title:"ELDEN RING + Shadow of the Erdtree — PC", region:"Global", games:["ELDEN RING","Shadow of the Erdtree"], price:599, mrp:4999, stock:3, tag:"Deal", p2:869, featured:true, active:true, img:"img/218d7e166581.png"},
+ {id:"pc-ac-shadows", platform:"pc", kind:"account", title:"Assassin's Creed Shadows — PC", region:"Global", games:["Assassin's Creed Shadows"], price:599, mrp:6309, stock:3, tag:"Trending", p2:809, featured:false, active:true, img:"img/cedc687c2cdb.png"},
+ {id:"pc-cyberpunk", platform:"pc", kind:"account", title:"Cyberpunk 2077 — PC", region:"Global", games:["Cyberpunk 2077"], price:299, mrp:2999, stock:4, tag:"Steal", p2:419, featured:false, active:true, img:"img/7299ab2057c5.png"},
+ {id:"pc-cod-bo6", img:"img/9819c02ba6c6.png", platform:"pc", kind:"account", title:"Call of Duty: Black Ops 6 — PC", region:"Global", games:["Call of Duty: Black Ops 6"], price:799, mrp:4599, stock:2, tag:"Deal", p2:1119, featured:false, active:true},
+ {id:"pc-hogwarts-deluxe", img:"img/5978ec423c85.png", platform:"pc", kind:"account", title:"Hogwarts Legacy: Deluxe Edition — PC", region:"Global", games:["Hogwarts Legacy Deluxe"], price:899, mrp:3999, stock:2, tag:"Limited", p2:1259, featured:true, active:true},
+ {id:"pc-dmc5-cyberpunk-ds-bundle", img:"img/198217d3d770.jpg", platform:"pc", kind:"account", title:"DMC5 + Cyberpunk 2077 + Dark Souls — PC Bundle", region:"Global", games:["Devil May Cry 5","Cyberpunk 2077","Dark Souls"], price:449, mrp:7999, stock:3, tag:"Bundle", featured:false, active:true},
+ {id:"pc-6-game-bundle", img:"img/8b90e56718e4.webp", platform:"pc", kind:"account", title:"6-Game Bundle — PC", region:"Global", games:["6 top PC games — ask us for this month's lineup"], price:599, mrp:9999, stock:3, tag:"Bundle", featured:true, active:true},
+ {id:"pc-warhammer-sm2-gold", img:"img/05a3f56c4410.png", platform:"pc", kind:"account", title:"Warhammer 40,000: Space Marine 2 Gold — PC", region:"Global", games:["Space Marine 2 Gold Edition"], price:1599, mrp:4599, stock:2, tag:"", p2:2079, featured:false, active:true},
+ /* ---- Xbox ---- */
+ {id:"xbox-gpu-lifetime", platform:"xbox", kind:"account", title:"Xbox Game Pass Ultimate — Lifetime (400+ games)", region:"Global", games:["Game Pass Ultimate library — 400+ games","EA Play"], price:899, mrp:9999, stock:5, tag:"Bestseller", featured:true, active:true, img:"img/22fd6a3a3370.jpg"},
+ {id:"xbox-gpu-1m", platform:"xbox", kind:"subscription", title:"Xbox Game Pass Ultimate — 1 Month", region:"India", games:["Game Pass Ultimate · 1 Month"], price:549, mrp:749, stock:8, tag:"", featured:false, active:true, img:"img/22fd6a3a3370.jpg"},
+ {id:"psn-gta-v", platform:"psn", kind:"account", title:"GTA V — PS5", region:"Global", games:["GTA V"], price:499, mrp:1499, stock:3, tag:"Hot", p2:899,
+  img:"img/acd56e2712c1.png", featured:false, active:true},
+ {id:"psn-gta-trilogy", platform:"psn", kind:"account", title:"GTA Trilogy — PS5", region:"Global", games:["GTA Trilogy"], price:999, mrp:4999, stock:7, tag:"Hot",
+  img:"img/3bf3c5cc755b.jpg", featured:false, active:true},
+ {id:"psn-red-dead-redemption", platform:"psn", kind:"account", title:"Red Dead Redemption — PS5", region:"Global", games:["Red Dead Redemption"], price:999, mrp:4499, stock:5, tag:"Hot", p2:1799,
+  img:"img/b3cb9ac4515d.jpg", featured:false, active:true},
+ {id:"psn-god-of-war-ragnarok", platform:"psn", kind:"account", title:"God of War Ragnarok — PS5", region:"Global", games:["God Of War Ragnarok"], price:1099, mrp:3999, stock:3, tag:"Hot", p2:2199,
+  img:"img/1c642aeeff01.png", featured:false, active:true},
+ {id:"psn-god-of-war-4", platform:"psn", kind:"account", title:"God of War 4 — PS5", region:"Global", games:["God Of War 4"], price:399, mrp:1199, stock:7, tag:"Hot", p2:719,
+  img:"img/ed2ecce3f4c8.png", featured:false, active:true},
+ {id:"psn-god-of-war-3-4-ragnarok-combo-offer", platform:"psn", kind:"account", title:"God of War 3+4+ragnarok Combo Offer — PS5", region:"Global", games:["God Of War 3+4+ragnarok Combo Offer"], price:1299, mrp:3899, stock:7, tag:"New Arrival", p2:2469,
+  img:"img/c7ca3ec0c663.png", featured:false, active:true},
+ {id:"psn-god-of-war-3-remastered", platform:"psn", kind:"account", title:"God of War 3 Remastered — PS5", region:"Global", games:["God Of War 3 Remastered"], price:699, mrp:3999, stock:3, tag:"New Arrival", p2:1329,
+  img:"img/35a62b1de883.png", featured:false, active:true},
+ {id:"psn-marvel-spiderman-miles-morales", platform:"psn", kind:"account", title:"Marvel Spiderman Miles Morales / — PS5", region:"Global", games:["Marvel Spiderman Miles Morales /"], price:899, mrp:3999, stock:6, tag:"", p2:1619,
+  img:"img/1716a918b49a.png", featured:false, active:true},
+ {id:"psn-marvel-spiderman", platform:"psn", kind:"account", title:"Marvel Spiderman — PS5", region:"Global", games:["Marvel Spiderman"], price:799, mrp:3999, stock:7, tag:"", p2:1519,
+  img:"img/f6f1054bac13.png", featured:false, active:true},
+ {id:"psn-marvel-s-spider-man-miles-morales", platform:"psn", kind:"account", title:"Marvel's Spider-Man: Miles Morales — PS5", region:"Global", games:["Marvel's Spider-Man: Miles Morales"], price:649, mrp:4999, stock:3, tag:"", p2:1239,
+  img:"img/70c6040bdf17.webp", featured:false, active:true},
+ {id:"psn-spiderman-2018", platform:"psn", kind:"account", title:"Spiderman 2018 — PS5", region:"Global", games:["Spiderman 2018"], price:599, mrp:4499, stock:5, tag:"", p2:1199,
+  img:"img/4f2f0ae5f36e.jpg", featured:false, active:true},
+ {id:"psn-elden-ring", platform:"psn", kind:"account", title:"Elden Ring — PS5", region:"Global", games:["Elden Ring"], price:699, mrp:2099, stock:6, tag:"", p2:1329,
+  img:"img/7cc58879f5c9.png", featured:false, active:true},
+ {id:"psn-cyberpunk-2077-phantom-liberty", platform:"psn", kind:"account", title:"Cyberpunk 2077+phantom Liberty — PS5", region:"Global", games:["Cyberpunk 2077+phantom Liberty"], price:999, mrp:3999, stock:8, tag:"", p2:1899,
+  img:"img/f29be6b12540.png", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare", platform:"psn", kind:"account", title:"Call of Duty Modern Warfare — PS5", region:"Global", games:["Call Of Duty Modern Warfare"], price:899, mrp:2699, stock:5, tag:"", p2:1619,
+  img:"img/d59fce50d566.png", featured:false, active:true},
+ {id:"psn-call-of-duty-black-ops-3", platform:"psn", kind:"account", title:"Call of Duty Black Ops 3 — PS5", region:"Global", games:["Call Of Duty Black Ops 3"], price:799, mrp:3999, stock:9, tag:"", p2:1599,
+  img:"img/566cb54a3153.png", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-3", platform:"psn", kind:"account", title:"Call of Duty Modern Warfare 3 — PS5", region:"Global", games:["Call Of Duty Modern Warfare 3"], price:1099, mrp:3999, stock:7, tag:"", p2:1979,
+  img:"img/90663a930bbf.png", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-2", platform:"psn", kind:"account", title:"Call of Duty Modern Warfare 2 — PS5", region:"Global", games:["Call Of Duty Modern Warfare 2"], price:899, mrp:3999, stock:6, tag:"", p2:1799,
+  img:"img/d4da9804b0fd.png", featured:false, active:true},
+ {id:"psn-call-of-duty-vanguard", platform:"psn", kind:"account", title:"Call of Duty Vanguard — PS5", region:"Global", games:["Call Of Duty Vanguard"], price:799, mrp:3999, stock:4, tag:"", p2:1599,
+  img:"img/cfd54b121ede.png", featured:false, active:true},
+ {id:"psn-call-of-duty-black-ops-7", platform:"psn", kind:"account", title:"Call of Duty Black Ops 7 — PS5", region:"Global", games:["Call Of Duty Black Ops 7"], price:2999, mrp:8999, stock:6, tag:"", p2:5399,
+  img:"img/7b1c284ab4b7.png", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-combo", platform:"psn", kind:"account", title:"Call of Duty Modern Warfare Combo — PS5", region:"Global", games:["Call Of Duty Modern Warfare Combo"], price:1799, mrp:5399, stock:7, tag:"", p2:3239,
+  img:"img/7778e5cbd065.png", featured:false, active:true},
+ {id:"psn-call-of-duty-black-ops-6-7-combo", platform:"psn", kind:"account", title:"Call of Duty Black Ops 6+7 Combo — PS5", region:"Global", games:["Call Of Duty Black Ops 6+7 Combo"], price:1699, mrp:5099, stock:6, tag:"", p2:3399,
+  img:"img/2e499e8a792b.png", featured:false, active:true},
+ {id:"psn-call-of-duty-black-ops-ii", platform:"psn", kind:"account", title:"Call of Duty: Black Ops II — PS5", region:"Global", games:["Call of Duty: Black Ops II"], price:799, mrp:4999, stock:5, tag:"", p2:1599,
+  img:"img/39a83966b1d6.jpg", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-4", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare 4 — PS5", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:1549, mrp:4999, stock:8, tag:"", p2:2949,
+  img:"img/f1ae50df1fea.jpg", featured:false, active:true},
+ {id:"psn-call-of-duty-black-ops", platform:"psn", kind:"account", title:"Call of Duty: Black Ops — PS5", region:"Global", games:["Call of Duty: Black Ops"], price:799, mrp:4999, stock:6, tag:"", p2:1599,
+  img:"img/2ef67eccd8d4.jpg", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-ii", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare II — PS5", region:"Global", games:["Call of Duty: Modern Warfare II"], price:999, mrp:4998, stock:4, tag:"", p2:1799,
+  img:"img/353bea26e7d9.jpg", featured:false, active:true},
+ {id:"psn-call-of-duty-modern-warfare-iii", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare III — PS5", region:"Global", games:["Call of Duty: Modern Warfare III"], price:649, mrp:6299, stock:7, tag:"", p2:1169,
+  img:"img/03ee8a75c3f8.webp", featured:false, active:true},
+ {id:"psn-battlefield-4", platform:"psn", kind:"account", title:"Battlefield 4 & — PS5", region:"Global", games:["Battlefield 4 &"], price:499, mrp:3999, stock:4, tag:"", p2:949,
+  img:"img/17b6a40baa79.png", featured:false, active:true},
+ {id:"psn-battlefield-v", platform:"psn", kind:"account", title:"Battlefield V — PS5", region:"Global", games:["Battlefield V"], price:399, mrp:3999, stock:7, tag:"", p2:759,
+  img:"img/0d45e8ae15ad.png", featured:false, active:true},
+ {id:"psn-battlefield-1", platform:"psn", kind:"account", title:"Battlefield 1 — PS5", region:"Global", games:["Battlefield 1"], price:499, mrp:1499, stock:8, tag:"", p2:949,
+  img:"img/0cac91d86f7d.png", featured:false, active:true},
+ {id:"psn-hogwarts-legacy", platform:"psn", kind:"account", title:"Hogwarts Legacy — PS5", region:"Global", games:["Hogwarts Legacy"], price:599, mrp:3999, stock:9, tag:"", p2:1199,
+  img:"img/5978ec423c85.png", featured:false, active:true},
+ {id:"psn-assassin-creed-shadows", platform:"psn", kind:"account", title:"Assassin Creed Shadows — PS5", region:"Global", games:["Assassin Creed Shadows"], price:1199, mrp:3599, stock:8, tag:"", p2:2399,
+  img:"img/d7034f0d2f0a.png", featured:false, active:true},
+ {id:"psn-assassin-creed-unity", platform:"psn", kind:"account", title:"Assassin Creed Unity — PS5", region:"Global", games:["Assassin Creed Unity"], price:699, mrp:3999, stock:3, tag:"", p2:1399,
+  img:"img/e7391d1e7cdb.png", featured:false, active:true},
+ {id:"psn-assassin-creed-origins", platform:"psn", kind:"account", title:"Assassin Creed Origins — PS5", region:"Global", games:["Assassin Creed Origins"], price:699, mrp:3999, stock:4, tag:"", p2:1329,
+  img:"img/929850216d10.png", featured:false, active:true},
+ {id:"psn-assassin-creed-black-flag", platform:"psn", kind:"account", title:"Assassin Creed Black Flag — PS5", region:"Global", games:["Assassin Creed Black Flag"], price:699, mrp:3999, stock:3, tag:"", p2:1329,
+  img:"img/29ad9ebb155f.png", featured:false, active:true},
+ {id:"psn-hitman-world-of-assassination", platform:"psn", kind:"account", title:"Hitman World of Assassination — PS5", region:"Global", games:["Hitman World Of Assassination"], price:999, mrp:3999, stock:9, tag:"", p2:1899,
+  img:"img/21d6b722a356.png", featured:false, active:true},
+ {id:"psn-assassin-creed-mirage", platform:"psn", kind:"account", title:"Assassin Creed Mirage — PS5", region:"Global", games:["Assassin Creed Mirage"], price:699, mrp:3999, stock:9, tag:"", p2:1399,
+  img:"img/a74eee679aa2.png", featured:false, active:true},
+ {id:"psn-assassin-creed-valhalla", platform:"psn", kind:"account", title:"Assassin Creed Valhalla — PS5", region:"Global", games:["Assassin Creed Valhalla"], price:599, mrp:3999, stock:8, tag:"", p2:1079,
+  img:"img/4fb6f6606538.png", featured:false, active:true},
+ {id:"psn-assassin-s-creed-valhalla", platform:"psn", kind:"account", title:"Assassin'S Creed Valhalla — PS5", region:"Global", games:["Assassin'S Creed Valhalla"], price:1049, mrp:4999, stock:5, tag:"", p2:1999,
+  img:"img/0ac3748201ac.jpg", featured:false, active:true},
+ {id:"psn-assassin-s-creed-mirage", platform:"psn", kind:"account", title:"Assassin's Creed Mirage — PS5", region:"Global", games:["Assassin's Creed Mirage"], price:649, mrp:4499, stock:4, tag:"", p2:1169,
+  img:"img/9000359b6658.webp", featured:false, active:true},
+ {id:"psn-far-cry-6", platform:"psn", kind:"account", title:"Far Cry 6 — PS5", region:"Global", games:["Far Cry 6"], price:599, mrp:3999, stock:8, tag:"", p2:1199,
+  img:"img/28e797ce6021.png", featured:false, active:true},
+ {id:"psn-batman-arkham-knight", platform:"psn", kind:"account", title:"Batman Arkham Knight & — PS5", region:"Global", games:["Batman Arkham Knight &"], price:499, mrp:3999, stock:5, tag:"", p2:899,
+  img:"img/05d717601812.png", featured:false, active:true},
+ {id:"psn-lego-batman-legacy-of-the-dark-knight", platform:"psn", kind:"account", title:"LEGO Batman: Legacy of the Dark Knight — PS5", region:"Global", games:["LEGO Batman: Legacy of the Dark Knight"], price:1049, mrp:4999, stock:9, tag:"", p2:1999,
+  img:"img/b5f4d1519a48.jpg", featured:false, active:true},
+ {id:"psn-witcher-3", platform:"psn", kind:"account", title:"Witcher 3 — PS5", region:"Global", games:["Witcher 3"], price:399, mrp:3999, stock:6, tag:"", p2:799,
+  img:"img/280232887051.png", featured:false, active:true},
+ {id:"psn-the-witcher-3-wild-hunt-complete-edition", platform:"psn", kind:"account", title:"The Witcher 3: Wild Hunt Complete Edition — PS5", region:"Global", games:["The Witcher 3: Wild Hunt Complete Edition"], price:999, mrp:4499, stock:5, tag:"", p2:1999,
+  img:"img/973b268299d9.jpg", featured:false, active:true},
+ {id:"psn-nba-2k25", platform:"psn", kind:"account", title:"NBA 2k25 — PS5", region:"Global", games:["NBA 2k25"], price:1699, mrp:5099, stock:6, tag:"", p2:3399,
+  img:"img/500e2fba92a6.png", featured:false, active:true},
+ {id:"psn-nba-2k22", platform:"psn", kind:"account", title:"NBA 2k22 — PS5", region:"Global", games:["NBA 2k22"], price:999, mrp:1999, stock:3, tag:"", p2:1999,
+  img:"img/f170ea7e66e4.jpg", featured:false, active:true},
+ {id:"psn-nba-2k24-kobe-bryant-edition", platform:"psn", kind:"account", title:"NBA 2K24 Kobe Bryant Edition — PS5", region:"Global", games:["NBA 2K24 Kobe Bryant Edition"], price:999, mrp:4999, stock:4, tag:"", p2:1999,
+  img:"img/2355776de5c7.jpg", featured:false, active:true},
+ {id:"psn-wwe-2k25", platform:"psn", kind:"account", title:"WWE 2k25 — PS5", region:"Global", games:["WWE 2k25"], price:999, mrp:2999, stock:8, tag:"", p2:1999,
+  img:"img/440963d96d8f.png", featured:false, active:true},
+ {id:"psn-wwe-2k23", platform:"psn", kind:"account", title:"WWE 2k23 — PS5", region:"Global", games:["WWE 2k23"], price:999, mrp:4999, stock:6, tag:"", p2:1799,
+  img:"img/b77ec159e0a9.jpg", featured:false, active:true},
+ {id:"pc-god-of-war", platform:"pc", kind:"account", title:"God of War — PC", region:"Global", games:["God of War"], price:599, mrp:2999, stock:4, tag:"Hot", p2:839,
+  img:"img/6473d6479ec6.webp", featured:false, active:true},
+ {id:"pc-marvel-spiderman-2", platform:"pc", kind:"account", title:"Marvel Spiderman 2 — PC", region:"Global", games:["Marvel Spiderman 2"], price:599, mrp:2999, stock:9, tag:"Hot", p2:779,
+  img:"img/c6342f1530c8.webp", featured:false, active:true},
+ {id:"pc-elden-ring-shadow-of-the-erdtree-deluxe-edition", platform:"pc", kind:"account", title:"ELDEN RING + Shadow of the Erdtree Deluxe Edition — PC", region:"Global", games:["ELDEN RING + Shadow of the Erdtree Deluxe Edition"], price:599, mrp:2999, stock:6, tag:"Hot", p2:809,
+  img:"img/95c9a8d496c7.webp", featured:false, active:true},
+ {id:"pc-call-of-duty-black-ops-cold-war", platform:"pc", kind:"account", title:"Call of Duty: Black Ops Cold War — PC", region:"Global", games:["Call of Duty: Black Ops Cold War"], price:799, mrp:5399, stock:5, tag:"Hot", p2:1079,
+  img:"img/2a6c3dcdc18c.jpg", featured:false, active:true},
+ {id:"pc-battlefield-6-phantom-edition", platform:"pc", kind:"account", title:"Battlefield 6 Phantom Edition — PC", region:"Global", games:["Battlefield 6 Phantom Edition"], price:799, mrp:5999, stock:5, tag:"Hot", p2:1079,
+  img:"img/035c14bf37f7.jpg", featured:false, active:true},
+ {id:"pc-hitman-world-of-assassination-deluxe-edition", platform:"pc", kind:"account", title:"HITMAN World of Assassination Deluxe Edition — PC", region:"Global", games:["HITMAN World of Assassination Deluxe Edition"], price:599, mrp:2999, stock:4, tag:"New Arrival", p2:839,
+  img:"img/6c9a3e8acbae.webp", featured:false, active:true},
+ {id:"pc-assassin-creed-odyssey", platform:"pc", kind:"account", title:"Assassin Creed Odyssey — PC", region:"Global", games:["Assassin Creed Odyssey"], price:1099, mrp:3299, stock:3, tag:"New Arrival", p2:1429,
+  img:"img/e09330c499f8.png", featured:false, active:true},
+ {id:"pc-assassin-creed-black-flag-resynced", platform:"pc", kind:"account", title:"Assassin Creed Black Flag Resynced — PC", region:"Global", games:["Assassin Creed Black Flag Resynced"], price:1799, mrp:5399, stock:9, tag:"New Arrival", p2:2429,
+  img:"img/ebf5d2d33ff6.png", featured:false, active:true},
+ {id:"pc-assassin-s-creed-black-flag-resynced-deluxe-edit", platform:"pc", kind:"account", title:"Assassin's Creed Black Flag Resynced Deluxe Edition — PC", region:"Global", games:["Assassin's Creed Black Flag Resynced Deluxe Edition"], price:599, mrp:4899, stock:9, tag:"New Arrival", p2:869,
+  img:"img/619057eebe80.jpg", featured:false, active:true},
+ {id:"pc-assassin-s-creed-valhalla-complete-edition", platform:"pc", kind:"account", title:"Assassin's Creed Valhalla - Complete Edition — PC", region:"Global", games:["Assassin's Creed Valhalla - Complete Edition"], price:699, mrp:4999, stock:8, tag:"", p2:979,
+  img:"img/8c8d191b38c3.webp", featured:false, active:true},
+ {id:"pc-assassin-s-creed-mirage-deluxe-edition", platform:"pc", kind:"account", title:"Assassin's Creed Mirage Deluxe Edition — PC", region:"Global", games:["Assassin's Creed Mirage Deluxe Edition"], price:599, mrp:2999, stock:6, tag:"", p2:779,
+  img:"img/139712371ef2.webp", featured:false, active:true},
+ {id:"pc-far-cry-5", platform:"pc", kind:"account", title:"Far Cry 5 — PC", region:"Global", games:["Far Cry 5"], price:699, mrp:4999, stock:6, tag:"", p2:949,
+  img:"img/63a887d1740f.png", featured:false, active:true},
+ {id:"pc-far-cry-6-game-of-the-year-edition", platform:"pc", kind:"account", title:"Far Cry 6 Game of the Year Edition — PC", region:"Global", games:["Far Cry 6 Game of the Year Edition"], price:599, mrp:5999, stock:3, tag:"", p2:839,
+  img:"img/4bd9fb61760b.webp", featured:false, active:true},
+ {id:"pc-batman-arkham-knight-premium-edition", platform:"pc", kind:"account", title:"Batman: Arkham Knight Premium Edition — PC", region:"Global", games:["Batman: Arkham Knight Premium Edition"], price:599, mrp:2999, stock:6, tag:"", p2:779,
+  img:"img/637e0ddb870d.webp", featured:false, active:true},
+ {id:"pc-wwe-2k26-monday-night-war-edition", platform:"pc", kind:"account", title:"WWE 2K26 Monday Night War Edition — PC", region:"Global", games:["WWE 2K26 Monday Night War Edition"], price:599, mrp:8699, stock:4, tag:"", p2:839,
+  img:"img/311b773480f3.jpg", featured:false, active:true},
+ {id:"pc-wwe-2k23-icon-edition", platform:"pc", kind:"account", title:"WWE 2k23 Icon Edition — PC", region:"Global", games:["WWE 2k23 Icon Edition"], price:599, mrp:6799, stock:5, tag:"", p2:869,
+  img:"img/b977202a9770.webp", featured:false, active:true},
+ {id:"pc-tekken-8", platform:"pc", kind:"account", title:"Tekken 8 — PC", region:"Global", games:["Tekken 8"], price:699, mrp:2099, stock:3, tag:"", p2:979,
+  img:"img/d2a963dd1e2d.png", featured:false, active:true},
+ {id:"pc-mortal-kombat-1-khaos-reigns-collection", platform:"pc", kind:"account", title:"Mortal Kombat 1 Khaos Reigns Collection — PC", region:"Global", games:["Mortal Kombat 1 Khaos Reigns Collection"], price:599, mrp:6099, stock:8, tag:"", p2:809,
+  img:"img/c7c9bf97c5a0.webp", featured:false, active:true},
+ {id:"pc-street-fighter-6-ultimate-edition-street-fighter", platform:"pc", kind:"account", title:"Street Fighter™ 6 Ultimate Edition + Street Fighter™ V — PC", region:"Global", games:["Street Fighter™ 6 Ultimate Edition + Street Fighter™ V"], price:599, mrp:7599, stock:4, tag:"", p2:779,
+  img:"img/d148b3652d40.webp", featured:false, active:true},
+ {id:"pc-resident-evil-4", platform:"pc", kind:"account", title:"Resident Evil 4 — PC", region:"Global", games:["Resident Evil 4"], price:599, mrp:4999, stock:8, tag:"", p2:869,
+  img:"img/8fdb547558d9.png", featured:false, active:true},
+ {id:"pc-forza-horizon-5", platform:"pc", kind:"account", title:"Forza Horizon 5 — PC", region:"Global", games:["Forza Horizon 5"], price:599, mrp:2999, stock:5, tag:"", p2:809,
+  img:"img/c46b1b20602b.webp", featured:false, active:true},
+ {id:"pc-resident-evil-requiem", platform:"pc", kind:"account", title:"Resident Evil Requiem — PC", region:"Global", games:["Resident Evil Requiem"], price:699, mrp:2099, stock:3, tag:"", p2:979,
+  img:"img/6120dfee6856.png", featured:false, active:true},
+ {id:"pc-metal-gear-solid-master-collection-vol-2", platform:"pc", kind:"account", title:"Metal Gear Solid: Master Collection Vol.2 — PC", region:"Global", games:["Metal Gear Solid: Master Collection Vol.2"], price:599, mrp:3824, stock:9, tag:"", p2:839,
+  img:"img/b42dae93b824.webp", featured:false, active:true},
+ {id:"pc-forza-horizon-6-premium-edition", platform:"pc", kind:"account", title:"Forza Horizon 6 Premium Edition — PC", region:"Global", games:["Forza Horizon 6 Premium Edition"], price:599, mrp:9699, stock:4, tag:"", p2:809,
+  img:"img/46dda431d2e6.jpg", featured:false, active:true},
+ {id:"pc-forza-motorsport-2023-premium-edition-vip-all-dl", platform:"pc", kind:"account", title:"Forza Motorsport 2023 - Premium Edition + VIP + ALL DLC — PC", region:"Global", games:["Forza Motorsport 2023 - Premium Edition + VIP + ALL DLC"], price:999, mrp:9999, stock:6, tag:"", p2:1299,
+  img:"img/80762e54bfc4.webp", featured:false, active:true},
+ {id:"pc-buy-forza-horizon-5-premium-edition-vip-hot-whee", platform:"pc", kind:"account", title:"Buy Forza Horizon 5 - Premium Edition + VIP + Hot Wheels + ALL DLC — PC", region:"Global", games:["Buy Forza Horizon 5 - Premium Edition + VIP + Hot Wheels + ALL DLC"], price:999, mrp:9999, stock:5, tag:"", p2:1399,
+  img:"img/c2af6ed9c2c5.jpg", featured:false, active:true},
+ {id:"pc-forza-motorsport-standard-edition-200-game", platform:"pc", kind:"account", title:"Forza Motorsport Standard Edition + 200 Game — PC", region:"Global", games:["Forza Motorsport Standard Edition + 200 Game"], price:699, mrp:4999, stock:6, tag:"", p2:949,
+  img:"img/890b5bf82b34.webp", featured:false, active:true},
+ {id:"pc-starfield-200-games", platform:"pc", kind:"account", title:"Starfield + 200 Games — PC", region:"Global", games:["Starfield + 200 Games"], price:699, mrp:6699, stock:8, tag:"", p2:979,
+  img:"img/a8881f82c556.jpg", featured:false, active:true},
+ {id:"pc-starfield-premium-edition", platform:"pc", kind:"account", title:"Starfield Premium Edition — PC", region:"Global", games:["Starfield Premium Edition"], price:599, mrp:6699, stock:5, tag:"", p2:809,
+  img:"img/5f6eecdfd7a7.webp", featured:false, active:true},
+ {id:"pc-ea-sports-fc-25-ultimate-edition", platform:"pc", kind:"account", title:"EA SPORTS FC 25 Ultimate Edition — PC", region:"Global", games:["EA SPORTS FC 25 Ultimate Edition"], price:599, mrp:2999, stock:3, tag:"", p2:779,
+  img:"img/26bdef7fe4d7.jpg", featured:false, active:true},
+ {id:"pc-ea-sports-fc-27-ultimate-plus-edition", platform:"pc", kind:"account", title:"EA SPORTS FC 27 Ultimate Plus Edition — PC", region:"Global", games:["EA SPORTS FC 27 Ultimate Plus Edition"], price:599, mrp:8999, stock:6, tag:"",
+  img:"img/dea212ae262d.jpg", featured:false, active:true},
+ {id:"pc-ea-sports-fifa-23-ultimate-edition", platform:"pc", kind:"account", title:"EA SPORTS™ FIFA 23 Ultimate Edition — PC", region:"Global", games:["EA SPORTS™ FIFA 23 Ultimate Edition"], price:699, mrp:4799, stock:4, tag:"", p2:1019,
+  img:"img/82c1ec1e5d60.jpg", featured:false, active:true},
+ {id:"pc-shadow-of-the-tomb-raider-rise-of-the-tomb-raide", platform:"pc", kind:"account", title:"Shadow of the Tomb Raider + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY — PC", region:"Global", games:["Shadow of the Tomb Raider + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY"], price:699, mrp:4999, stock:8, tag:"", p2:979,
+  img:"img/a01dbb497de2.png", featured:false, active:true},
+ {id:"pc-watch-dogs-2", platform:"pc", kind:"account", title:"Watch Dogs 2 — PC", region:"Global", games:["Watch Dogs 2"], price:699, mrp:4999, stock:7, tag:"", p2:1019,
+  img:"img/f34e39722af0.webp", featured:false, active:true},
+ {id:"pc-yakuza-like-a-dragon-legendary-hero-edition", platform:"pc", kind:"account", title:"Yakuza: Like a Dragon Legendary Hero Edition — PC", region:"Global", games:["Yakuza: Like a Dragon Legendary Hero Edition"], price:699, mrp:4699, stock:3, tag:"", p2:949,
+  img:"img/f8fd1094c52a.webp", featured:false, active:true},
+ {id:"pc-shadow-of-the-tomb-raider-definitive-edition-ris", platform:"pc", kind:"account", title:"Shadow of the Tomb Raider: Definitive Edition + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY — PC", region:"Global", games:["Shadow of the Tomb Raider: Definitive Edition + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY"], price:899, mrp:4093, stock:5, tag:"", p2:1219,
+  img:"img/58369b81174f.jpg", featured:false, active:true},
+ {id:"pc-doom-eternal-deluxe-edition", platform:"pc", kind:"account", title:"DOOM Eternal Deluxe Edition — PC", region:"Global", games:["DOOM Eternal Deluxe Edition"], price:699, mrp:3199, stock:4, tag:"", p2:979,
+  img:"img/8eeed58b18a9.webp", featured:false, active:true},
+ {id:"pc-need-for-speed-heat-deluxe-edition", platform:"pc", kind:"account", title:"Need for Speed™ Heat Deluxe Edition — PC", region:"Global", games:["Need for Speed™ Heat Deluxe Edition"], price:699, mrp:3499, stock:3, tag:"", p2:1019,
+  img:"img/818b91fe4df8.webp", featured:false, active:true},
+ {id:"pc-need-for-speed-payback-deluxe-edition", platform:"pc", kind:"account", title:"Need for Speed™ Payback - Deluxe Edition — PC", region:"Global", games:["Need for Speed™ Payback - Deluxe Edition"], price:699, mrp:1499, stock:8, tag:"", p2:909,
+  img:"img/8079fac0394f.webp", featured:false, active:true},
+ {id:"pc-like-a-dragon-gaiden-the-man-who-erased-his-name", platform:"pc", kind:"account", title:"Like a Dragon Gaiden: the Man Who Erased His Name + 200 games — PC", region:"Global", games:["Like a Dragon Gaiden: The Man Who Erased His Name + 200 games"], price:699, mrp:3999, stock:8, tag:"", p2:979,
+  img:"img/b046d00cc493.webp", featured:false, active:true},
+ {id:"pc-marvel-s-avengers", platform:"pc", kind:"account", title:"Marvel's Avengers — PC", region:"Global", games:["Marvel's Avengers"], price:699, mrp:4999, stock:7, tag:"", p2:979,
+  img:"img/b319a7a58530.png", featured:false, active:true},
+ {id:"pc-farming-simulator-25", platform:"pc", kind:"account", title:"Farming Simulator 25 — PC", region:"Global", games:["Farming Simulator 25"], price:699, mrp:4999, stock:3, tag:"", p2:1019,
+  img:"img/d935fa7f7dd5.png", featured:false, active:true},
+ {id:"pc-cricket-24", platform:"pc", kind:"account", title:"Cricket 24 — PC", region:"Global", games:["Cricket 24"], price:599, mrp:4999, stock:7, tag:"", p2:869,
+  img:"img/eaa155a07cc2.png", featured:false, active:true},
+ {id:"pc-split-fiction", platform:"pc", kind:"account", title:"Split Fiction — PC", region:"Global", games:["Split Fiction"], price:599, mrp:4999, stock:9, tag:"", p2:779,
+  img:"img/93203e01cf2f.png", featured:false, active:true},
+ {id:"pc-marvel-s-avengers-the-definitive-edition", platform:"pc", kind:"account", title:"Marvel's Avengers - the Definitive Edition — PC", region:"Global", games:["Marvel's Avengers - The Definitive Edition"], price:599, mrp:2999, stock:5, tag:"", p2:839,
+  img:"img/9f5d1f58869b.webp", featured:false, active:true},
+ {id:"pc-farming-simulator-25-year-1-bundle", platform:"pc", kind:"account", title:"Farming Simulator 25 - Year 1 Bundle — PC", region:"Global", games:["Farming Simulator 25 - Year 1 Bundle"], price:599, mrp:2999, stock:4, tag:"",
+  img:"img/ca493e4299d0.webp", featured:false, active:true},
+ {id:"pc-dying-light-the-beast", platform:"pc", kind:"account", title:"Dying Light : the Beast — PC", region:"Global", games:["Dying Light : The Beast"], price:999, mrp:2999, stock:8, tag:"", p2:1299,
+  img:"img/0e74f41c839c.png", featured:false, active:true},
+ {id:"pc-transport-fever-3-deluxe-edition", platform:"pc", kind:"account", title:"Transport Fever 3 - Deluxe Edition — PC", region:"Global", games:["Transport Fever 3 - Deluxe Edition"], price:599, mrp:3699, stock:7, tag:"", p2:779,
+  img:"img/9373c503c5c1.jpg", featured:false, active:true},
+ {id:"pc-phantom-blade-zero-deluxe-edition", platform:"pc", kind:"account", title:"Phantom Blade Zero Deluxe Edition — PC", region:"Global", games:["Phantom Blade Zero Deluxe Edition"], price:599, mrp:5199, stock:8, tag:"", p2:869,
+  img:"img/5323cbdc046f.png", featured:false, active:true},
+ {id:"pc-onimusha-wots-premium-deluxe-edition", platform:"pc", kind:"account", title:"Onimusha: WotS - Premium Deluxe Edition — PC", region:"Global", games:["Onimusha: WotS - Premium Deluxe Edition"], price:599, mrp:5699, stock:3, tag:"", p2:779,
+  img:"img/f33755318d4e.jpg", featured:false, active:true},
+ {id:"pc-resonance-a-plague-tale-legacy", platform:"pc", kind:"account", title:"Resonance: a Plague Tale Legacy — PC", region:"Global", games:["Resonance: A Plague Tale Legacy"], price:599, mrp:2699, stock:6, tag:"", p2:809,
+  img:"img/7297707ff7b2.jpg", featured:false, active:true},
+ {id:"pc-mortal-shell-ii-devout-edition", platform:"pc", kind:"account", title:"Mortal Shell II: Devout Edition — PC", region:"Global", games:["Mortal Shell II: Devout Edition"], price:599, mrp:3469, stock:3, tag:"", p2:809,
+  img:"img/e8ee0392cd17.jpg", featured:false, active:true},
+ {id:"pc-the-sinking-city-2-premium-edition", platform:"pc", kind:"account", title:"The Sinking City 2 - Premium Edition — PC", region:"Global", games:["The Sinking City 2 - Premium Edition"], price:599, mrp:3700, stock:3, tag:"", p2:779,
+  img:"img/2ebb67909cf2.jpg", featured:false, active:true},
+ {id:"pc-beast-of-reincarnation-deluxe-edition", platform:"pc", kind:"account", title:"Beast of Reincarnation - Deluxe Edition — PC", region:"Global", games:["Beast of Reincarnation - Deluxe Edition"], price:599, mrp:3499, stock:5, tag:"", p2:809,
+  img:"img/9cbd1c371190.png", featured:false, active:true},
+ {id:"pc-gothic-1-remake", platform:"pc", kind:"account", title:"Gothic 1 Remake — PC", region:"Global", games:["Gothic 1 Remake"], price:599, mrp:3850, stock:8, tag:"", p2:809,
+  img:"img/615259311486.jpg", featured:false, active:true},
+ {id:"pc-directive-8020-deluxe-edition", platform:"pc", kind:"account", title:"Directive 8020 - Deluxe Edition — PC", region:"Global", games:["Directive 8020 - Deluxe Edition"], price:599, mrp:3850, stock:9, tag:"", p2:809,
+  img:"img/e31a95b5873b.jpg", featured:false, active:true},
+ {id:"xbox-call-of-duty-modern-warfare-ii", platform:"xbox", kind:"account", title:"Call of Duty®: Modern Warfare® II & ) — Xbox", region:"Global", games:["Call of Duty®: Modern Warfare® II & )"], price:699, mrp:4999, stock:5, tag:"Hot",
+  img:"img/d2ebb3f8107d.jpg", featured:false, active:true},
+ {id:"xbox-assassin-s-creed-mirage-master-assassin-edition", platform:"xbox", kind:"account", title:"Assassin's Creed Mirage Master Assassin Edition & — Xbox", region:"Global", games:["Assassin's Creed Mirage Master Assassin Edition &"], price:699, mrp:2999, stock:3, tag:"Hot",
+  img:"img/6314a353893a.webp", featured:false, active:true},
+ {id:"xbox-tekken-8", platform:"xbox", kind:"account", title:"Tekken 8 & — Xbox", region:"Global", games:["Tekken 8 &"], price:699, mrp:6599, stock:7, tag:"Hot",
+  img:"img/c7a05b9d5359.webp", featured:false, active:true},
+ {id:"xbox-metal-gear-solid-master-collection-vol-2", platform:"xbox", kind:"account", title:"Metal Gear Solid: Master Collection Vol.2 — Xbox", region:"Global", games:["Metal Gear Solid: Master Collection Vol.2"], price:699, mrp:2999, stock:3, tag:"Hot",
+  img:"img/0178d4797350.jpg", featured:false, active:true},
+ {id:"xbox-ea-sports-fc-27", platform:"xbox", kind:"account", title:"Ea Sports FC 27 & — Xbox", region:"Global", games:["Ea Sports FC 27 &"], price:699, mrp:5999, stock:7, tag:"Hot",
+  img:"img/17e69e0bbd71.jpg", featured:false, active:true},
+ {id:"xbox-transport-fever-3", platform:"xbox", kind:"account", title:"Transport Fever 3 — Xbox", region:"Global", games:["Transport Fever 3"], price:699, mrp:4499, stock:7, tag:"New Arrival",
+  img:"img/f12ef51af19b.webp", featured:false, active:true},
+ {id:"xbox-onimusha-way-of-the-sword", platform:"xbox", kind:"account", title:"Onimusha: Way of the Sword — Xbox", region:"Global", games:["Onimusha: Way of the Sword"], price:699, mrp:4399, stock:9, tag:"New Arrival",
+  img:"img/5fd203b344d6.jpg", featured:false, active:true},
+ {id:"xbox-resonance-a-plague-tale-legacy", platform:"xbox", kind:"account", title:"Resonance: a Plague Tale Legacy — Xbox", region:"Global", games:["Resonance: A Plague Tale Legacy"], price:699, mrp:3499, stock:8, tag:"New Arrival",
+  img:"img/304e2b33c751.jpg", featured:false, active:true},
+ {id:"xbox-mortal-shell-ii", platform:"xbox", kind:"account", title:"Mortal Shell II — Xbox", region:"Global", games:["Mortal Shell II"], price:699, mrp:2999, stock:6, tag:"New Arrival",
+  img:"img/7da2d0a01cdf.jpg", featured:false, active:true},
+ {id:"xbox-the-sinking-city-2", platform:"xbox", kind:"account", title:"The Sinking City 2 — Xbox", region:"Global", games:["The Sinking City 2"], price:699, mrp:3700, stock:6, tag:"",
+  img:"img/f0b8f120979c.png", featured:false, active:true},
+ {id:"xbox-crimson-desert", platform:"xbox", kind:"account", title:"Crimson Desert — Xbox", region:"Global", games:["Crimson Desert"], price:699, mrp:4499, stock:6, tag:"",
+  img:"img/d6c72cbc3019.jpg", featured:false, active:true},
+ {id:"xbox-borderlands-4", platform:"xbox", kind:"account", title:"Borderlands 4 & — Xbox", region:"Global", games:["Borderlands 4 &"], price:699, mrp:4999, stock:7, tag:"",
+  img:"img/f88d67e2eda6.png", featured:false, active:true},
+ {id:"xbox-the-crew-motorfest", platform:"xbox", kind:"account", title:"The Crew™ Motorfest & — Xbox", region:"Global", games:["The Crew™ Motorfest &"], price:699, mrp:5999, stock:3, tag:"",
+  img:"img/ab4a48c0a2b5.jpg", featured:false, active:true},
+ {id:"xbox-sekiro-shadows-die-twice-goty-edition", platform:"xbox", kind:"account", title:"Sekiro: Shadows Die Twice - GOTY Edition & — Xbox", region:"Global", games:["Sekiro: Shadows Die Twice - GOTY Edition &"], price:699, mrp:6400, stock:4, tag:"",
+  img:"img/82b7a4e80784.jpg", featured:false, active:true},
+ {id:"xbox-hogwarts-legacy", platform:"xbox", kind:"account", title:"Hogwarts Legacy — Xbox", region:"Global", games:["Hogwarts Legacy"], price:599, mrp:3999, stock:3, tag:"",
+  img:"img/5978ec423c85.png", featured:false, active:true},
+ {id:"xbox-mortal-kombat-11", platform:"xbox", kind:"account", title:"Mortal Kombat 11 — Xbox", region:"Global", games:["Mortal Kombat 11"], price:599, mrp:3999, stock:6, tag:"",
+  img:"img/f687b00cecd9.png", featured:false, active:true},
+ {id:"xbox-street-fighter-6-standard-edition", platform:"xbox", kind:"account", title:"Street Fighter 6 Standard Edition — Xbox", region:"Global", games:["Street Fighter 6 Standard Edition"], price:999, mrp:4499, stock:3, tag:"",
+  img:"img/58f082fe134f.jpg", featured:false, active:true},
+ {id:"xbox-assassin-creed-shadows", platform:"xbox", kind:"account", title:"Assassin Creed Shadows — Xbox", region:"Global", games:["Assassin Creed Shadows"], price:799, mrp:2399, stock:5, tag:"",
+  img:"img/eace2835d35b.png", featured:false, active:true},
+ {id:"xbox-far-cry-6", platform:"xbox", kind:"account", title:"Far Cry 6 — Xbox", region:"Global", games:["Far Cry 6"], price:699, mrp:4999, stock:9, tag:"",
+  img:"img/ba7aeb142915.webp", featured:false, active:true},
+ {id:"xbox-watch-dogs-2", platform:"xbox", kind:"account", title:"Watch Dogs 2 — Xbox", region:"Global", games:["Watch Dogs 2"], price:699, mrp:4999, stock:9, tag:"",
+  img:"img/f34e39722af0.webp", featured:false, active:true},
+ {id:"xbox-batman-arkham-knight", platform:"xbox", kind:"account", title:"Batman: Arkham Knight — Xbox", region:"Global", games:["Batman: Arkham Knight"], price:699, mrp:4999, stock:7, tag:"",
+  img:"img/a893072e8d98.webp", featured:false, active:true},
+ {id:"xbox-witcher-3", platform:"xbox", kind:"account", title:"Witcher 3 — Xbox", region:"Global", games:["Witcher 3"], price:399, mrp:3999, stock:7, tag:"",
+  img:"img/280232887051.png", featured:false, active:true},
+ {id:"xbox-grand-theft-auto-vi", platform:"xbox", kind:"account", title:"Grand Theft Auto VI — Xbox", region:"Global", games:["Grand Theft Auto VI"], price:3999, mrp:4999, stock:3, tag:"",
+  img:"img/8b90e56718e4.webp", featured:false, active:true},
+ {id:"xbox-sekiro-shadow-die-twice", platform:"xbox", kind:"account", title:"Sekiro : Shadow Die Twice — Xbox", region:"Global", games:["Sekiro : Shadow Die Twice"], price:999, mrp:3999, stock:4, tag:"",
+  img:"img/0fcb4a608d9a.png", featured:false, active:true},
+ {id:"xbox-armored-core-vi-fires-of-rubicon", platform:"xbox", kind:"account", title:"Armored Core™ VI Fires of Rubicon™ — Xbox", region:"Global", games:["Armored Core™ VI Fires Of Rubicon™"], price:549, mrp:4999, stock:5, tag:"",
+  img:"img/2d62f997a043.png", featured:false, active:true},
+ {id:"xbox-star-wars-outlaws", platform:"xbox", kind:"account", title:"Star Wars Outlaws — Xbox", region:"Global", games:["Star Wars Outlaws"], price:799, mrp:3999, stock:7, tag:"",
+  img:"img/1bc2b972d618.png", featured:false, active:true},
+ {id:"xbox-like-a-dragon-pirate-yakuza-in-hawai", platform:"xbox", kind:"account", title:"Like a Dragon : Pirate Yakuza in Hawai — Xbox", region:"Global", games:["Like A Dragon : Pirate Yakuza In Hawai"], price:699, mrp:2099, stock:6, tag:"",
+  img:"img/83af0667becf.png", featured:false, active:true},
+ {id:"xbox-dragon-ball-sparking-zero", platform:"xbox", kind:"account", title:"Dragon Ball: Sparking Zero — Xbox", region:"Global", games:["Dragon Ball: Sparking Zero"], price:999, mrp:3999, stock:6, tag:"",
+  img:"img/6402b0f76689.png", featured:false, active:true},
+ {id:"xbox-need-for-speed-unbound", platform:"xbox", kind:"account", title:"Need for Speed Unbound — Xbox", region:"Global", games:["Need For Speed Unbound"], price:499, mrp:3999, stock:6, tag:"",
+  img:"img/64573a6eb9d7.png", featured:false, active:true},
+ {id:"xbox-ufc-5", platform:"xbox", kind:"account", title:"UFC 5 — Xbox", region:"Global", games:["UFC 5"], price:899, mrp:2699, stock:7, tag:"",
+  img:"img/1eb3c3d86d96.png", featured:false, active:true},
+ {id:"xbox-madden-nfl-22", platform:"xbox", kind:"account", title:"Madden Nfl 22 — Xbox", region:"Global", games:["Madden Nfl 22"], price:999, mrp:3999, stock:8, tag:"",
+  img:"img/b5369a78e4bd.jpg", featured:false, active:true},
+ {id:"xbox-call-of-duty-black-ops-7", platform:"xbox", kind:"account", title:"Call of Duty Black Ops 7 — Xbox", region:"Global", games:["Call Of Duty Black Ops 7"], price:2999, mrp:8999, stock:7, tag:"",
+  img:"img/7b1c284ab4b7.png", featured:false, active:true},
+ {id:"xbox-call-of-duty-modern-warfare", platform:"xbox", kind:"account", title:"Call of Duty Modern Warfare — Xbox", region:"Global", games:["Call Of Duty Modern Warfare"], price:899, mrp:2699, stock:6, tag:"",
+  img:"img/d59fce50d566.png", featured:false, active:true},
+ {id:"xbox-nba-2k25", platform:"xbox", kind:"account", title:"NBA 2k25 — Xbox", region:"Global", games:["NBA 2k25"], price:1699, mrp:5099, stock:8, tag:"",
+  img:"img/500e2fba92a6.png", featured:false, active:true},
+ {id:"xbox-wwe-2k25", platform:"xbox", kind:"account", title:"WWE 2k25 — Xbox", region:"Global", games:["WWE 2k25"], price:599, mrp:1799, stock:3, tag:"",
+  img:"img/05c4ffb13b16.png", featured:false, active:true},
+ {id:"xbox-fifa-23", platform:"xbox", kind:"account", title:"Fifa 23 — Xbox", region:"Global", games:["Fifa 23"], price:999, mrp:4299, stock:7, tag:"",
+  img:"img/029286201c5b.jpg", featured:false, active:true},
+ {id:"xbox-shadow-of-the-tomb-raider-rise-of-the-tomb-raide", platform:"xbox", kind:"account", title:"Shadow of the Tomb Raider + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY — Xbox", region:"Global", games:["Shadow of the Tomb Raider + Rise of the Tomb Raider: 20 Year Celebration + Tomb Raider GOTY"], price:699, mrp:4999, stock:3, tag:"",
+  img:"img/a01dbb497de2.png", featured:false, active:true},
+ {id:"xbox-hitman-world-of-assassination-deluxe-edition", platform:"xbox", kind:"account", title:"HITMAN World of Assassination Deluxe Edition — Xbox", region:"Global", games:["HITMAN World of Assassination Deluxe Edition"], price:599, mrp:2999, stock:8, tag:"",
+  img:"img/6c9a3e8acbae.webp", featured:false, active:true},
+ {id:"xbox-resident-evil-4", platform:"xbox", kind:"account", title:"Resident Evil 4 — Xbox", region:"Global", games:["Resident Evil 4"], price:599, mrp:4999, stock:3, tag:"",
+  img:"img/8fdb547558d9.png", featured:false, active:true},
+ {id:"xbox-monster-hunter-stories-3-twisted-reflection", platform:"xbox", kind:"account", title:"Monster Hunter Stories 3:twisted Reflection — Xbox", region:"Global", games:["Monster Hunter Stories 3:twisted Reflection"], price:1099, mrp:3299, stock:4, tag:"",
+  img:"img/71b0ac0da1b7.png", featured:false, active:true},
+ {id:"xbox-star-wars-jedi-survivor", platform:"xbox", kind:"account", title:"Star Wars Jedi : Survivor — Xbox", region:"Global", games:["Star Wars Jedi : Survivor"], price:999, mrp:4999, stock:5, tag:"",
+  img:"img/8d9b653cf008.jpg", featured:false, active:true},
+ {id:"xbox-sonic-frontiers-deluxe", platform:"xbox", kind:"account", title:"Sonic Frontiers – Deluxe — Xbox", region:"Global", games:["Sonic Frontiers – Deluxe"], price:599, mrp:5299, stock:9, tag:"",
+  img:"img/230ffd4282b5.webp", featured:false, active:true},
+ {id:"xbox-clair-obscur-expedition-33", platform:"xbox", kind:"account", title:"Clair Obscur: Expedition 33 — Xbox", region:"Global", games:["Clair Obscur: Expedition 33"], price:2099, mrp:6299, stock:3, tag:"",
+  img:"img/baeab9e39ca3.png", featured:false, active:true},
+ {id:"xbox-halo-infinite", platform:"xbox", kind:"account", title:"Halo Infinite — Xbox", region:"Global", games:["Halo Infinite"], price:499, mrp:1999, stock:6, tag:"",
+  img:"img/54736c51eb80.png", featured:false, active:true},
+ {id:"xbox-halo-the-master-chief-collection", platform:"xbox", kind:"account", title:"Halo: the Master Chief Collection — Xbox", region:"Global", games:["Halo: The Master Chief Collection"], price:499, mrp:1999, stock:8, tag:"",
+  img:"img/fa81ebb64081.png", featured:false, active:true},
+ {id:"xbox-forza-horizon-5", platform:"xbox", kind:"account", title:"Forza Horizon 5 — Xbox", region:"Global", games:["Forza Horizon 5"], price:699, mrp:2799, stock:7, tag:"",
+  img:"img/ff417c35d086.jpg", featured:false, active:true},
+ {id:"xbox-forza-motorsport", platform:"xbox", kind:"account", title:"Forza Motorsport — Xbox", region:"Global", games:["Forza Motorsport"], price:699, mrp:2799, stock:7, tag:"",
+  img:"img/584a73776bae.png", featured:false, active:true},
+ {id:"xbox-starfield", platform:"xbox", kind:"account", title:"Starfield — Xbox", region:"Global", games:["Starfield"], price:499, mrp:1999, stock:3, tag:"",
+  img:"img/461ac78df4cc.png", featured:false, active:true},
+ {id:"xbox-gears-5", platform:"xbox", kind:"account", title:"Gears 5 — Xbox", region:"Global", games:["Gears 5"], price:999, mrp:3999, stock:7, tag:"",
+  img:"img/ccf643fc8815.png", featured:false, active:true},
+ {id:"xbox-gears-of-war-e-day", platform:"xbox", kind:"account", title:"Gears of War: E-Day — Xbox", region:"Global", games:["Gears of War: E-Day"], price:999, mrp:3999, stock:6, tag:"",
+  img:"img/24431024c307.png", featured:false, active:true},
+ {id:"xbox-sea-of-thieves", platform:"xbox", kind:"account", title:"Sea of Thieves — Xbox", region:"Global", games:["Sea of Thieves"], price:699, mrp:2799, stock:6, tag:"",
+  img:"img/73dec70144c5.jpg", featured:false, active:true},
+ {id:"xbox-microsoft-flight-simulator", platform:"xbox", kind:"account", title:"Microsoft Flight Simulator — Xbox", region:"Global", games:["Microsoft Flight Simulator"], price:499, mrp:1999, stock:8, tag:"",
+  img:"img/b09e3bca5e20.png", featured:false, active:true},
+ {id:"xbox-avowed", platform:"xbox", kind:"account", title:"Avowed — Xbox", region:"Global", games:["Avowed"], price:599, mrp:2399, stock:5, tag:"",
+  img:"img/95b33a49e75d.jpeg", featured:false, active:true},
+ {id:"xbox-indiana-jones-and-the-great-circle", platform:"xbox", kind:"account", title:"Indiana Jones and the Great Circle — Xbox", region:"Global", games:["Indiana Jones and the Great Circle"], price:699, mrp:2799, stock:4, tag:"",
+  img:"img/df6671856618.jpg", featured:false, active:true},
+ {id:"xbox-senua-s-saga-hellblade-ii", platform:"xbox", kind:"account", title:"Senua's Saga: Hellblade II — Xbox", region:"Global", games:["Senua's Saga: Hellblade II"], price:499, mrp:1999, stock:9, tag:"",
+  img:"img/c96299cd2a76.png", featured:false, active:true},
+ {id:"xbox-fallout-76", platform:"xbox", kind:"account", title:"Fallout 76 — Xbox", region:"Global", games:["Fallout 76"], price:499, mrp:1999, stock:8, tag:"",
+  img:"img/88dc2e62c0a8.jpg", featured:false, active:true},
+ {id:"xbox-psychonauts-2", platform:"xbox", kind:"account", title:"Psychonauts 2 — Xbox", region:"Global", games:["Psychonauts 2"], price:699, mrp:2799, stock:3, tag:"",
+  img:"img/5ac959b52ee0.png", featured:false, active:true},
+ {id:"xbox-hollow-knight-silksong", platform:"xbox", kind:"account", title:"Hollow Knight: Silksong — Xbox", region:"Global", games:["Hollow Knight: Silksong"], price:899, mrp:3599, stock:4, tag:"",
+  img:"img/c349d62f91da.jpg", featured:false, active:true},
+ {id:"psn-marvel-wolverine", platform:"psn", kind:"account", title:"Marvel Wolverine — PS5", region:"Global", games:["Marvel Wolverine"], price:1399, mrp:4199, stock:6, tag:"Hot", p2:2659,
+  img:"img/7aa959b07dda.png", featured:false, active:true},
+ {id:"psn-marvel-tokon-fighting-souls", platform:"psn", kind:"account", title:"MARVEL Tokon: Fighting Souls — PS5", region:"Global", games:["MARVEL Tokon: Fighting Souls"], price:1049, mrp:4999, stock:7, tag:"Hot", p2:1999,
+  img:"img/116042654681.jpg", featured:false, active:true},
+ {id:"psn-marvel-s-guardians-of-the-galaxy", platform:"psn", kind:"account", title:"Marvel's Guardians of the Galaxy — PS5", region:"Global", games:["Marvel's Guardians of the Galaxy"], price:999, mrp:4999, stock:3, tag:"Hot", p2:1799,
+  img:"img/54814ab338f5.jpg", featured:false, active:true},
+ {id:"psn-tekken-7", platform:"psn", kind:"account", title:"Tekken 7 / — PS5", region:"Global", games:["Tekken 7 /"], price:599, mrp:3999, stock:7, tag:"", p2:1139,
+  img:"img/1ad7f0043296.png", featured:false, active:true},
+ {id:"psn-mortal-kombat-1", platform:"psn", kind:"account", title:"Mortal Kombat 1 — PS5", region:"Global", games:["Mortal Kombat 1"], price:799, mrp:3999, stock:4, tag:"", p2:1519,
+  img:"img/d12cc3160e93.png", featured:false, active:true},
+ {id:"psn-mortal-kombat-1-premium-edition", platform:"psn", kind:"account", title:"Mortal Kombat 1 Premium Edition — PS5", region:"Global", games:["Mortal Kombat 1 Premium Edition"], price:599, mrp:3999, stock:6, tag:"", p2:1199,
+  img:"img/320790895663.jpg", featured:false, active:true},
+ {id:"psn-silent-hill-f", platform:"psn", kind:"account", title:"Silent Hill F — PS5", region:"Global", games:["Silent Hill F"], price:599, mrp:1799, stock:5, tag:"", p2:1079,
+  img:"img/643d215d7d5a.png", featured:false, active:true},
+ {id:"psn-resident-evil-4-remake", platform:"psn", kind:"account", title:"Resident Evil 4 Remake / — PS5", region:"Global", games:["Resident Evil 4 Remake /"], price:899, mrp:3999, stock:3, tag:"", p2:1619,
+  img:"img/f8fc048a92bb.png", featured:false, active:true},
+ {id:"psn-resident-evil-village", platform:"psn", kind:"account", title:"Resident Evil Village — PS5", region:"Global", games:["Resident Evil Village"], price:599, mrp:3999, stock:3, tag:"", p2:1199,
+  img:"img/7c87e36e4d6f.png", featured:false, active:true},
+ {id:"psn-resident-evil-2-remake", platform:"psn", kind:"account", title:"Resident Evil 2 Remake — PS5", region:"Global", games:["Resident Evil 2 Remake"], price:499, mrp:3999, stock:8, tag:"", p2:949,
+  img:"img/f96a8374df89.png", featured:false, active:true},
+ {id:"psn-resident-evil-7", platform:"psn", kind:"account", title:"Resident Evil 7 — PS5", region:"Global", games:["Resident Evil 7"], price:1099, mrp:3299, stock:4, tag:"", p2:2199,
+  img:"img/8e14a3133f50.png", featured:false, active:true},
+ {id:"psn-silent-hill-2-f-combo", platform:"psn", kind:"account", title:"Silent Hill 2+f Combo / — PS5", region:"Global", games:["Silent Hill 2+f Combo /"], price:1399, mrp:4199, stock:8, tag:"", p2:2659,
+  img:"img/f080aff71059.png", featured:false, active:true},
+ {id:"pc-god-of-war-ragnarok", platform:"pc", kind:"account", title:"God of War Ragnarok — PC", region:"Global", games:["God of War Ragnarok"], price:699, mrp:4999, stock:4, tag:"Hot", p2:1019,
+  img:"img/a3f2bc1435a6.webp", featured:false, active:true},
+ {id:"pc-the-last-of-ustm-part-i", platform:"pc", kind:"account", title:"The Last of Us™ Part I — PC", region:"Global", games:["The Last of Us™ Part I"], price:599, mrp:4999, stock:5, tag:"Hot", p2:839,
+  img:"img/2a395b381866.png", featured:false, active:true},
+ {id:"pc-crimson-desert-deluxe-edition", platform:"pc", kind:"account", title:"Crimson Desert Deluxe Edition — PC", region:"Global", games:["Crimson Desert Deluxe Edition"], price:599, mrp:5129, stock:7, tag:"Hot", p2:809,
+  img:"img/2d21806b5c60.png", featured:false, active:true},
+ {id:"pc-nioh-3-deluxe-edition", platform:"pc", kind:"account", title:"Nioh 3 Deluxe Edition — PC", region:"Global", games:["Nioh 3 Deluxe Edition"], price:599, mrp:7700, stock:9, tag:"", p2:809,
+  img:"img/53e09ef6db9d.png", featured:false, active:true},
+ {id:"pc-life-is-strange-reunion-deluxe-edition", platform:"pc", kind:"account", title:"Life is Strange: Reunion - Deluxe Edition — PC", region:"Global", games:["Life is Strange: Reunion - Deluxe Edition"], price:599, mrp:3499, stock:7, tag:"", p2:779,
+  img:"img/6aad9d9da1ad.jpg", featured:false, active:true},
+ {id:"pc-death-stranding-2-on-the-beach-deluxe-edition", platform:"pc", kind:"account", title:"Death Stranding 2: on the Beach - Deluxe Edition — PC", region:"Global", games:["Death Stranding 2: on the Beach - Deluxe Edition"], price:599, mrp:5599, stock:5, tag:"", p2:809,
+  img:"img/9c5ea087d386.jpg", featured:false, active:true},
+ {id:"pc-high-on-life-2", platform:"pc", kind:"account", title:"High on Life 2 — PC", region:"Global", games:["High On Life 2"], price:599, mrp:2400, stock:6, tag:"", p2:809,
+  img:"img/60d9a517ff51.jpg", featured:false, active:true},
+ {id:"pc-reanimal-deluxe-edition", platform:"pc", kind:"account", title:"REANIMAL Deluxe Edition — PC", region:"Global", games:["REANIMAL Deluxe Edition"], price:599, mrp:2400, stock:9, tag:"", p2:779,
+  img:"img/cecab2f76c73.jpg", featured:false, active:true},
+ {id:"pc-norse-oath-of-blood-special-edition", platform:"pc", kind:"account", title:"NORSE: Oath of Blood Special Edition — PC", region:"Global", games:["NORSE: Oath of Blood Special Edition"], price:599, mrp:1540, stock:7, tag:"", p2:869,
+  img:"img/a48688d383f8.jpg", featured:false, active:true},
+ {id:"pc-styx-blades-of-greed-quartz-edition", platform:"pc", kind:"account", title:"Styx: Blades of Greed - Quartz Edition — PC", region:"Global", games:["Styx: Blades of Greed - Quartz Edition"], price:599, mrp:2999, stock:3, tag:"", p2:779,
+  img:"img/f6a1937a5c67.jpg", featured:false, active:true},
+ {id:"pc-f1-24-champions-edition", platform:"pc", kind:"account", title:"F1® 24 Champions Edition — PC", region:"Global", games:["F1® 24 Champions Edition"], price:599, mrp:4799, stock:5, tag:"", p2:779,
+  img:"img/a213dcc89004.webp", featured:false, active:true},
+ {id:"pc-dragon-age-the-veilguard-deluxe-edition", platform:"pc", kind:"account", title:"Dragon Age: the Veilguard Deluxe Edition — PC", region:"Global", games:["Dragon Age: The Veilguard Deluxe Edition"], price:599, mrp:4699, stock:4, tag:"", p2:779,
+  img:"img/2b4ffc1c52cb.webp", featured:false, active:true},
+ {id:"pc-demon-slayer-kimetsu-no-yaiba-the-hinokami-chron", platform:"pc", kind:"account", title:"Demon Slayer -Kimetsu no Yaiba- the Hinokami Chronicles: Deluxe Edition — PC", region:"Global", games:["Demon Slayer -Kimetsu no Yaiba- The Hinokami Chronicles: Deluxe Edition"], price:599, mrp:4399, stock:7, tag:"", p2:839,
+  img:"img/cc0cf3358f76.webp", featured:false, active:true},
+ {id:"pc-the-lord-of-the-rings-gollum-precious-edition", platform:"pc", kind:"account", title:"The Lord of the Rings: Gollum - Precious Edition — PC", region:"Global", games:["The Lord of the Rings: Gollum - Precious Edition"], price:699, mrp:2899, stock:4, tag:"", p2:909,
+  img:"img/69b0c07aeb2b.webp", featured:false, active:true},
+ {id:"pc-enshrouded", platform:"pc", kind:"account", title:"Enshrouded — PC", region:"Global", games:["Enshrouded"], price:599, mrp:1479, stock:9, tag:"", p2:779,
+  img:"img/0c79376e0759.webp", featured:false, active:true},
+ {id:"pc-outcast-a-new-beginning", platform:"pc", kind:"account", title:"Outcast – a New Beginning — PC", region:"Global", games:["Outcast – a New Beginning"], price:599, mrp:3400, stock:3, tag:"", p2:779,
+  img:"img/9ae2c78b81a0.webp", featured:false, active:true},
+ {id:"pc-the-outlast-trials-deluxe-edition", platform:"pc", kind:"account", title:"The Outlast Trials - Deluxe Edition — PC", region:"Global", games:["The Outlast Trials - Deluxe Edition"], price:599, mrp:2000, stock:6, tag:"", p2:779,
+  img:"img/1766bf661936.webp", featured:false, active:true},
+ {id:"pc-pacific-drive-deluxe-edition", platform:"pc", kind:"account", title:"Pacific Drive: Deluxe Edition — PC", region:"Global", games:["Pacific Drive: Deluxe Edition"], price:599, mrp:2339, stock:8, tag:"", p2:779,
+  img:"img/39c6d100d3e7.webp", featured:false, active:true},
+ {id:"pc-last-epoch-ultimate-edition", platform:"pc", kind:"account", title:"Last Epoch Ultimate Edition — PC", region:"Global", games:["Last Epoch Ultimate Edition"], price:599, mrp:2700, stock:6, tag:"", p2:809,
+  img:"img/66d294840326.webp", featured:false, active:true},
+ {id:"pc-a-plague-tale-requiem-200-games", platform:"pc", kind:"account", title:"A Plague Tale: Requiem + 200 games — PC", region:"Global", games:["A Plague Tale: Requiem + 200 games"], price:699, mrp:2299, stock:6, tag:"", p2:979,
+  img:"img/f9aa5ce24d03.jpg", featured:false, active:true},
+ {id:"xbox-it-takes-two", platform:"xbox", kind:"account", title:"It Takes Two / — Xbox", region:"Global", games:["It Takes Two /"], price:599, mrp:3999, stock:3, tag:"",
+  img:"img/7375ba3d07d0.png", featured:false, active:true},
+ {id:"xbox-lies-of-p", platform:"xbox", kind:"account", title:"Lies of P — Xbox", region:"Global", games:["Lies of P"], price:999, mrp:4999, stock:4, tag:"",
+  img:"img/f512b97dd2dc.png", featured:false, active:true},
+ {id:"xbox-the-elder-scrolls-iv-oblivion-remastered", platform:"xbox", kind:"account", title:"The Elder Scrolls IV: Oblivion Remastered — Xbox", region:"Global", games:["The Elder Scrolls IV: Oblivion Remastered"], price:749, mrp:5599, stock:7, tag:"",
+  img:"img/b7af1f780086.jpg", featured:false, active:true},
+ {id:"xbox-wuchang-fallen-feather", platform:"xbox", kind:"account", title:"Wuchang: Fallen Feather — Xbox", region:"Global", games:["Wuchang: Fallen Feather"], price:599, mrp:1799, stock:9, tag:"",
+  img:"img/b34421a397fa.png", featured:false, active:true},
+ {id:"xbox-lords-of-the-fallen-deluxe-edition", platform:"xbox", kind:"account", title:"Lords of the Fallen Deluxe Edition — Xbox", region:"Global", games:["Lords of the Fallen Deluxe Edition"], price:599, mrp:3499, stock:3, tag:"",
+  img:"img/d811b44d9e74.webp", featured:false, active:true},
+ {id:"xbox-minecraft-dungeons", platform:"xbox", kind:"account", title:"Minecraft Dungeons — Xbox", region:"Global", games:["Minecraft Dungeons"], price:699, mrp:2799, stock:3, tag:"",
+  img:"img/8c687d06c83e.jpg", featured:false, active:true},
+ {id:"xbox-ori-and-the-blind-forest", platform:"xbox", kind:"account", title:"Ori and the Blind Forest — Xbox", region:"Global", games:["Ori and the Blind Forest"], price:699, mrp:2799, stock:8, tag:"",
+  img:"img/6f57af4747b0.jpg", featured:false, active:true},
+ {id:"xbox-forza-horizon-4", platform:"xbox", kind:"account", title:"Forza Horizon 4 — Xbox", region:"Global", games:["Forza Horizon 4"], price:699, mrp:2799, stock:9, tag:"",
+  img:"img/3d2e8a2b4c17.jpg", featured:false, active:true},
+ {id:"xbox-gears-tactics", platform:"xbox", kind:"account", title:"Gears Tactics — Xbox", region:"Global", games:["Gears Tactics"], price:699, mrp:2799, stock:6, tag:"",
+  img:"img/ff1ab291a6eb.jpg", featured:false, active:true},
+ {id:"xbox-gears-of-war-4", platform:"xbox", kind:"account", title:"Gears of War 4 — Xbox", region:"Global", games:["Gears of War 4"], price:699, mrp:2799, stock:7, tag:"",
+  img:"img/7cfde607b8ac.jpg", featured:false, active:true},
+ {id:"xbox-halo-5-guardians", platform:"xbox", kind:"account", title:"Halo 5: Guardians — Xbox", region:"Global", games:["Halo 5: Guardians"], price:699, mrp:2799, stock:9, tag:"",
+  img:"img/7a61fd632cb7.png", featured:false, active:true},
+ {id:"xbox-killer-instinct", platform:"xbox", kind:"account", title:"Killer Instinct — Xbox", region:"Global", games:["Killer Instinct"], price:699, mrp:2799, stock:3, tag:"",
+  img:"img/9f02971b78d3.jpg", featured:false, active:true},
+ {id:"xbox-minecraft-legends", platform:"xbox", kind:"account", title:"Minecraft Legends — Xbox", region:"Global", games:["Minecraft Legends"], price:699, mrp:2799, stock:7, tag:"",
+  img:"img/31861e2c1898.jpg", featured:false, active:true},
+ {id:"xbox-recore", platform:"xbox", kind:"account", title:"ReCore — Xbox", region:"Global", games:["ReCore"], price:699, mrp:2799, stock:3, tag:"",
+  img:"img/63ae39cabf21.jpg", featured:false, active:true},
+ {id:"xbox-super-lucky-s-tale", platform:"xbox", kind:"account", title:"Super Lucky's Tale — Xbox", region:"Global", games:["Super Lucky's Tale"], price:699, mrp:2799, stock:5, tag:"",
+  img:"img/f279f3d69708.jpg", featured:false, active:true},
+ {id:"xbox-fallout-3", platform:"xbox", kind:"account", title:"Fallout 3 — Xbox", region:"Global", games:["Fallout 3"], price:699, mrp:2799, stock:8, tag:"",
+  img:"img/2dc9213d0c3a.png", featured:false, active:true},
+ {id:"xbox-halo-wars-2", platform:"xbox", kind:"account", title:"Halo Wars 2 — Xbox", region:"Global", games:["Halo Wars 2"], price:699, mrp:2799, stock:4, tag:"",
+  img:"img/b40f97ad031b.png", featured:false, active:true},
+ {id:"xbox-max-payne-3", platform:"xbox", kind:"account", title:"Max Payne 3 — Xbox", region:"Global", games:["Max Payne 3"], price:699, mrp:2799, stock:7, tag:"",
+  img:"img/61ca2d8a8d35.jpg", featured:false, active:true},
+];
+
+/* ============ helpers ============ */
+const $ = s => document.querySelector(s);
+const inr = n => "₹" + Number(n).toLocaleString("en-IN");
+const esc = s => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>';
+const PLATFORMS = {
+  psn: {name:"PSN", long:"PlayStation", mono:"PS", cls:"ps"},
+  xbox:{name:"Xbox", long:"Xbox", mono:"XB", cls:"xb"},
+  pc:  {name:"PC", long:"PC / Steam", mono:"PC", cls:"pc"},
+  subs:{name:"Extras", long:"Subscriptions & top-ups", mono:"+", cls:"pc"}
+};
+const KINDS = {account:"Game account", subscription:"Subscription", wallet:"Wallet top-up"};
+const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const FINE = window.matchMedia("(pointer: fine)").matches;
+const buzz = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
+
+let toastTimer;
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2400); }
+function copyText(txt){
+  const done=()=>toast("Copied: "+txt);
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done));}
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){toast(txt);}ta.remove();}
+
+/* ============ state ============ */
+const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
+const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true};
+const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null, adminMsg:null };
+function loadLocal(){
+  try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length) p.forEach(x=>state.products[x.id]=x); else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
+  try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS_P, JSON.stringify(Object.values(state.products))); localStorage.setItem(LS_S, JSON.stringify(state.settings)); }catch(e){}
+}
+loadLocal();
+
+function loadCart(){ try{return JSON.parse(localStorage.getItem(LS_C)||"{}")||{};}catch(e){return{};} }
+function saveCart(c){ try{localStorage.setItem(LS_C, JSON.stringify(c));}catch(e){} }
+let cart=loadCart();
+const cartCount=()=>Object.values(cart).reduce((a,b)=>a+b,0);
+const byId=id=>state.products[id];
+function cartAdd(id,q,opt){ const k=id+(opt==="p2"?"~p2":""); cart[k]=(cart[k]||0)+q; if(cart[k]<=0) delete cart[k]; saveCart(cart); updateBadge(); }
+function splitKey(k){ const i=k.indexOf("~"); return i<0?[k,"base"]:[k.slice(0,i),"p2"]; }
+function priceOf(p,opt){ return opt==="p2"&&p.p2?p.p2:p.price; }
+function optLabel(p,two){ if(p.platform==="pc") return two?"Online":"Offline"; if(p.platform==="psn") return two?"Primary":"Secondary"; return two?"":"Standard"; }
+function tierShort(p,two){ if(p.platform==="pc") return two?"Online multiplayer":"Play offline"; if(p.platform==="psn") return two?"All profiles, online":"Offline on the account"; return "Standard"; }
+function tierDesc(p,two){
+  if(p.platform==="pc") return two?"Multiplayer and online modes are unlocked on this account — for FC, CoD, GTA Online and friends-night games.":"Best value — you play single-player on the account we provide, offline. Same game, same download, lowest price.";
+  if(p.platform==="psn") return two?"Your PS5 is set as this account's Primary console — every profile on your console plays the game, with online features working.":"The game plays on the account we provide, in offline mode — the unbeatable-price option for single-player titles.";
+  return "Standard tier";
+}
+let pdOpt="base";
+function updateBadge(){
+  const n=cartCount();
+  ["#cartCount","#cartCountM"].forEach(sel=>{ const el=$(sel); if(!el) return;
+    if(el.textContent!==String(n)){ el.textContent=n; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); } });
+}
+let appliedCoupon=null;
+function cartTotal(){ return Object.entries(cart).reduce((a,[k,q])=>{const [id,opt]=splitKey(k);const p=byId(id); return p?a+priceOf(p,opt)*q:a;},0); }
+function discountAmount(){ return appliedCoupon ? Math.round(cartTotal()*state.settings.couponPercent/100) : 0; }
+
+/* ============ firebase ============ */
+function firebaseConfigured(){
+  const c=window.FirebaseConfig;
+  return !!(c && c.apiKey && !String(c.apiKey).includes("PASTE") && c.projectId && !String(c.projectId).includes("PASTE"));
+}
+function initFirebase(){
+  if(!(window.firebase && firebaseConfigured())) return;
+  try{
+    firebase.initializeApp(window.FirebaseConfig);
+    const db=firebase.firestore(), auth=firebase.auth();
+    state.fbReady=true;
+    auth.onAuthStateChanged(u=>{ state.user=u; if(routeNow().startsWith("/admin")) route(); });
+    db.collection("settings").doc("store").onSnapshot(s=>{
+      if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; renderAnnounce(); if(!routeNow().startsWith("/admin")) route(); }
+    });
+    db.collection("products").onSnapshot(snap=>{
+      if(!state._seedProducts) state._seedProducts=Object.assign({},state.products);
+      const del=deletedIds();
+      const merged={};
+      Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]=state._seedProducts[k]; });
+      if(!snap.empty){ snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]=d.data(); }); state.source="firestore"; }
+      state.fsCount=snap.size; state.products=merged;
+      renderAnnounce();
+      if(routeNow().startsWith("/admin")) renderAdminTable(); else route();
+    });
+  }catch(e){ console.warn("Firebase init failed:", e); }
+}
+async function fsAdd(data){
+  const db=firebase.firestore();
+  data.id = data.id || (data.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)+"-"+Math.random().toString(36).slice(2,6));
+  await db.collection("products").doc(data.id).set(data, {merge:true});
+  return data.id;
+}
+window.addEventListener("load", initFirebase);
+/* deleted-product tombstones (so a Firestore delete doesn't get resurrected by the local seed) */
+function deletedIds(){ try{ return JSON.parse(localStorage.getItem("hd_deleted_v1")||"[]"); }catch(e){ return []; } }
+function markDeleted(id){ const d=deletedIds(); if(!d.includes(id)){ d.push(id); localStorage.setItem("hd_deleted_v1", JSON.stringify(d)); } }
+async function syncCatalog(btn){
+  if(!(state.fbReady&&state.user)){ toast("Log in as owner first"); return; }
+  btn.disabled=true; const msg=$("#syncMsg");
+  const set=m=>{ if(msg) msg.innerHTML='<p class="hint">'+m+'</p>'; };
+  const items=Object.values(state._seedProducts||state.products);
+  const db=firebase.firestore(); let done=0;
+  try{
+    for(let i=0;i<items.length;i+=400){
+      const batch=db.batch();
+      items.slice(i,i+400).forEach(p=>batch.set(db.collection("products").doc(p.id), p, {merge:true}));
+      await batch.commit();
+      done+=Math.min(400,items.length-i);
+      set("Uploading… "+done+" / "+items.length);
+    }
+    set("✅ Catalog synced — Firestore now holds "+done+" products and is the live source. Edits in the panel go live instantly.");
+    toast("Catalog uploaded");
+  }catch(err){ set("❌ "+err.message+" — most likely the Firestore rules aren't published with your UID yet, or the database region/type is wrong. Fix and retry."); }
+  btn.disabled=false;
+}
+
+/* ============ render bits ============ */
+function offPct(p){ return p.mrp>p.price ? Math.round((1-p.price/p.mrp)*100) : 0; }
+function saveAmt(p){ return p.mrp>p.price ? p.mrp-p.price : 0; }
+function artHTML(p, extra){
+  const pl=PLATFORMS[p.platform]||PLATFORMS.pc;
+  return '<a class="art art-'+pl.cls+' '+(extra||"")+'" href="#/p/'+p.id+'" aria-label="'+esc(p.title)+'">'+
+    '<span class="mono">'+pl.mono+'</span>'+
+    (p.img?'<img class="pimg" src="'+esc(p.img)+'" alt="" loading="lazy" decoding="async" onerror="this.remove()">':'')+
+    '<span class="sheen"></span>'+
+    (offPct(p)>=50?'<span class="off">'+offPct(p)+'% OFF</span>':'')+
+    '<span class="ptag">'+pl.name+(p.kind==='account'?' account':'')+'</span></a>';
+}
+function stockLine(p){
+  if(p.stock<=0) return '<span class="stock-low">Out of stock</span>';
+  if(p.stock<=2) return '<span class="stock-low">🔥 Only '+p.stock+' left</span>';
+  return '<span class="stock-ok">In stock · instant handover</span>';
+}
+function bsCard(p,i){
+  const nm=(p.games&&p.games[0])||p.title;
+  return '<a class="bscard rv" href="#/p/'+p.id+'">'+
+    '<span class="bs-rank">#'+(i+1)+'</span>'+
+    (p.img?'<img class="bs-img" src="'+esc(p.img)+'" alt="" loading="lazy" onerror="this.remove()">':'<span class="bs-img bs-fallback">'+esc(nm.slice(0,2).toUpperCase())+'</span>')+
+    '<span class="bs-body"><b>'+esc(nm)+'</b>'+
+    '<span class="bs-meta">'+((PLATFORMS[p.platform]||{}).long||"")+(p.p2?" · "+optLabel(p,false)+" & "+optLabel(p,true)+" tiers":"")+'</span>'+
+    '<span class="bs-price">From '+inr(p.price)+(offPct(p)?'<em>'+offPct(p)+'% off</em>':'')+'</span></span></a>';
+}
+function cardHTML(p){
+  const chips=(p.games||[]).slice(0,3).map(g=>'<span class="gchip">'+esc(g)+'</span>').join("");
+  const more=(p.games&&p.games.length>3)?'<span class="gchip">+'+(p.games.length-3)+' more</span>':"";
+  return '<article class="card"><span class="glare"></span>'+artHTML(p)+
+    '<div class="card-body">'+
+    (p.tag?'<span class="tag">'+esc(p.tag)+'</span>':'')+
+    '<h3 class="card-title"><a href="#/p/'+p.id+'">'+esc(p.title)+'</a></h3>'+
+    ((chips||more)?'<div class="gchips">'+chips+more+'</div>':'')+
+    '<div class="save">Save '+inr(saveAmt(p))+'</div>'+stockLine(p)+
+    '<div class="card-foot"><span class="price">'+(p.p2?'<i class="t2l" style="font-style:normal;font-size:10px;margin-right:5px">FROM</i>':'')+inr(p.price)+'<s class="mrp">'+inr(p.mrp)+'</s></span>'+
+    (p.stock>0?'<button class="btn btn-sm" data-add="'+p.id+'" aria-label="Add '+esc(p.title)+' to cart">Add</button>':'<span class="stock-low">Sold out</span>')+
+    '</div></div></article>';
+}
+function renderAnnounce(){
+  const el=$("#announceBar");
+  const code=String(state.settings.couponCode||"");
+  if(state.settings.couponOn && code){
+    const rx=new RegExp(code.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"g");
+    el.innerHTML=esc(state.settings.announce).replace(rx,"<b>"+esc(code)+"</b>");
+  } else el.textContent=state.settings.announce||"";
+}
+
+/* ============ views ============ */
+function vHome(){
+  const all=Object.values(state.products).filter(p=>p.active!==false);
+  const featured=all.filter(p=>p.featured).slice(0,8);
+  const deals=all.filter(p=>offPct(p)>=80).slice(0,8);
+  const count=pl=>all.filter(p=>p.platform===pl).length;
+  const tick=all.slice(0,14).map(p=>(p.games&&p.games[0])||p.title).join("◆")+"◆";
+  const best=(featured.length>=4?featured:all.slice().sort((a,b)=>offPct(b)-offPct(a)).slice(0,8)).slice(0,8);
+  return `
+  <section class="hero">
+    <div class="hero-visual" id="heroVisual" aria-hidden="true">
+      <div class="scene" id="heroScene">
+        <div class="layer" data-depth="5"><div class="orb floaty2"></div></div>
+        <div class="layer" data-depth="10"><div class="ring"></div></div>
+        <div class="layer" data-depth="22"><div class="gcard gc1 floaty"><img class="gimg" src="img/1c13fc05be39.png" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>PC · Steam account</span><span>${inr(299)}</span></div><div class="gbot"><div class="g">Black Myth: Wukong</div><div class="p">Save ${inr(3300)} · 92% off</div></div></div></div>
+        <div class="layer" data-depth="32"><div class="gcard gc2 floaty"><img class="gimg" src="img/fbff5cd4f82a.webp" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>PSN · Subscription</span><span>${inr(499)}</span></div><div class="gbot"><div class="g">PS Plus Extra · 1 Month</div><div class="p">Save ${inr(3500)} · 87% off</div></div></div></div>
+        <div class="layer" data-depth="16"><div class="gcard gc3 floaty"><img class="gimg" src="img/d82390370b1a.jpg" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>Xbox · Game Pass</span><span>${inr(899)}</span></div><div class="gbot"><div class="g">Game Pass Lifetime · 400+ games</div><div class="p">Save ${inr(9100)} · 91% off</div></div></div></div>
+      </div>
+    </div>
+    <div>
+      <span class="kicker"><span class="dotpulse"></span> WhatsApp delivery in minutes</span>
+      <h1>Level up your <span class="shine">gaming experience.</span></h1>
+      <p class="lead">Explore the best games for PC &amp; console — PSN, Xbox and Steam accounts with top titles at up to 90% off. Credentials on WhatsApp in minutes, guided download setup, 30-day warranty.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#/pc">Browse PC deals</a>
+        <a class="btn btn-ghost" href="#/psn">Browse PSN</a>
+      </div>
+      <div class="chips">
+        <span class="chip">${CHECK} Guided download setup</span>
+        <span class="chip">${CHECK} Tested before delivery</span>
+        <span class="chip">${CHECK} 30-day warranty</span>
+        <span class="chip">${CHECK} UPI · GPay · PhonePe</span>
+      </div>
+      <div class="statsrow">
+        <div class="stat2"><b>4,200+</b><span>Gamers served</span></div>
+        <div class="stat2"><b>10 min</b><span>Avg. delivery</span></div>
+        <div class="stat2"><b>4.9★</b><span>Buyer rating</span></div>
+        <div class="stat2"><b>90%</b><span>Max discount</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker-wrap" aria-hidden="true"><div class="ticker"><span>${esc(tick)}</span><span>${esc(tick)}</span></div></div>
+
+  <section class="sec bests">
+    <div class="sec-head rv"><div><span class="eyebrow">Hand-picked · restocked weekly</span><h2>🔥 Bestsellers this week</h2><p class="sub">The listings our buyers keep coming back for.</p></div></div>
+    <div class="bestrail">${best.map(bsCard).join("")}</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head rv"><div><span class="eyebrow">${all.length} listings live · updated daily</span><h2>Shop by platform</h2><p class="sub">Every listing states the platform, region and exactly what's included.</p></div></div>
+    <div class="collections">
+      <a class="colcard rv" href="#/pc"><span class="ic ic-pc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M8 20h8"/></svg></span><b>PC · Steam</b><span>${count("pc")} accounts — Wukong, GoT, GTA</span></a>
+      <a class="colcard rv" href="#/psn"><span class="ic ic-ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12h10M12 7v10"/></svg></span><b>PlayStation</b><span>${count("psn")} listings — PS5 + PS Plus</span></a>
+      <a class="colcard rv" href="#/xbox"><span class="ic ic-xb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M8 16c2-4 6-4 8-8M16 16c-2-4-6-4-8-8"/></svg></span><b>Xbox</b><span>${count("xbox")} listings — Game Pass</span></a>
+      <a class="colcard rv" href="#/how"><span class="ic ic-sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></span><b>How it works</b><span>Guided setup &amp; warranty</span></a>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head rv"><div><h2>Featured accounts</h2><p class="sub">Hand-picked, verified working, ready for handover.</p></div><a class="see-all" href="#/pc">View all →</a></div>
+    <div class="grid">${featured.map(cardHTML).join("")||'<p class="sub">Catalog coming right up — check back shortly.</p>'}</div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head rv"><div><h2>Crazy deals right now</h2><p class="sub">Up to 92% off. When they're gone, they're gone.</p></div>${state.settings.couponOn?'<span class="timer" id="dealTimer" title="Coupon window — resets daily at IST midnight"></span>':""}</div>
+    <div class="grid">${deals.map(cardHTML).join("")}</div>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="sec-head rv"><div><h2>How your game access works</h2><p class="sub">First time buying an account? Here's exactly what happens — no mystery.</p></div></div>
+    <div class="hiw">
+      <div class="step rv"><div class="n">1</div><h3>Pick your account</h3><p>Every listing shows the games included, platform and region. Add to cart and check out with UPI.</p></div>
+      <div class="step rv"><div class="n">2</div><h3>Secure handover</h3><p>We verify payment, then send the credentials on WhatsApp — usually under 10 minutes during ${esc(CONFIG.hours)}.</p></div>
+      <div class="step rv"><div class="n">3</div><h3>Download &amp; play</h3><p>Our team guides your download and setup live on WhatsApp — most buyers are in-game within 15 minutes. 30-day warranty included.</p></div>
+    </div>
+    <div style="margin-top:14px" class="rv"><a class="see-all" href="#/how">Full walkthrough with per-platform steps →</a></div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head rv"><div><h2>Why gamers rebuy here</h2></div></div>
+    <div class="quotes">
+      <!-- SAMPLE testimonials — replace with real customer feedback (with permission) before launch -->
+      <figure class="quote rv"><div class="stars">★★★★★</div>"Bought Wukong at 2am, had the login in my WhatsApp before I finished making chai. Changed the mail myself, all good."<figcaption class="who"><span class="avatar">AK</span><span><b>Aditya K.</b><span>Pune · repeat buyer</span></span></figcaption></figure>
+      <figure class="quote rv"><div class="stars">★★★★★</div>"PS Plus Extra for ₹499 vs ₹3,999 official. They stayed on WhatsApp till my download finished. Legit sellers."<figcaption class="who"><span class="avatar">SR</span><span><b>Sana R.</b><span>Hyderabad</span></span></figcaption></figure>
+      <figure class="quote rv"><div class="stars">★★★★★</div>"One account had an issue on day 6. Sent one WhatsApp message, replacement came the same evening. That's why I keep buying here."<figcaption class="who"><span class="avatar">MJ</span><span><b>Manish J.</b><span>Delhi</span></span></figcaption></figure>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="sec-head rv"><div><h2>Questions, answered</h2></div><a class="see-all" href="#/faq">All FAQs →</a></div>
+    <div class="rv">
+    <details class="acc"><summary>What exactly am I buying — a code?</summary><div class="acc-body">No codes. You buy the <b>account itself</b> — with the game already on it. We send you the credentials on WhatsApp and our team guides you through downloading and starting the game, step by step, until you're playing.</div></details>
+    <details class="acc"><summary>How fast is delivery?</summary><div class="acc-body">After payment verification, credentials are sent to your WhatsApp — typically under 10 minutes during ${esc(CONFIG.hours)}. Night orders are delivered first thing in the morning.</div></details>
+    <details class="acc"><summary>Is this safe?</summary><div class="acc-body">Every account is <b>tested before delivery</b>, and your entire setup is guided live by our team on WhatsApp — you're never left figuring things out alone. Every order also carries a <b>30-day replacement warranty</b>: if anything goes wrong that isn't your doing, we replace it or refund.</div></details>
+    </div>
+  </section>
+
+  <div class="cta-band rv">
+    <div><h2>Ready to play for less?</h2><p>Join the gamers who stopped paying full price.</p></div>
+    <a class="btn" href="#/pc">Browse the catalog</a>
+  </div>`;
+}
+
+let catFilter="all";
+function vCatalog(pl){
+  const P=PLATFORMS[pl];
+  const all=Object.values(state.products).filter(p=>p.active!==false && p.platform===pl);
+  const kinds=[...new Set(all.map(p=>p.kind))];
+  const items=all.filter(p=>catFilter==="all"||p.kind===catFilter);
+  const fb=(k,l)=>'<button class="fbtn'+(catFilter===k?" on":"")+'" data-filter="'+k+'">'+l+'</button>';
+  return `
+  <div class="sec-head rv" style="padding-top:26px;margin-bottom:10px"><div>
+    <h2>${P.long}</h2><p class="sub">${items.length} listing${items.length!==1?"s":""} · region stated on every account · 30-day warranty</p>
+  </div></div>
+  <div class="filters rv">${fb("all","All")}${kinds.includes("account")?fb("account","Accounts"):""}${kinds.includes("subscription")?fb("subscription","Subscriptions"):""}${kinds.includes("wallet")?fb("wallet","Top-ups"):""}</div>
+  <div class="grid">${items.map(cardHTML).join("")||'<p class="sub">Nothing here yet — new stock lands soon.</p>'}</div>
+  <div class="cta-band rv"><div><h2>Can't find your game?</h2><p>Message us the title — if it exists, we'll source it.</p></div><a class="btn" href="#/contact">Ask on WhatsApp</a></div>`;
+}
+
+function vProduct(id){
+  const p=byId(id);
+  if(!p) return v404();
+  const P=PLATFORMS[p.platform]||PLATFORMS.pc;
+  pdOpt="base";
+  const related=Object.values(state.products).filter(x=>x.active!==false&&x.platform===p.platform&&x.id!==p.id).slice(0,4);
+  const sticky = p.stock>0 ?
+    '<div class="pd-sticky"><span class="price" id="pdStickyPrice">'+inr(p.price)+' <s class="mrp">'+inr(p.mrp)+'</s></span><button class="btn" data-add-pd="'+p.id+'">Add to cart</button></div>' : "";
+  return `
+  <div class="crumb"><a href="#/">Home</a> / <a href="#/${p.platform}">${esc(P.long)}</a> / ${esc(p.title)}</div>
+  <div class="pd">
+    <div class="rv">${artHTML(p,"")}</div>
+    <div class="rv">
+      ${p.tag?'<span class="tag">'+esc(p.tag)+'</span>':''}
+      <h1>${esc(p.title)}</h1>
+      <div class="sub" style="margin-top:2px">${KINDS[p.kind]||"Account"} · Region: ${esc(p.region||"Global")} · Delivered on WhatsApp</div>
+      <div class="pd-price">${inr(p.price)}<s>${inr(p.mrp)}</s><span class="saveb">Save ${inr(saveAmt(p))} (${offPct(p)}%)</span></div>
+      ${p.p2?`<div class="vopts" id="vopts" role="radiogroup" aria-label="Choose your tier">
+        <button class="vopt on" type="button" data-opt="base" data-price="${p.price}" data-desc="${esc(tierDesc(p,false))}"><span>${optLabel(p,false)}</span><b>${inr(p.price)}</b><i>${tierShort(p,false)}</i></button>
+        <button class="vopt" type="button" data-opt="p2" data-price="${p.p2}" data-desc="${esc(tierDesc(p,true))}"><span>${optLabel(p,true)}</span><b>${inr(p.p2)}</b><i>${tierShort(p,true)}</i></button>
+      </div><div class="vhint" id="vhint">${esc(tierDesc(p,false))}</div>`:""}
+      ${stockLine(p)}
+      <div class="qtyrow">
+        <span class="qty"><button type="button" data-qlocal="dec" aria-label="Decrease quantity">−</button><input id="qty" value="1" inputmode="numeric" aria-label="Quantity"><button type="button" data-qlocal="inc" aria-label="Increase quantity">+</button></span>
+        <button class="btn" data-add-pd="${p.id}" ${p.stock>0?"":"disabled"}>Add to cart</button>
+        <button class="btn btn-ghost" data-buynow="${p.id}" ${p.stock>0?"":"disabled"}>Buy now</button>
+      </div>
+      <div class="dlv">${CHECK} Credentials delivered on WhatsApp — usually under 10 minutes</div>
+      <div class="dlv">${CHECK} We guide your download &amp; setup live, till you're playing</div>
+      <div class="dlv">${CHECK} 30-day replacement warranty included</div>
+      <h3 class="gamehead">What's included</h3>
+      <div class="gchips">${(p.games||[]).map(g=>'<span class="gchip">'+esc(g)+'</span>').join("")}</div>
+      <details class="acc" open><summary>How it works</summary><div class="acc-body"><ol><li>Pay via UPI and tap "I've paid" on WhatsApp.</li><li>We verify payment and send you the account credentials on WhatsApp.</li><li>Our team guides you step by step through downloading and starting the game — live, till you're playing.</li></ol></div></details>
+      <details class="acc"><summary>Download &amp; setup guide</summary><div class="acc-body">${downloadGuide(p.platform)}</div></details>
+      <details class="acc"><summary>Warranty &amp; support</summary><div class="acc-body">30-day replacement warranty: if credentials fail or the account develops problems not caused by you, message us with your order ID — we replace the account or refund your money, your choice. Issues caused by not following the setup guidance we provide may not be covered.</div></details>
+    </div>
+  </div>
+  ${sticky}
+  <section class="sec"><div class="sec-head rv"><div><h2>More from ${esc(P.long)}</h2></div></div><div class="grid">${related.map(cardHTML).join("")}</div></section>`;
+}
+function downloadGuide(platform){
+  if(platform==="psn") return '<p><b>PlayStation — download in 4 steps:</b></p><ol><li>We send the account credentials on WhatsApp.</li><li>Sign in on your PS5 with those details (we show you exactly where).</li><li>Open the Game Library → find your game → hit Download.</li><li>Our team stays on WhatsApp until your download is finished and the game runs.</li></ol><p>That\'s it — you\'re playing. No technical knowledge needed; we walk you through every screen.</p>';
+  if(platform==="xbox") return '<p><b>Xbox — download in 4 steps:</b></p><ol><li>We send the account credentials on WhatsApp.</li><li>Sign in with those details on your console or the Xbox app.</li><li>Open My games &amp; apps → Full library → download your game.</li><li>We stay on WhatsApp till the game is installed and running.</li></ol><p>Stuck anywhere? Send one message — we guide you live.</p>';
+  return '<p><b>PC — download in 4 steps:</b></p><ol><li>We send the account credentials on WhatsApp.</li><li>Install Steam (if you don\'t have it) and sign in with the provided details.</li><li>Open your Library → download the game.</li><li>We guide you through the final launch settings and stay on WhatsApp till it runs.</li></ol><p>Total time is usually 15–30 minutes depending on your internet speed.</p>';
+}
+
+function vHow(){
+  return '<div class="prose rv"><h1>How buying works — the full picture</h1>'+
+  '<p>No codes, no sharing your own account with strangers. You buy an <b>account with the game already on it</b>, receive the credentials on WhatsApp, and our team guides you through downloading and playing — live, till you\'re in the game. Here is the exact flow.</p>'+
+  '<h3>1 · Order &amp; payment</h3><p>Add to cart, check out with any UPI app. Your order ID is generated instantly; tap "I\'ve paid" on WhatsApp and we verify in our bank app before anything is sent — that protects both sides from fake screenshots.</p>'+
+  '<h3>2 · Credentials handover (under 10 minutes during '+esc(CONFIG.hours)+')</h3><p>You receive the account credentials on WhatsApp with a copy of your order ID. Night orders are delivered first thing in the morning.</p>'+
+  '<h3>3 · Download &amp; start playing — we guide you live</h3><ul><li><b>PC / Steam:</b> sign in with the provided credentials → open your Library → download the game. We help with any launch settings.</li><li><b>PlayStation:</b> sign in on your console with the provided credentials → Game Library → download. Takes minutes.</li><li><b>Xbox:</b> sign in with the provided credentials → My games &amp; apps → download.</li></ul>'+
+  '<p>Our team stays with you on WhatsApp through every screen until the game is downloaded and running — that\'s included with every purchase, not an upsell.</p>'+
+  '<h3>4 · Warranty</h3><p>30 days. If the credentials fail or the account develops a problem not caused by you, we replace it or refund — your choice. See the Refund &amp; warranty page for full terms.</p>'+
+  '<h3>Why buyers trust HeavenDigital</h3><p>Every account is <b>tested before delivery</b>, your entire setup is <b>guided live on WhatsApp</b>, and every order carries a <b>30-day replacement warranty</b> — that combination is why 4,200+ gamers have bought from us and why most of our sales come from referrals and repeat buyers. Account resale operates in a grey zone of platform terms of service; we keep it as low-risk as it can be with tested stock, honest listings and a real warranty behind every order. If you want zero risk, official stores exist; if you want 80–90% off with a safety net, you\'re home.</p></div>';
+}
+
+function vCart(){
+  const ids=Object.keys(cart);
+  if(!ids.length) return '<div class="empty"><b>Your cart is empty</b>Accounts start at ₹299.<br><a class="btn" href="#/pc">Browse PC</a> <a class="btn btn-ghost" href="#/psn">Browse PSN</a></div>';
+  const rows=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); if(!p) return ""; return '<div class="citem">'+artHTML(p,"")+
+    '<div class="ci-t"><b>'+esc(p.title)+'</b><span>'+esc(p.region||"Global")+(opt==="p2"?' · <b class="t2l">'+optLabel(p,true)+'</b>':'')+' · '+inr(priceOf(p,opt))+' each</span></div>'+
+    '<div class="ci-r"><span class="price">'+inr(priceOf(p,opt)*cart[k])+'</span><button class="rm" data-rm="'+k+'">Remove</button></div></div>';}).join("");
+  const disc=discountAmount();
+  return `
+  <div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Your cart</h2><p class="sub">${cartCount()} item${cartCount()!==1?"s":""} · delivered on WhatsApp</p></div></div>
+  <div class="cartlay">
+    <div class="panel">${rows}</div>
+    <div class="panel">
+      <h3 style="margin-top:0">Order summary</h3>
+      <div class="couprow"><input class="f" id="coupon" placeholder="Coupon code" value="${appliedCoupon?esc(appliedCoupon):""}"><button class="btn btn-sm" data-coupon>Apply</button></div>
+      <div id="couponMsg">${appliedCoupon?'<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+state.settings.couponPercent+'% off</div>':""}</div>
+      <div class="sumline"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
+      ${disc?'<div class="sumline"><span>Coupon ('+esc(state.settings.couponCode)+')</span><span>− '+inr(disc)+'</span></div>':""}
+      <div class="sumline"><span>Delivery (WhatsApp handover)</span><span>Free</span></div>
+      <div class="sumline total"><span>Total</span><span>${inr(cartTotal()-disc)}</span></div>
+      <div class="paybtns"><button class="btn btn-block" data-checkout>Proceed to checkout</button></div>
+      <p class="hint">You pay via UPI, tap confirm on WhatsApp, we verify and hand over the account — usually under 10 minutes during ${esc(CONFIG.hours)}.</p>
+    </div>
+  </div>`;
+}
+
+function vFaq(){
+  const qa=[
+   ["What am I actually buying?","An account with the game already on it — not a redeem code. We send the credentials on WhatsApp and guide you through downloading and playing, step by step. Most buyers are in-game within 15 minutes."],
+   ["How fast is delivery?","Under 10 minutes during "+esc(CONFIG.hours)+" after payment verification. Orders at night are delivered first thing in the morning."],
+   ["Is this safe? What if it stops working?","Every account is tested before delivery, and our team guides your whole setup live on WhatsApp. If anything goes wrong that isn't your doing, the 30-day warranty covers you — replacement or refund, your choice."],
+   ["Why so cheap compared to the official store?","We source accounts in bulk from regions where games are priced lower and pass the margin on. The listing always states the region so you know exactly what you're getting."],
+   ["PSN India or another region — which account do I need?","For game accounts, region doesn't stop you from downloading and playing the included game. For subscriptions on your own account, region matters — ask us on WhatsApp before paying if unsure."],
+   ["Do you need MY account password ever?","Never. We never ask for your existing accounts' passwords or OTPs. Anyone who asks is scamming you — block them."],
+   ["What if the account stops working?","30-day warranty: message us with your order ID and a description. Replacement or refund, your choice. See the refund page for what's covered."],
+   ["Can I buy games for a friend?","Yes — accounts make great gifts. Just order normally and share it after setup — we guide the whole process."],
+   ["Bulk or reseller orders?","Yes — cafés, gifting, resellers. WhatsApp us quantities for pricing."],
+   ["How do I reach support?","WhatsApp is fastest (button below), or email "+esc(CONFIG.email)+". Replies in minutes during "+esc(CONFIG.hours)+"."]
+  ];
+  return '<div class="sec-head rv" style="padding-top:26px;margin-bottom:12px"><div><h2>Frequently asked questions</h2><p class="sub">Everything about buying accounts, safety, delivery and warranty.</p></div></div>'+
+    '<div class="rv">'+qa.map(x=>'<details class="acc"><summary>'+x[0]+'</summary><div class="acc-body">'+x[1]+'</div></details>').join("")+'</div>'+
+    '<div class="cta-band rv"><div><h2>Still stuck?</h2><p>Real humans on WhatsApp — no bots pretending to be people.</p></div><a class="btn" href="#/contact">Contact support</a></div>';
+}
+
+function vContact(){
+  return '<div class="sec-head rv" style="padding-top:26px;margin-bottom:8px"><div><h2>Contact us</h2><p class="sub">Fastest replies on WhatsApp · '+esc(CONFIG.hours)+'</p></div></div>'+
+  '<div class="cartlay rv">'+
+  '<div class="panel"><h3>Send a quick message</h3><p>We pre-fill everything into WhatsApp for you.</p>'+
+  '<label for="cf-name">Your name</label><input class="f" id="cf-name" placeholder="Aditya" autocomplete="name">'+
+  '<label for="cf-order">Order ID (optional)</label><input class="f" id="cf-order" placeholder="HD-XXXXX">'+
+  '<label for="cf-msg">Message</label><textarea class="f" id="cf-msg" rows="3" placeholder="Is Wukong still in stock?"></textarea>'+
+  '<div class="paybtns"><button class="btn" data-wasend>Compose in WhatsApp</button></div><div id="waOut"></div></div>'+
+  '<div class="panel"><h3>Direct channels</h3><p>WhatsApp — typical reply under 10 minutes during support hours.</p>'+
+  '<a class="btn btn-block" target="_blank" rel="noopener" href="https://wa.me/'+CONFIG.whatsapp+'">Message on WhatsApp</a>'+
+  '<p style="margin-top:14px">Email for invoices &amp; business:</p><a class="btn btn-ghost btn-block" href="mailto:'+CONFIG.email+'">'+esc(CONFIG.email)+'</a>'+
+  '<p style="margin-top:14px">Instagram DMs also work:</p><a class="btn btn-ghost btn-block" target="_blank" rel="noopener" href="'+esc(CONFIG.instagram)+'">DM on Instagram</a></div>'+
+  '</div>';
+}
+
+function vAbout(){
+  return '<div class="prose rv"><h1>About HeavenDigital</h1>'+
+  '<p>HeavenDigital is the new home of a shop many of you already know — same seller, same deals, upgraded from our old Wix storefront to a proper store with live stock, real offers and a proper warranty system. Level up your gaming experience, exactly as always — just faster now.</p>'+
+  '<h3>What we do differently</h3><ul><li><b>Guided setup, end to end.</b> We don\'t just hand over credentials — our team walks you through the download and launch live on WhatsApp until you\'re playing.</li>'+
+  '<li><b>Everything is verified before sale.</b> We check every account works before it\'s listed.</li>'+
+  '<li><b>30-day replacement warranty.</b> If something breaks on our side of the deal, we make it right — replacement or refund, your choice.</li>'+
+  '<li><b>Humans on support.</b> WhatsApp is answered by people who actually game, between '+esc(CONFIG.hours)+'.</li></ul>'+
+  '<h3>The legal bit</h3><p>HeavenDigital is an independent reseller and is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft or EA. All product names and trademarks belong to their respective owners.</p></div>';
+}
+
+function vPolicy(kind){
+  const P={
+   "refund-policy":["Refund & warranty policy",'<p>Last updated: September 2026</p>'+
+    '<h3>Before handover</h3><p>Cancel any order before credentials are sent for a <b>100% refund</b> — no questions asked. Refunds return to your original payment method within 5–7 business days.</p>'+
+    '<h3>30-day warranty</h3><p>If credentials fail, the account is recovered by a previous owner, or a problem arises that is not caused by you, message support with your order ID within 30 days. We issue a <b>replacement account or a full refund</b> — your choice.</p>'+
+    '<h3>Not covered</h3><ul><li>Account bans or restrictions arising from how you use the account after handover (cheating, payment chargebacks you initiate on the platform, sharing credentials).</li><li>Not following the setup guidance we provide, in ways that lock you out.</li><li>Requests made after the 30-day window.</li></ul>'+
+    '<h3>How to claim</h3><p>WhatsApp us with your order ID, what happened, and when. Claims are answered during '+esc(CONFIG.hours)+', usually same day.</p>'],
+   "terms":["Terms of service",'<p>Last updated: September 2026 · By ordering you agree to these terms.</p>'+
+    '<h3>What we sell</h3><p>Game accounts, subscriptions and top-ups for PlayStation, Xbox and PC platforms. We are an independent reseller, not affiliated with Sony, Microsoft, Valve, Ubisoft or EA; trademarks belong to their owners.</p>'+
+    '<h3>Orders &amp; delivery</h3><p>Credentials are delivered to the WhatsApp number you provide, normally within 10 minutes during support hours ('+esc(CONFIG.hours)+'). You are responsible for providing a reachable number and following the setup guidance we share.</p>'+
+    '<h3>Acceptable use</h3><p>No fraudulent payments, no chargeback abuse, no reselling in violation of platform terms. Fraudulent orders are cancelled and reported.</p>'+
+    '<h3>Pricing</h3><p>All prices in INR, inclusive of applicable taxes. Prices may change without notice; checkout price is final.</p>'+
+    '<h3>Contact</h3><p>'+esc(CONFIG.email)+'</p>'],
+   "privacy":["Privacy policy",'<p>Last updated: September 2026 · We collect the minimum needed to deliver your order.</p>'+
+    '<h3>What we collect</h3><p>Your name, WhatsApp number and order details. That\'s it.</p>'+
+    '<h3>What we never collect</h3><p>We never see your card or UPI credentials — payment providers handle that. We never ask for passwords or OTPs to your existing accounts.</p>'+
+    '<h3>How it\'s used</h3><p>Only to deliver orders, provide support and honour warranties. We do not sell your data.</p>'+
+    '<h3>Deletion</h3><p>Email '+esc(CONFIG.email)+' with your order ID and we delete your data within 7 days (beyond what law requires us to keep).</p>']
+  }[kind];
+  return '<div class="prose rv"><h1>'+P[0]+'</h1>'+P[1]+'</div>';
+}
+
+function v404(){ return '<div class="empty"><b>404 — page not found</b>That link doesn\'t exist.<br><a class="btn" href="#/">Back to home</a></div>'; }
+
+/* ============ admin ============ */
+function vAdmin(){
+  if(!state.fbReady){
+    return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Owner admin</h2><p class="sub">Private — only you can log in here.</p></div></div>'+
+    '<div class="demo-note"><b>Setup not finished yet.</b><br>This is where you\'ll log in with your email and manage products, prices, stock and offers. To switch it on: (1) paste your Firebase config into <b>firebase-config.js</b>, (2) publish <b>firestore.rules</b> with your admin UID, (3) redeploy. Step-by-step: <b>SETUP-FIREBASE.md</b> in your project folder.<br><br>The storefront keeps working in the meantime using the local starter catalog.</div>';
+  }
+  if(!state.user){
+    return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Owner login</h2><p class="sub">Private admin — authorized email only.</p></div></div>'+
+    '<div class="panel" style="max-width:460px">'+
+    '<label for="ad-email">Email</label><input class="f" id="ad-email" type="email" autocomplete="username" inputmode="email" placeholder="you@yourdomain.com">'+
+    '<label for="ad-pass">Password</label><input class="f" id="ad-pass" type="password" autocomplete="current-password" placeholder="••••••••••">'+
+    '<div class="paybtns"><button class="btn btn-block" data-login>Log in</button></div>'+
+    '<div id="adMsg" class="err">'+(state.adminMsg?esc(state.adminMsg):"")+'</div>'+
+    '<p class="hint">Sign-up is intentionally not offered. Your account was created in the Firebase console (see SETUP-FIREBASE.md).</p>'+
+    '</div>';
+  }
+  const all=Object.values(state.products);
+  const active=all.filter(p=>p.active!==false).length;
+  const low=all.filter(p=>p.stock>0&&p.stock<=2).length;
+  const out=all.filter(p=>p.stock<=0).length;
+  const value=all.reduce((a,p)=>a+p.price*Math.max(p.stock,0),0);
+  const e=state.editing||{};
+  return `
+  <div class="sec-head" style="padding-top:26px;margin-bottom:0"><div><h2>Dashboard</h2><p class="sub">Signed in as ${esc(state.user.email)} · catalog ${state.source==="firestore"?"live on Firestore":"local"}</p></div>
+  <button class="btn btn-ghost btn-sm" data-logout>Log out</button></div>
+  <div class="stats">
+    <div class="stat"><b>${all.length}</b><span>Products</span></div>
+    <div class="stat"><b>${active}</b><span>Active on site</span></div>
+    <div class="stat"><b>${low}</b><span>Low stock (≤2)</span></div>
+    <div class="stat"><b>${inr(value)}</b><span>Inventory at sale price</span></div>
+  </div>
+  ${out?'<div class="demo-note" style="margin:0 0 16px"><b>'+out+' product(s) are out of stock</b> and hidden from the buy buttons. Restock below.</div>':''}
+  <div class="panel" style="margin-bottom:18px">
+    <h3>Firestore catalog</h3>
+    <p class="hint" style="margin-top:0">Firestore holds <b>${state.fsCount||0}</b> product(s) · local catalog has <b>${Object.keys(state._seedProducts||all).length}</b>. <b>Upload once</b> to make your catalog live and manageable from any device. ${deletedIds().length?'<b>'+deletedIds().length+' deleted</b> item(s) can be restored.':''}</p>
+    <div class="paybtns">
+      <button class="btn btn-sm" data-sync-up>⬆ Upload catalog to Firestore</button>
+      ${deletedIds().length?'<button class="btn btn-ghost btn-sm" data-restore-deleted>Restore deleted</button>':''}
+    </div>
+    <div id="syncMsg"></div>
+  </div>
+  <div class="admin-grid">
+    <div>
+      <div class="panel" style="margin-bottom:18px">
+        <h3>Offers &amp; announcement</h3>
+        <label for="set-announce">Announcement bar text</label>
+        <input class="f" id="set-announce" value="${esc(state.settings.announce)}">
+        <div class="form2">
+          <div><label for="set-code">Coupon code</label><input class="f" id="set-code" value="${esc(state.settings.couponCode)}" style="text-transform:uppercase"></div>
+          <div><label for="set-pct">Discount %</label><input class="f" id="set-pct" type="number" min="1" max="90" value="${esc(state.settings.couponPercent)}"></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="set-on" ${state.settings.couponOn?"checked":""}> Coupon active</label>
+        <div class="paybtns"><button class="btn btn-sm" data-save-settings>Save offer settings</button></div>
+        <div id="setMsg"></div>
+      </div>
+      <div class="panel">
+        <h3>${state.editing?"Edit product":"Add product"}</h3>
+        <div class="form2">
+          <div class="full"><label for="f-title">Title</label><input class="f" id="f-title" value="${esc(e.title||"")}" placeholder="Black Myth: Wukong — PC"></div>
+          <div><label for="f-platform">Platform</label><select class="f" id="f-platform">${Object.entries(PLATFORMS).map(([k,v])=>'<option value="'+k+'"'+(e.platform===k?" selected":"")+'>'+esc(v.long)+'</option>').join("")}</select></div>
+          <div><label for="f-kind">Type</label><select class="f" id="f-kind">${["account","subscription","wallet"].map(k=>'<option value="'+k+'"'+(e.kind===k?" selected":"")+'>'+KINDS[k]+'</option>').join("")}</select></div>
+          <div><label for="f-region">Region</label><input class="f" id="f-region" value="${esc(e.region||"Global")}" placeholder="India / Global / US"></div>
+          <div><label for="f-tag">Badge</label><select class="f" id="f-tag">${["","Bestseller","Deal","New","Hot","Instant","Bundle","Limited","Preorder"].map(t=>'<option value="'+t+'"'+((e.tag||"")===t?" selected":"")+'>'+(t||"— none —")+'</option>').join("")}</select></div>
+          <div><label for="f-price">Sale price (₹)</label><input class="f" id="f-price" type="number" min="0" inputmode="numeric" value="${esc(e.price??"")}" placeholder="299"></div>
+          <div><label for="f-mrp">MRP (₹)</label><input class="f" id="f-mrp" type="number" min="0" inputmode="numeric" value="${esc(e.mrp??"")}" placeholder="3599"></div>
+          <div><label for="f-p2">Tier-2 price (₹) — Online (PC) / Primary (PSN). Blank = single price</label><input class="f" id="f-p2" type="number" min="0" inputmode="numeric" value="${esc(e.p2||"")}" placeholder="e.g. 599"></div>
+          <div><label for="f-stock">Stock</label><input class="f" id="f-stock" type="number" min="0" inputmode="numeric" value="${esc(e.stock??1)}"></div>
+          <div class="full"><label for="f-games">Games included (comma-separated)</label><input class="f" id="f-games" value="${esc((e.games||[]).join(", "))}" placeholder="Black Myth: Wukong"></div>
+          <div class="full"><label for="f-img">Poster image URL (optional)</label><input class="f" id="f-img" inputmode="url" value="${esc(e.img||"")}" placeholder="https://…/poster.png"></div>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="f-featured" ${e.featured?"checked":""}> Featured on homepage</label>
+        <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="f-active" ${(e.active!==false)?"checked":""}> Visible on site</label>
+        <div class="paybtns">
+          <button class="btn btn-sm" data-save-product>${state.editing?"Save changes":"Add product"}</button>
+          ${state.editing?'<button class="btn btn-ghost btn-sm" data-cancel-edit>Cancel edit</button>':''}
+        </div>
+        <div id="pMsg"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Products (${all.length})</h3>
+      <label for="ad-search" style="margin-top:0">Search</label>
+      <input class="f" id="ad-search" placeholder="Filter by title…" oninput="renderAdminTable()">
+      <div class="tblwrap"><table class="ptable"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+    </div>
+  </div>`;
+}
+function renderAdminTable(){
+  const tb=$("#adminRows"); if(!tb) return;
+  const q=($("#ad-search")&&$("#ad-search").value.toLowerCase())||"";
+  const rows=Object.values(state.products).filter(p=>p.title.toLowerCase().includes(q)).sort((a,b)=>(b.featured===true)-(a.featured===true));
+  if(!rows.length){ tb.innerHTML='<tr><td colspan="5" style="color:var(--mut)">No products. Add one above.</td></tr>'; return; }
+  tb.innerHTML=rows.map(p=>'<tr>'+
+    '<td class="ttl" title="'+esc(p.title)+'">'+esc(p.title)+'<br><span style="color:var(--mut);font-size:11px">'+esc((PLATFORMS[p.platform]||{}).name||p.platform)+' · '+esc(p.region||"")+'</span></td>'+
+    '<td><span style="font-family:var(--mono)">'+inr(p.price)+'</span><br><s style="color:var(--mut);font-size:11px">'+inr(p.mrp)+'</s>'+(p.p2?'<br><span style="color:var(--gold);font-size:11px">T2 '+inr(p.p2)+'</span>':'')+'</td>'+
+    '<td>'+p.stock+' <button class="rm" data-stockdec="'+p.id+'" title="Reduce stock by 1">−1</button></td>'+
+    '<td>'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+' '+(p.featured?'<span class="pill feat">FEAT</span>':'')+'</td>'+
+    '<td><div class="rowbtns"><button class="btn btn-ghost btn-sm" data-edit="'+p.id+'">Edit</button>'+
+    '<button class="btn btn-ghost btn-sm" data-toggle-active="'+p.id+'">'+(p.active!==false?"Hide":"Show")+'</button>'+
+    '<button class="btn btn-ghost btn-sm" data-toggle-feat="'+p.id+'">'+(p.featured?"Unfeature":"Feature")+'</button>'+
+    '<button class="btn btn-danger btn-sm" data-del="'+p.id+'">Delete</button></div></td></tr>').join("");
+}
+
+/* ============ checkout ============ */
+function openCheckout(){
+  const ids=Object.keys(cart); if(!ids.length) return;
+  const oid="HD-"+Math.random().toString(36).slice(2,7).toUpperCase();
+  const disc=discountAmount(); const total=cartTotal()-disc;
+  const lines=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return cart[k]+"× "+p.title+(opt==="p2"?" ("+optLabel(p,true)+")":"")+" — "+inr(priceOf(p,opt)*cart[k]);});
+  const waMsg="New order "+oid+" on "+CONFIG.brand+"\n"+lines.join("\n")+
+    (disc?"\nCoupon: "+appliedCoupon+" (−"+inr(disc)+")":"")+"\nTotal: "+inr(total)+"\nName: \nWhatsApp: ";
+  const wa="https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(waMsg);
+  const upi="upi://pay?pa="+encodeURIComponent(CONFIG.upiId)+"&pn="+encodeURIComponent(CONFIG.brand)+"&am="+total+"&cu=INR&tn="+encodeURIComponent(oid);
+  const rows=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return '<div class="sumline"><span>'+cart[k]+'× '+esc(p.title)+(opt==="p2"?' <b class="t2l">'+optLabel(p,true)+'</b>':'')+'</span><span>'+inr(priceOf(p,opt)*cart[k])+'</span></div>';}).join("");
+  $("#modalRoot").innerHTML=
+   '<div class="overlay" data-overlay><div class="modal" role="dialog" aria-modal="true" aria-label="Checkout">'+
+   '<button class="x" data-close-modal aria-label="Close">✕</button>'+
+   '<h3>Checkout</h3><div class="oid">Order '+oid+'</div>'+
+   '<div style="margin-top:12px">'+rows+
+   (disc?'<div class="sumline"><span>Coupon '+esc(appliedCoupon||"")+'</span><span>− '+inr(disc)+'</span></div>':'')+
+   '<div class="sumline total"><span>Total</span><span>'+inr(total)+'</span></div></div>'+
+   '<div class="paybtns">'+
+   '<a class="btn btn-block" href="'+upi+'">Pay '+inr(total)+' via any UPI app</a>'+
+   '<button class="btn btn-ghost btn-block" data-copy="'+esc(CONFIG.upiId)+'">Copy UPI ID: '+esc(CONFIG.upiId)+'</button>'+
+   '<a class="btn btn-block" target="_blank" rel="noopener" href="'+wa+'">I&#39;ve paid — confirm on WhatsApp</a>'+
+   '</div>'+
+   '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Keep order ID <b>'+oid+'</b>.</p>'+
+   '</div></div>';
+  document.body.style.overflow="hidden";
+  const ov=$("[data-overlay]"); if(ov) ov.addEventListener("click",e=>{if(e.target===ov) closeModal();});
+}
+function closeModal(){ $("#modalRoot").innerHTML=""; document.body.style.overflow=""; }
+
+/* ============ router ============ */
+const ROUTES={
+  "/":{t:"PSN, Xbox & PC game accounts at up to 90% off",v:vHome},
+  "/pc":{t:"PC & Steam game accounts",v:()=>vCatalog("pc")},
+  "/psn":{t:"PSN & PlayStation game accounts",v:()=>vCatalog("psn")},
+  "/xbox":{t:"Xbox & Game Pass accounts",v:()=>vCatalog("xbox")},
+  "/subs":{t:"Subscriptions & top-ups",v:()=>vCatalog("subs")},
+  "/cart":{t:"Your cart",v:vCart},
+  "/how":{t:"How buying works",v:vHow},
+  "/faq":{t:"FAQ",v:vFaq},
+  "/contact":{t:"Contact support",v:vContact},
+  "/about":{t:"About us",v:vAbout},
+  "/admin":{t:"Owner admin",v:vAdmin},
+  "/refund-policy":{t:"Refund & warranty policy",v:()=>vPolicy("refund-policy")},
+  "/terms":{t:"Terms of service",v:()=>vPolicy("terms")},
+  "/privacy":{t:"Privacy policy",v:()=>vPolicy("privacy")}
+};
+function routeNow(){ return (location.hash.replace(/^#/,"")||"/").split("?")[0]; }
+function route(){
+  const h=routeNow();
+  const app=$("#app");
+  window.scrollTo(0,0);
+  let base=h;
+  if(h.startsWith("/p/")){
+    const p=byId(h.slice(3));
+    document.title=(p?p.title:"Product")+" — "+CONFIG.brand;
+    app.innerHTML=vProduct(h.slice(3));
+    base=p?"/"+p.platform:"/";
+  } else if(ROUTES[h]){
+    document.title=ROUTES[h].t+" — "+CONFIG.brand;
+    app.innerHTML=ROUTES[h].v();
+  } else {
+    document.title="Page not found — "+CONFIG.brand;
+    app.innerHTML=v404(); base="/";
+  }
+  document.querySelectorAll(".nav a").forEach(a=>a.classList.toggle("on",a.dataset.nav===base));
+  document.querySelectorAll(".bottomnav a").forEach(a=>a.classList.toggle("on",a.dataset.bnav===base));
+  if(h==="/admin") renderAdminTable();
+  if(!REDUCED && app.animate) app.animate([{opacity:.2,transform:"translateY(10px)"},{opacity:1,transform:"none"}],{duration:260,easing:"cubic-bezier(.2,.7,.3,1)"});
+  updateBadge();
+  initMotion(app);
+}
+window.addEventListener("hashchange",route);
+
+/* ============================================================
+   MOTION ENGINE — reveals, counters, hero tilt, card tilt+glare,
+   countdown. Auto-tilt on touch is pure CSS (see styles).
+   ============================================================ */
+let dealInt=null;
+function initMotion(scope){
+  if(!REDUCED && "IntersectionObserver" in window){
+    const io=new IntersectionObserver(es=>{
+      es.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); } });
+    },{threshold:.1,rootMargin:"0px 0px -24px 0px"});
+    scope.querySelectorAll(".rv").forEach(el=>io.observe(el));
+    scope.querySelectorAll(".grid .card").forEach((c,i)=>{ c.classList.add("rv"); c.style.transitionDelay=(i%8)*40+"ms"; io.observe(c); });
+  } else {
+    scope.querySelectorAll(".rv, .grid .card").forEach(el=>el.classList.add("in"));
+  }
+  scope.querySelectorAll("[data-count]").forEach(el=>{
+    if(el.dataset.done) return; el.dataset.done="1";
+    const target=parseInt(el.dataset.count,10)||0;
+    if(REDUCED){ el.textContent=target.toLocaleString("en-IN"); return; }
+    const t0=performance.now(), dur=1400;
+    (function tick(t){
+      const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
+      el.textContent=Math.round(target*e).toLocaleString("en-IN");
+      if(k<1) requestAnimationFrame(tick);
+    })(t0);
+  });
+  /* pointer-based 3D hero tilt — desktop only (touch uses CSS auto-tilt) */
+  const scene=$("#heroScene");
+  if(scene && FINE && !REDUCED && !scene.dataset.bound){
+    scene.dataset.bound="1";
+    const layers=scene.querySelectorAll(".layer");
+    let tx=0,ty=0,cx=0,cy=0,raf=null;
+    const loop=()=>{
+      cx+=(tx-cx)*.07; cy+=(ty-cy)*.07;
+      scene.style.transform="rotateY("+(cx*9)+"deg) rotateX("+(-cy*7)+"deg)";
+      layers.forEach(l=>{
+        const d=parseFloat(l.dataset.depth||"10");
+        l.style.transform="translate3d("+(cx*d)+"px,"+(cy*d*.7)+"px,0)";
+      });
+      if(Math.abs(tx-cx)>.001||Math.abs(ty-cy)>.001) raf=requestAnimationFrame(loop); else raf=null;
+    };
+    const kick=()=>{ if(!raf) raf=requestAnimationFrame(loop); };
+    const zone=$("#heroVisual")||scene;
+    zone.addEventListener("pointermove",e=>{
+      const r=zone.getBoundingClientRect();
+      tx=((e.clientX-r.left)/r.width-.5)*2;
+      ty=((e.clientY-r.top)/r.height-.5)*2;
+      kick();
+    });
+    zone.addEventListener("pointerleave",()=>{ tx=0; ty=0; kick(); });
+  }
+  /* card tilt + glare — pointer devices only */
+  if(FINE && !REDUCED){
+    scope.querySelectorAll(".grid .card").forEach(card=>{
+      if(card.dataset.tilt) return; card.dataset.tilt="1";
+      card.addEventListener("pointermove",e=>{
+        const r=card.getBoundingClientRect();
+        const px=(e.clientX-r.left)/r.width, py=(e.clientY-r.top)/r.height;
+        card.style.transform="translateY(-4px) perspective(800px) rotateX("+((.5-py)*7)+"deg) rotateY("+((px-.5)*9)+"deg)";
+        card.style.setProperty("--gx",(px*100)+"%");
+        card.style.setProperty("--gy",(py*100)+"%");
+      });
+      card.addEventListener("pointerleave",()=>{ card.style.transform=""; });
+    });
+  }
+  /* deal countdown → next IST midnight */
+  if(dealInt) clearInterval(dealInt);
+  const tEl=$("#dealTimer");
+  if(tEl){
+    const code=state.settings.couponCode||"HEAVEN10";
+    const tick=()=>{
+      const now=new Date();
+      const ist=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
+      const end=new Date(ist); end.setHours(24,0,0,0);
+      let s=Math.max(0,Math.floor((end-ist)/1000));
+      const h=String(Math.floor(s/3600)).padStart(2,"0"), m=String(Math.floor(s%3600/60)).padStart(2,"0"), ss=String(s%60).padStart(2,"0");
+      tEl.textContent=code+" ends in "+h+":"+m+":"+ss;
+    };
+    tick(); dealInt=setInterval(tick,1000);
+  }
+}
+
+/* ============ global ambient motion (once) ============ */
+(function ambient(){
+  const sp=$("#splash");
+  if(sp && !REDUCED){ setTimeout(()=>sp.classList.add("gone"),650); setTimeout(()=>sp.remove(),1300); }
+  else if(sp) sp.remove();
+  if(FINE && !REDUCED){
+    document.body.classList.add("pointer-fine");
+    const glow=$("#glow");
+    let gx=innerWidth/2, gy=innerHeight/2, tx=gx, ty=gy, raf=null;
+    addEventListener("pointermove",e=>{ tx=e.clientX; ty=e.clientY; if(!raf) raf=requestAnimationFrame(loop); },{passive:true});
+    function loop(){
+      gx+=(tx-gx)*.12; gy+=(ty-gy)*.12;
+      glow.style.transform="translate("+gx+"px,"+gy+"px)";
+      raf=(Math.abs(tx-gx)>.3||Math.abs(ty-gy)>.3)?requestAnimationFrame(loop):null;
+    }
+  }
+  const head=$("#siteHead"), toTop=$("#toTop");
+  addEventListener("scroll",()=>{
+    head.classList.toggle("scrolled",scrollY>10);
+    toTop.classList.toggle("show",scrollY>700);
+  },{passive:true});
+  toTop.addEventListener("click",()=>scrollTo({top:0,behavior:REDUCED?"auto":"smooth"}));
+  const cv=$("#stars");
+  if(cv && !REDUCED){
+    const ctx=cv.getContext("2d");
+    let W,H,stars=[],shoot=null,last=0;
+    function resize(){ W=cv.width=innerWidth*devicePixelRatio; H=cv.height=innerHeight*devicePixelRatio; cv.style.width=innerWidth+"px"; cv.style.height=innerHeight+"px";
+      const n=Math.min(110,Math.floor(innerWidth/12));
+      stars=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.4+.4)*devicePixelRatio,s:(Math.random()*.16+.05)*devicePixelRatio,tw:Math.random()*Math.PI*2,g:Math.random()<.28}));
+    }
+    resize(); addEventListener("resize",resize);
+    function frame(t){
+      requestAnimationFrame(frame);
+      if(document.hidden) return;
+      if(t-last<16) return; last=t;
+      ctx.clearRect(0,0,W,H);
+      for(const s of stars){
+        s.y+=s.s; s.tw+=.02; if(s.y>H+4){ s.y=-4; s.x=Math.random()*W; }
+        const a=.35+.4*Math.abs(Math.sin(s.tw));
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7);
+        ctx.fillStyle=s.g?"rgba(245,192,68,"+a+")":"rgba(220,230,255,"+(a*.8)+")";
+        ctx.fill();
+      }
+      if(!shoot && Math.random()<.0022) shoot={x:Math.random()*W*.7,y:Math.random()*H*.3,l:0};
+      if(shoot){
+        shoot.l+=14*devicePixelRatio; const len=130*devicePixelRatio;
+        const x=shoot.x+shoot.l, y=shoot.y+shoot.l*.5;
+        const grad=ctx.createLinearGradient(x,y,x-len,y-len*.5);
+        grad.addColorStop(0,"rgba(255,236,180,.85)"); grad.addColorStop(1,"rgba(255,236,180,0)");
+        ctx.strokeStyle=grad; ctx.lineWidth=1.6*devicePixelRatio;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-len,y-len*.5); ctx.stroke();
+        if(shoot.l>Math.max(W,H)) shoot=null;
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+})();
+
+/* ============ events ============ */
+document.addEventListener("click", async function(e){
+  const q=s=>e.target.closest(s); let el;
+  if((el=q("[data-add]"))){
+    const p=byId(el.dataset.add);
+    if(p&&p.stock>0){ cartAdd(el.dataset.add,1); toast("Added to cart"); buzz(12);
+      if(!REDUCED){ const o=el.textContent; el.textContent="Added ✓"; el.disabled=true; setTimeout(()=>{el.textContent=o; el.disabled=false;},1100); } }
+    return; }
+  if((el=q("[data-opt]"))){ pdOpt=el.dataset.opt; const vo=$("#vopts"); if(vo) Array.prototype.forEach.call(vo.children,function(c){c.classList.toggle("on",c===el);}); const sp=$("#pdStickyPrice"); if(sp) sp.innerHTML=inr(parseInt(el.dataset.price,10)||0)+' <s class="mrp">'+inr((byId(location.hash.slice(4))||{}).mrp||0)+'</s>'; const vh=$("#vhint"); if(vh) vh.textContent=el.dataset.desc||""; buzz(8); return; }
+  if((el=q("[data-add-pd]"))){ const i=$("#qty"),n=Math.max(1,Math.min(10,parseInt(i&&i.value,10)||1)); cartAdd(el.dataset.addPd,n,pdOpt); toast(n+" added to cart"); buzz(12); return; }
+  if((el=q("[data-buynow]"))){ const i=$("#qty"),n=Math.max(1,Math.min(10,parseInt(i&&i.value,10)||1)); cartAdd(el.dataset.buynow,n,pdOpt); location.hash="#/cart"; return; }
+  if((el=q("[data-qlocal]"))){ const i=$("#qty"); if(!i)return; let v=parseInt(i.value,10)||1; i.value=Math.max(1,Math.min(10,el.dataset.qlocal==="inc"?v+1:v-1)); return; }
+  if((el=q("[data-rm]"))){ delete cart[el.dataset.rm]; saveCart(cart); route(); toast("Removed from cart"); return; }
+  if(q("[data-checkout]")){ openCheckout(); return; }
+  if(q("[data-close-modal]")){ closeModal(); return; }
+  if((el=q("[data-copy]"))){ copyText(el.dataset.copy); return; }
+  if(q("[data-coupon]")){
+    const inp=($("#coupon")||{}).value||""; const code=inp.trim().toUpperCase();
+    const valid=state.settings.couponOn && code && code===String(state.settings.couponCode||"").toUpperCase();
+    if(valid){ appliedCoupon=code; toast("Coupon applied — "+state.settings.couponPercent+"% off"); buzz(15); route(); }
+    else{ appliedCoupon=null; const m=$("#couponMsg"); if(m) m.innerHTML='<div class="coup-no">Invalid or expired coupon.</div>'; }
+    return;
+  }
+  if(q("[data-wasend]")){
+    const name=($("#cf-name")||{}).value||"", oid=($("#cf-order")||{}).value||"", msg=($("#cf-msg")||{}).value||"";
+    const txt="Hi "+CONFIG.brand+"!"+(name?" I'm "+name+".":"")+(oid?" (Order "+oid+")":"")+(msg?" "+msg:"");
+    const out=$("#waOut"); if(out) out.innerHTML='<p class="hint" style="margin-top:14px"><a class="btn btn-block" target="_blank" rel="noopener" href="https://wa.me/'+CONFIG.whatsapp+'?text='+encodeURIComponent(txt)+'">Open WhatsApp with your message</a></p>';
+    return;
+  }
+  /* admin */
+  if(q("[data-login]") && state.fbReady){
+    const em=($("#ad-email")||{}).value||"", pw=($("#ad-pass")||{}).value||"";
+    const msgEl=$("#adMsg"); if(msgEl) msgEl.textContent="";
+    try{ await firebase.auth().signInWithEmailAndPassword(em,pw); toast("Welcome back"); }
+    catch(err){ if(msgEl) msgEl.textContent = err.code==="auth/invalid-credential"||err.code==="auth/wrong-password" ? "Wrong email or password." : err.code==="auth/too-many-requests" ? "Too many attempts — try again in a few minutes." : ("Login failed: "+(err.message||err.code)); }
+    return;
+  }
+  if(q("[data-logout]") && state.fbReady){ await firebase.auth().signOut(); toast("Logged out"); return; }
+  if(q("[data-save-settings]") && state.fbReady && state.user){
+    const s={announce:($("#set-announce")||{}).value||"", couponCode:(($("#set-code")||{}).value||"").toUpperCase(), couponPercent:Math.max(1,Math.min(90,parseInt(($("#set-pct")||{}).value,10)||10)), couponOn:!!($("#set-on")||{}).checked};
+    try{ await firebase.firestore().collection("settings").doc("store").set(s,{merge:true}); state.settings={...state.settings,...s}; renderAnnounce(); saveLocal(); const m=$("#setMsg"); if(m) m.innerHTML='<div class="ok-note">Saved — live on the site now.</div>'; }
+    catch(err){ const m=$("#setMsg"); if(m) m.innerHTML='<div class="err">Save failed: '+esc(err.message)+'</div>'; }
+    return;
+  }
+  if(q("[data-save-product]") && state.fbReady && state.user){
+    const g=v=>($(v)||{}).value;
+    const data={
+      title:(g("#f-title")||"").trim(), platform:g("#f-platform")||"pc", kind:g("#f-kind")||"account",
+      region:(g("#f-region")||"Global").trim(), tag:g("#f-tag")||"",
+      price:Math.max(0,parseInt(g("#f-price"),10)||0), mrp:Math.max(0,parseInt(g("#f-mrp"),10)||0),
+      p2:Math.max(0,parseInt(g("#f-p2"),10)||0),
+      stock:Math.max(0,parseInt(g("#f-stock"),10)||0),
+      games:(g("#f-games")||"").split(",").map(x=>x.trim()).filter(Boolean),
+      img:(g("#f-img")||"").trim(),
+      featured:!!g("#f-featured"), active:!!g("#f-active")
+    };
+    const msg=$("#pMsg");
+    if(!data.title||!data.price){ if(msg) msg.innerHTML='<div class="err">Title and sale price are required.</div>'; return; }
+    try{
+      if(state.editing){ await fsAdd({...state.editingObj,...data, id:state.editing}); toast("Product updated"); }
+      else{ await fsAdd(data); toast("Product added — live on site"); }
+      state.editing=null; state.editingObj=null; route();
+    }catch(err){ if(msg) msg.innerHTML='<div class="err">Save failed: '+esc(err.message)+'</div>'; }
+    return;
+  }
+  if(q("[data-cancel-edit]")){ state.editing=null; state.editingObj=null; route(); return; }
+  if((el=q("[data-edit]")) && state.fbReady && state.user){
+    const p=byId(el.dataset.edit); if(!p) return;
+    state.editing=p.id; state.editingObj={...p}; route(); return;
+  }
+  if((el=q("[data-toggle-active]")) && state.fbReady && state.user){
+    const p=byId(el.dataset.toggleActive); if(!p) return;
+    try{ await fsAdd({...p, active:p.active===false}); toast(p.active===false?"Shown":"Hidden"); }catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
+  if((el=q("[data-toggle-feat]")) && state.fbReady && state.user){
+    const p=byId(el.dataset.toggleFeat); if(!p) return;
+    try{ await fsAdd({...p, featured:!p.featured}); toast(p.featured?"Removed from featured":"Featured on homepage"); }catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
+  if((el=q("[data-stockdec]")) && state.fbReady && state.user){
+    const p=byId(el.dataset.stockdec); if(!p||p.stock<=0) return;
+    try{ await fsAdd({...p, stock:p.stock-1}); toast("Stock −1"); }catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
+  if((el=q("[data-del]")) && state.fbReady && state.user){
+    const p=byId(el.dataset.del); if(!p) return;
+    if(!confirm("Delete '"+p.title+"' permanently?")) return;
+    try{
+      markDeleted(p.id);
+      await firebase.firestore().collection("products").doc(p.id).delete();
+      delete state._seedProducts[p.id]; delete state.products[p.id];
+      toast("Deleted"); state.editing=null; route();
+    }catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
+  if((el=q("[data-sync-up]"))){ syncCatalog(el); return; }
+  if((el=q("[data-restore-deleted]"))){
+    localStorage.setItem("hd_deleted_v1","[]");
+    if(state._seedProducts){ const merged={}; Object.keys(state._seedProducts).forEach(k=>merged[k]=state._seedProducts[k]); state.products=merged; }
+    toast("Deleted products restored"); route(); return;
+  }
+  if((el=q("[data-filter]"))){ catFilter=el.dataset.filter; route(); const f=document.querySelector(".filters"); if(f) f.scrollIntoView({block:"nearest"}); return; }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
+$("#yr").textContent=new Date().getFullYear();
+renderAnnounce();
+route();
+</script>
+
+<!-- Heaven Assist — FAQ chat widget -->
+<button id="chatFab" aria-label="Chat with Heaven Assist" aria-expanded="false"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span id="chatDot">1</span></button>
+<div id="chatPanel" role="dialog" aria-label="Heaven Assist chat">
+  <div class="chat-head"><div><b>Heaven Assist</b><span>Instant answers · humans on WhatsApp <span id="chatHours"></span></span></div><button id="chatClose" aria-label="Close chat">✕</button></div>
+  <div class="chat-msgs" id="chatMsgs"></div>
+  <div class="chat-chips" id="chatChips"></div>
+  <div class="chat-inrow"><input id="chatIn" placeholder="Ask about a game, price, delivery…" aria-label="Your question"><button id="chatSend" class="chat-send" aria-label="Send">➤</button></div>
+</div>
+<script>
+(function(){
+  var WA=(typeof CONFIG!=="undefined"&&CONFIG.whatsapp)?CONFIG.whatsapp:"919000000000";
+  var HRS=(typeof CONFIG!=="undefined"&&CONFIG.hours)?CONFIG.hours:"10am–11pm IST";
+  var waLink=function(t){return "https://wa.me/"+WA+(t?"?text="+encodeURIComponent(t):"");};
+  var el=function(id){return document.getElementById(id);};
+  var KB=[
+   {k:["how","work","process","deliver","fast","long","time","receive","get my"],a:"Pay via UPI (GPay/PhonePe/Paytm) → tap \"I've paid\" on WhatsApp → we verify and send your account credentials, usually under 10 minutes during "+HRS+". Our team then guides your download live until you're in the game. 🎮",c:[["Browse PS5","#/psn"],["Browse PC","#/pc"],["How it works","#/how"]]},
+   {k:["safe","legit","trust","real","scam","fake","risk"],a:"Every account is tested before delivery and carries a 30-day replacement warranty — if anything goes wrong that isn't your doing, we replace it or refund. 4,200+ gamers have bought from us, most through referrals.",c:[["Read how it works","#/how"],["Warranty terms","#/refund-policy"]]},
+         {k:["cheap","why so","discount","how come","lower price"],a:"We source accounts in bulk from regions where games are priced lower — same game, same official download, far less money. Every listing states its region so you know exactly what you're getting.",c:[["Today's deals","#/pc"]]},
+   {k:["warranty","refund","replace","guarantee","broken","stopped","not working"],a:"30-day replacement warranty on every order: if credentials fail or the account develops a problem not caused by you, message us with your order ID — replacement or refund, your choice.",c:[["Full warranty terms","#/refund-policy"]]},
+   {k:["pay","upi","gpay","phonepe","paytm","payment","cash"],a:"We accept all UPI apps — GPay, PhonePe, Paytm, BHIM. Pay, confirm on WhatsApp, and get delivered in minutes. No cards needed.",c:[["Have a question on WhatsApp",null]]},
+   {k:["stock","available","availability","find","looking for","source","arrange"],a:"If it's listed, it's in stock — stock counts are live on every product. Don't see your game? Message us the title: if it exists, we source it.",c:[["Ask about a game",null]]},
+   {k:["human","agent","person","support","talk","whatsapp","contact"],a:"WhatsApp us — a real human (who actually games) replies during "+HRS+". Orders always get priority.",c:[["Open WhatsApp",null]]},
+   {k:["hi","hello","hey","yo","namaste","start"],a:"Hey! 👋 Ask me anything — delivery time, safety, warranty, payments… or tap a question below.",c:[]},
+   {k:["price","cost","rate"],a:"Every listing shows its live price and discount right on the card. Many PC accounts start at ₹299, PSN accounts from ₹399, and PS Plus/Game Pass subscriptions from ₹499. Which game are you eyeing?",c:[["Browse PC","#/pc"],["Browse PS5","#/psn"],["Browse Xbox","#/xbox"]]},
+   {k:["xbox","game pass"],a:"Xbox Game Pass Ultimate gives you 400+ games — we have Lifetime and monthly options, delivered on WhatsApp in minutes.",c:[["Browse Xbox","#/xbox"]]},
+   {k:["thank","thanks","ok","great","nice"],a:"Anytime! 🙌 If you're ready, the bestsellers are one tap away — and if anything's unclear, I'm here.",c:[["See bestsellers","#/"]]}
+  ];
+  var FALLS=0, opened=false;
+  function chips(list){
+    var box=el("chatChips"); box.innerHTML="";
+    ["How does it work?","Is this safe?","Why so cheap?","Warranty?","Talk to human"].forEach(function(t){
+      var b=document.createElement("button"); b.type="button"; b.textContent=t;
+      b.onclick=function(){ ask(t); }; box.appendChild(b);
+    });
+  }
+  function bubble(text,who,ctas){
+    var m=el("chatMsgs"); var d=document.createElement("div"); d.className="bub "+who; d.textContent=text; m.appendChild(d);
+    if(ctas&&ctas.length){ var c=document.createElement("div"); c.className="chat-ctas";
+      ctas.forEach(function(pair){ var a=document.createElement("a");
+        a.textContent=pair[0];
+        if(pair[1]){ a.href=pair[1]; a.onclick=function(){ toggle(false); }; }
+        else { a.href=waLink("Hi HeavenDigital! I have a question: "+text.slice(0,80)); a.target="_blank"; a.rel="noopener"; }
+        c.appendChild(a); });
+      m.appendChild(c);
+    }
+    m.scrollTop=m.scrollHeight;
+  }
+  function reply(q){
+    var s=q.toLowerCase(); var best=null,bs=0;
+    KB.forEach(function(item){ var sc=0; item.k.forEach(function(kw){ if(s.indexOf(kw)>=0) sc++; }); if(sc>bs){bs=sc;best=item;} });
+    if(best){ FALLS=0; bubble(best.a,"bot",best.c&&best.c.length?best.c:[["Talk to human on WhatsApp",null]]); }
+    else{ FALLS++;
+      if(FALLS>=2) bubble("That one's better answered by a human — WhatsApp us and you'll get a reply in minutes during "+HRS+". For orders, always WhatsApp. 🙏","bot",[["Open WhatsApp",null]]);
+      else bubble("I didn't fully get that 😅 — try tapping a question below, or ask me about delivery, safety, tiers, prices or warranty.","bot",[]);
+    }
+  }
+  function ask(t){ bubble(t,"user",[]); setTimeout(function(){ reply(t); },350); }
+  function toggle(open){
+    var p=el("chatPanel"); opened=open||false;
+    if(open){ p.classList.add("open"); el("chatFab").setAttribute("aria-expanded","true"); el("chatDot").classList.remove("show");
+      if(!el("chatMsgs").children.length){ bubble("Hi! 👋 I'm Heaven Assist — instant answers about accounts, delivery, payments and warranty. What's on your mind?","bot",[]); chips(); }
+      setTimeout(function(){ var i=el("chatIn"); if(i) i.focus(); },250);
+    } else { p.classList.remove("open"); el("chatFab").setAttribute("aria-expanded","false"); }
+  }
+  el("chatFab").onclick=function(){ toggle(!el("chatPanel").classList.contains("open")); };
+  el("chatClose").onclick=function(){ toggle(false); };
+  el("chatSend").onclick=function(){ var i=el("chatIn"); var v=(i.value||"").trim(); if(v){ i.value=""; ask(v); } };
+  el("chatIn").addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); el("chatSend").click(); } });
+  el("chatHours").textContent=HRS;
+  setTimeout(function(){ if(!opened && !el("chatPanel").classList.contains("open")){ el("chatDot").classList.add("show"); el("chatFab").classList.add("pulse"); } },14000);
+  el("chatFab").addEventListener("click",function(){ el("chatFab").classList.remove("pulse"); });
+})();
+</script>
+
+</body>
+</html>
