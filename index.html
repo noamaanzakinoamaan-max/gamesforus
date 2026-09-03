@@ -339,7 +339,7 @@ input.f:focus,textarea.f:focus,select.f:focus{outline:none;border-color:var(--go
 @media(max-width:940px){
  .nav{display:none}
  .head-in{height:56px}
- .bottomnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(11,13,18,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 8px calc(8px + env(safe-area-inset-bottom));gap:2px}
+ .bottomnav{display:grid;grid-template-columns:repeat(6,1fr);position:fixed;left:0;right:0;bottom:0;z-index:70;background:rgba(11,13,18,.94);backdrop-filter:blur(16px);border-top:1px solid var(--line);padding:6px 8px calc(8px + env(safe-area-inset-bottom));gap:2px}
  .bottomnav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 0 5px;font-size:10.5px;font-weight:700;color:var(--mut);border-radius:12px;min-height:50px;position:relative}
  .bottomnav a svg{width:22px;height:22px}
  .bottomnav a.on{color:var(--gold);background:rgba(245,192,68,.09)}
@@ -621,7 +621,7 @@ label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;t
       <a href="#/faq" data-nav="/faq">FAQ</a>
       <a href="#/contact" data-nav="/contact">Contact</a>
     </nav>
-    <a class="cart-btn" href="#/cart" aria-label="View cart" style="margin-left:auto">
+    <a href="#/account" aria-label="Your account" class="nav-link-ac" style="display:none"></a><a class="cart-btn" href="#/cart" aria-label="View cart" style="margin-left:auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1.2 12H7.2L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
       <span class="count" id="cartCount">0</span>
     </a>
@@ -636,6 +636,7 @@ label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;t
   <a href="#/pc" data-bnav="/pc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="11" rx="2"/><path d="M8 20h8"/></svg><span>PC</span></a>
   <a href="#/psn" data-bnav="/psn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12h10M12 7v10"/></svg><span>PSN</span></a>
   <a href="#/xbox" data-bnav="/xbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M8 16c2-4 6-4 8-8M16 16c-2-4-6-4-8-8"/></svg><span>Xbox</span></a>
+  <a href="#/account" data-bnav="/account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg><span>Account</span></a>
   <a href="#/cart" data-bnav="/cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8h12l-1.2 12H7.2L6 8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg><span>Cart</span><span class="count" id="cartCountM">0</span></a>
 </nav>
 
@@ -1186,7 +1187,14 @@ function fallbackCopy(txt,done){const ta=document.createElement("textarea");ta.v
 
 /* ============ state ============ */
 const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
-const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true};
+const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true,
+  brand:CONFIG.brand, whatsapp:CONFIG.whatsapp, upiId:CONFIG.upiId, email:CONFIG.email, instagram:CONFIG.instagram, hours:CONFIG.hours,
+  chatIntro:"", chatQA:"", adminUid:"", ownerEmail:""};
+function applySettings(){
+  const s=state.settings||{};
+  ["brand","whatsapp","upiId","email","instagram","hours"].forEach(k=>{ if(s[k]) CONFIG[k]=s[k]; });
+  document.title=CONFIG.brand+" — PSN, Xbox & PC game accounts at up to 90% off";
+}
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null, adminMsg:null, adPlat:"all" };
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length) p.forEach(x=>state.products[x.id]=x); else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
@@ -1233,9 +1241,9 @@ function initFirebase(){
     firebase.initializeApp(window.FirebaseConfig);
     const db=firebase.firestore(), auth=firebase.auth();
     state.fbReady=true;
-    auth.onAuthStateChanged(u=>{ state.user=u; if(routeNow().startsWith("/admin")) route(); });
+    auth.onAuthStateChanged(u=>{ state.user=u; const r=routeNow(); if(r.startsWith("/admin")||r.startsWith("/account")) route(); });
     db.collection("settings").doc("store").onSnapshot(s=>{
-      if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; renderAnnounce(); if(!routeNow().startsWith("/admin")) route(); }
+      if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; applySettings(); renderAnnounce(); route(); }
     });
     db.collection("products").onSnapshot(snap=>{
       if(!state._seedProducts) state._seedProducts=Object.assign({},state.products);
@@ -1602,6 +1610,11 @@ function vAdmin(){
     return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Owner admin</h2><p class="sub">Private — only you can log in here.</p></div></div>'+
     '<div class="demo-note"><b>Setup not finished yet.</b><br>This is where you\'ll log in with your email and manage products, prices, stock and offers. To switch it on: (1) paste your Firebase config into <b>firebase-config.js</b>, (2) publish <b>firestore.rules</b> with your admin UID, (3) redeploy. Step-by-step: <b>SETUP-FIREBASE.md</b> in your project folder.<br><br>The storefront keeps working in the meantime using the local starter catalog.</div>';
   }
+  if(state.user && state.settings.adminUid && state.user.uid!==state.settings.adminUid){
+    return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Owner admin</h2></div></div>'+
+    '<div class="demo-note">This account ('+esc(state.user.email||"")+') is a <b>customer account</b>, not the store owner. The admin panel is available only to the owner account.</div>'+
+    '<button class="btn btn-ghost btn-sm" data-signout>Sign out</button>';
+  }
   if(!state.user){
     return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Owner login</h2><p class="sub">Private admin — authorized email only.</p></div></div>'+
     '<div class="panel" style="max-width:460px">'+
@@ -1627,6 +1640,7 @@ function vAdmin(){
     <div class="stat"><b>${inr(value)}</b><span>Inventory at sale price</span></div>
   </div>
   ${out?'<div class="demo-note" style="margin:0 0 16px"><b>'+out+' product(s) are out of stock</b> and hidden from the buy buttons. Restock below.</div>':''}
+  ${!state.settings.adminUid?'<div class="demo-note" style="margin:0 0 16px"><b>One-time:</b> make this account the store owner — nobody else will be able to claim it after you.<div class="paybtns"><button class="btn btn-sm" data-claim-owner>🔒 Claim owner with this account</button></div><div id="claimMsg"></div></div>':''}
   <div class="panel" style="margin-bottom:18px">
     <h3>Firestore catalog</h3>
     <p class="hint" style="margin-top:0">Firestore holds <b>${state.fsCount||0}</b> product(s) · local catalog has <b>${Object.keys(state._seedProducts||all).length}</b>. <b>Upload once</b> to make your catalog live and manageable from any device. ${deletedIds().length?'<b>'+deletedIds().length+' deleted</b> item(s) can be restored.':''}</p>
@@ -1649,6 +1663,37 @@ function vAdmin(){
         <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="set-on" ${state.settings.couponOn?"checked":""}> Coupon active</label>
         <div class="paybtns"><button class="btn btn-sm" data-save-settings>Save offer settings</button></div>
         <div id="setMsg"></div>
+      </div>
+      <div class="panel" style="margin-bottom:18px">
+        <h3>Store name &amp; contact</h3>
+        <p class="hint" style="margin-top:0">Changes apply across the whole site instantly — brand, checkout UPI, WhatsApp links, support email.</p>
+        <div class="form2">
+          <div><label for="st-brand">Website / brand name</label><input class="f" id="st-brand" value="${esc(CONFIG.brand)}"></div>
+          <div><label for="st-wa">WhatsApp number (with 91…)</label><input class="f" id="st-wa" inputmode="numeric" value="${esc(CONFIG.whatsapp)}" placeholder="9198XXXXXX"></div>
+          <div><label for="st-upi">UPI ID (checkout payments)</label><input class="f" id="st-upi" value="${esc(CONFIG.upiId)}" placeholder="name@upi"></div>
+          <div><label for="st-email">Support email</label><input class="f" id="st-email" type="email" value="${esc(CONFIG.email)}"></div>
+          <div><label for="st-ig">Instagram (link or @handle)</label><input class="f" id="st-ig" value="${esc(CONFIG.instagram)}"></div>
+          <div><label for="st-hours">Support hours (shown everywhere)</label><input class="f" id="st-hours" value="${esc(CONFIG.hours)}"></div>
+        </div>
+        <div class="paybtns"><button class="btn btn-sm" data-save-store>Save store details</button></div>
+        <div id="storeMsg"></div>
+      </div>
+      <div class="panel" style="margin-bottom:18px">
+        <h3>Chat assistant replies</h3>
+        <p class="hint" style="margin-top:0">Heaven Assist answers these before handing over to WhatsApp. One per line: <b>question | answer</b></p>
+        <label class="pm-l" for="st-chatintro">Greeting (first message when chat opens)</label>
+        <input class="f" id="st-chatintro" value="${esc(state.settings.chatIntro||"")}" placeholder="Hi! 👋 Ask me anything about accounts, delivery…">
+        <label class="pm-l" style="margin-top:12px" for="st-chatqa">Custom questions &amp; answers</label>
+        <textarea class="f" id="st-chatqa" rows="5" placeholder="Do you have GTA 6? | Yes! GTA VI preorder is live — ₹1,999. Tap Browse PS5 below.">${esc(state.settings.chatQA||"")}</textarea>
+        <div class="paybtns"><button class="btn btn-sm" data-save-chat>Save chat replies</button></div>
+        <div id="chatMsg2"></div>
+      </div>
+      <div class="panel" style="margin-bottom:18px">
+        <h3>Customers &amp; offers list</h3>
+        <p class="hint" style="margin-top:0">Buyers who create an account land here. Export the opted-in list to ping them on WhatsApp about new offers.</p>
+        <div class="stats"><div class="stat"><b id="custCount">–</b><span>Registered buyers</span></div><div class="stat"><b id="custOpt">–</b><span>Want offers</span></div></div>
+        <div class="paybtns"><button class="btn btn-sm" data-load-customers>↻ Load customers</button><button class="btn btn-ghost btn-sm" data-copy-emails>Copy opted-in emails</button></div>
+        <div id="custMsg"></div>
       </div>
     </div>
     <div class="panel">
@@ -1765,6 +1810,52 @@ function openConfirm(title,sub,yesLabel,cb){
   $("#pmYes").onclick=async()=>{ $("#pmYes").disabled=true; await cb(); pmClose(); };
 }
 
+
+/* ---- customer account ---- */
+let authMode="in";
+function vAccount(){
+  if(!state.fbReady){
+    return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Your account</h2></div></div>'+
+    '<div class="demo-note"><b>Buyer accounts activate once Firebase is connected.</b><br>The store itself works fine — accounts add order history, spend tracking and offer updates. Steps: SETUP-FIREBASE.md.</div>'+
+    '<a class="btn btn-ghost" href="#/">Back to store</a>';
+  }
+  if(!state.user){
+    return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Your account</h2><p class="sub">Track orders &amp; spend · get offer updates</p></div></div>'+
+    '<div class="panel" style="max-width:480px">'+
+    '<div class="filters" style="margin:0 0 14px"><button class="fbtn'+(authMode!=="up"?" on":"")+'" data-auth-mode="in">Sign in</button><button class="fbtn'+(authMode==="up"?" on":"")+'" data-auth-mode="up">Create account</button></div>'+
+    (authMode==="up"?'<label class="pm-l" for="au-name">Your name</label><input class="f" id="au-name" placeholder="Aditya" autocomplete="name">':'')+
+    '<label class="pm-l" for="au-email">Email</label><input class="f" id="au-email" type="email" autocomplete="email" inputmode="email" placeholder="you@gmail.com">'+
+    '<label class="pm-l" for="au-pass">Password</label><input class="f" id="au-pass" type="password" autocomplete="current-password" placeholder="••••••••">'+
+    (authMode==="up"?'<label style="display:flex;gap:8px;align-items:center;margin-top:12px"><input type="checkbox" id="au-optin" checked> Ping me on WhatsApp &amp; email for new offers and sales</label>':'')+
+    '<div class="paybtns"><button class="btn btn-block" data-auth-go>'+(authMode==="up"?"Create my account":"Sign in")+'</button></div>'+
+    '<div id="auMsg" class="err"></div>'+
+    '<p class="hint">Orders are still delivered on WhatsApp — the account just keeps your history and offers in one place.</p>'+
+    '</div>';
+  }
+  const nm=state.user.displayName|| (state.user.email||"").split("@")[0];
+  setTimeout(loadMyOrders,30);
+  return '<div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Hey, '+esc(nm)+' 👋</h2><p class="sub">'+esc(state.user.email||"")+'</p></div><button class="btn btn-ghost btn-sm" data-signout>Sign out</button></div>'+
+  '<div class="stats"><div class="stat"><b id="mo-count">–</b><span>Your orders</span></div><div class="stat"><b id="mo-spent">–</b><span>Total spent</span></div></div>'+
+  '<div class="panel" style="margin-bottom:18px"><h3>Order history</h3><div id="myOrders"><p class="sub">Loading…</p></div></div>'+
+  '<div class="panel" style="max-width:520px"><h3>Offers &amp; contact</h3>'+
+  '<label class="pm-l" for="ac-wa">Your WhatsApp number (for offer pings)</label><input class="f" id="ac-wa" inputmode="numeric" placeholder="9198XXXXXX" value=""><button class="btn btn-ghost btn-sm" data-save-wa style="margin-top:10px">Save number</button>'+
+  '<label style="display:flex;gap:8px;align-items:center;margin-top:16px"><input type="checkbox" id="ac-optin" data-optin> Send me new offers &amp; sale alerts</label>'+
+  '</div>';
+}
+async function loadMyOrders(){
+  if(!state.user) return;
+  const box=$("#myOrders"); if(!box) return;
+  try{
+    const snap=await firebase.firestore().collection("orders").where("uid","==",state.user.uid).get();
+    const arr=snap.docs.map(d=>d.data()).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    const spent=arr.reduce((a,o)=>a+(o.total||0),0);
+    const c=$("#mo-count"), s=$("#mo-spent");
+    if(c) c.textContent=arr.length; if(s) s.textContent=inr(spent);
+    if(!box) return;
+    box.innerHTML=arr.length?arr.map(o=>'<div class="sumline"><span><b>'+esc(o.oid||"")+'</b> · '+((o.items||[]).length)+' item(s) · '+(o.ts?new Date(o.ts).toLocaleDateString("en-IN"):"")+' <span class="pill on">'+esc(o.status||"pending")+'</span></span><span>'+inr(o.total||0)+'</span></div>').join(""):'<p class="sub">No orders yet — your future orders appear here automatically.</p>';
+  }catch(err){ if(box) box.innerHTML='<p class="sub">Sign-in expired or rules not live yet ('+esc(String(err.message||"").slice(0,60))+').</p>'; }
+}
+
 /* ============ checkout ============ */
 function openCheckout(){
   const ids=Object.keys(cart); if(!ids.length) return;
@@ -1790,6 +1881,9 @@ function openCheckout(){
    '</div>'+
    '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Keep order ID <b>'+oid+'</b>.</p>'+
    '</div></div>';
+  if(state.user && window.firebase){
+    try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending"},{merge:true}).catch(()=>{}); }catch(e){}
+  }
   document.body.style.overflow="hidden";
   const ov=$("[data-overlay]"); if(ov) ov.addEventListener("click",e=>{if(e.target===ov) closeModal();});
 }
@@ -1803,6 +1897,7 @@ const ROUTES={
   "/xbox":{t:"Xbox & Game Pass accounts",v:()=>vCatalog("xbox")},
   "/subs":{t:"Subscriptions & top-ups",v:()=>vCatalog("subs")},
   "/cart":{t:"Your cart",v:vCart},
+  "/account":{t:"Your account",v:vAccount},
   "/how":{t:"How buying works",v:vHow},
   "/faq":{t:"FAQ",v:vFaq},
   "/contact":{t:"Contact support",v:vContact},
@@ -2026,6 +2121,85 @@ document.addEventListener("click", async function(e){
   }
   if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
   if((el=q("[data-adplat]"))){ state.adPlat=el.dataset.adplat; document.querySelectorAll("[data-adplat]").forEach(b=>b.classList.toggle("on", b.dataset.adplat===state.adPlat)); renderAdminTable(); return; }
+  if((el=q("[data-save-store]")) && state.fbReady && state.user){
+    const s={brand:($("#st-brand")||{}).value||CONFIG.brand, whatsapp:($("#st-wa")||{}).value||CONFIG.whatsapp, upiId:($("#st-upi")||{}).value||CONFIG.upiId,
+      email:($("#st-email")||{}).value||CONFIG.email, instagram:($("#st-ig")||{}).value||CONFIG.instagram, hours:($("#st-hours")||{}).value||CONFIG.hours};
+    try{ await firebase.firestore().collection("settings").doc("store").set(s,{merge:true}); state.settings={...state.settings,...s}; applySettings(); renderAnnounce(); route();
+      const m=$("#storeMsg"); if(m) m.innerHTML='<div class="ok-note">Saved — live across the site.</div>'; toast("Store details updated");
+    }catch(err){ const m=$("#storeMsg"); if(m) m.innerHTML='<div class="err">'+esc(err.message)+'</div>'; }
+    return;
+  }
+  if((el=q("[data-save-chat]")) && state.fbReady && state.user){
+    const s={chatIntro:($("#st-chatintro")||{}).value||"", chatQA:($("#st-chatqa")||{}).value||""};
+    try{ await firebase.firestore().collection("settings").doc("store").set(s,{merge:true}); state.settings={...state.settings,...s};
+      const m=$("#chatMsg2"); if(m) m.innerHTML='<div class="ok-note">Saved — Heaven Assist now uses these replies.</div>'; toast("Chat replies updated");
+    }catch(err){ const m=$("#chatMsg2"); if(m) m.innerHTML='<div class="err">'+esc(err.message)+'</div>'; }
+    return;
+  }
+  if((el=q("[data-claim-owner]")) && state.fbReady && state.user){
+    try{
+      await firebase.firestore().collection("settings").doc("store").set({adminUid:state.user.uid, ownerEmail:state.user.email||""},{merge:true});
+      state.settings={...state.settings, adminUid:state.user.uid, ownerEmail:state.user.email};
+      toast("You are now the owner 🎉"); route();
+    }catch(err){
+      const m=$("#claimMsg"); if(m) m.innerHTML='<div class="err">Claim blocked: '+esc(err.message)+' — publish the updated firestore.rules first (SETUP-FIREBASE.md), then retry.</div>';
+    }
+    return;
+  }
+  if((el=q("[data-load-customers]")) && state.fbReady && state.user){
+    const m=$("#custMsg"); if(m) m.innerHTML='<div class="hint">Loading…</div>';
+    try{
+      const snap=await firebase.firestore().collection("users").get();
+      const arr=snap.docs.map(d=>d.data());
+      window.__cust=arr;
+      const opt=arr.filter(u=>u.optIn);
+      const a=$("#custCount"), b=$("#custOpt");
+      if(a) a.textContent=arr.length; if(b) b.textContent=opt.length;
+      if(m) m.innerHTML='<div class="ok-note">'+arr.length+' customer(s), '+opt.length+' opted in. Use "Copy opted-in emails" then paste into WhatsApp/email.</div>';
+    }catch(err){ if(m) m.innerHTML='<div class="err">'+esc(err.message)+' — reading all customers needs the updated rules + owner claim.</div>'; }
+    return;
+  }
+  if((el=q("[data-copy-emails]")) && window.__cust){
+    const list=window.__cust.filter(u=>u.optIn).map(u=>[u.name||"",u.email||"",u.wa||""].filter(Boolean).join(" — "));
+    const txt=list.length?list.join("\n"):"No opted-in customers yet.";
+    if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast("Copied "+list.length+" contact(s)"),()=>{});
+    const m=$("#custMsg"); if(m) m.innerHTML='<div class="ok-note" style="white-space:pre-wrap">'+esc(txt)+'</div>';
+    return;
+  }
+  if((el=q("[data-signout]")) && state.fbReady){ await firebase.auth().signOut(); toast("Signed out"); location.hash="#/"; route(); return; }
+  if((el=q("[data-auth-mode]"))){ authMode=el.dataset.authMode; route(); return; }
+  if((el=q("[data-auth-go]")) && state.fbReady){
+    const em=($("#au-email")||{}).value||"", pw=($("#au-pass")||{}).value||"", nm=($("#au-name")||{}).value||"", opt=!!($("#au-optin")||{}).checked;
+    const msg=$("#auMsg");
+    if(!em||!pw||pw.length<6){ if(msg) msg.textContent="Enter an email and a password (6+ characters)."; return; }
+    el.disabled=true;
+    try{
+      if(authMode==="up"){
+        const cred=await firebase.auth().createUserWithEmailAndPassword(em,pw);
+        if(nm&&cred.user.updateProfile) await cred.user.updateProfile({displayName:nm});
+        try{ await firebase.firestore().collection("users").doc(cred.user.uid).set({uid:cred.user.uid, email:em, name:nm, optIn:opt, createdAt:Date.now()}); }catch(e){}
+        toast("Welcome, "+(nm||"gamer")+"! 🎮");
+      }else{
+        await firebase.auth().signInWithEmailAndPassword(em,pw);
+        toast("Welcome back!");
+      }
+      route();
+    }catch(err){ if(msg) msg.textContent=String(err.message||"").replace("Firebase: ",""); }
+    el.disabled=false;
+    return;
+  }
+  if((el=q("[data-save-wa]")) && state.fbReady && state.user){
+    const wa=($("#ac-wa")||{}).value||"";
+    try{ await firebase.firestore().collection("users").doc(state.user.uid).set({wa:wa, updatedAt:Date.now()},{merge:true}); toast("WhatsApp number saved"); }
+    catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
+  if((el=q("[data-optin]")) && state.fbReady && state.user){
+    const on=!!el.checked;
+    try{ await firebase.firestore().collection("users").doc(state.user.uid).set({optIn:on, updatedAt:Date.now()},{merge:true}); toast(on?"You'll get offer updates 🔔":"Offers muted"); }
+    catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
   if((el=q("[data-pm-save]")) && state.fbReady && state.user){
     const g=v=>($(v)||{}).value;
     const id=el.dataset.pmSave||null;
@@ -2142,6 +2316,18 @@ route();
   }
   function reply(q){
     var s=q.toLowerCase(); var best=null,bs=0;
+    try{
+      var qa=(typeof state!=="undefined"&&state.settings&&state.settings.chatQA)||"";
+      var lns=qa.split("\n");
+      for(var li=0; li<lns.length; li++){
+        var ln=lns[li], pi=ln.indexOf("|");
+        if(pi>0){
+          var qw=ln.slice(0,pi).toLowerCase().split(/[^a-z0-9]+/).filter(function(w){return w.length>3;});
+          var ans=ln.slice(pi+1).trim();
+          if(ans && qw.some(function(w){return s.indexOf(w)>=0;})){ FALLS=0; bubble(ans,"bot",[["Talk to human on WhatsApp",null]]); return; }
+        }
+      }
+    }catch(e){}
     KB.forEach(function(item){ var sc=0; item.k.forEach(function(kw){ if(s.indexOf(kw)>=0) sc++; }); if(sc>bs){bs=sc;best=item;} });
     if(best){ FALLS=0; bubble(best.a,"bot",best.c&&best.c.length?best.c:[["Talk to human on WhatsApp",null]]); }
     else{ FALLS++;
@@ -2153,7 +2339,7 @@ route();
   function toggle(open){
     var p=el("chatPanel"); opened=open||false;
     if(open){ p.classList.add("open"); el("chatFab").setAttribute("aria-expanded","true"); el("chatDot").classList.remove("show");
-      if(!el("chatMsgs").children.length){ bubble("Hi! 👋 I'm Heaven Assist — instant answers about accounts, delivery, payments and warranty. What's on your mind?","bot",[]); chips(); }
+      if(!el("chatMsgs").children.length){ var INTRO=(typeof state!=="undefined"&&state.settings&&state.settings.chatIntro)?state.settings.chatIntro:"Hi! 👋 I'm Heaven Assist — instant answers about accounts, delivery, payments and warranty. What's on your mind?"; bubble(INTRO,"bot",[]); chips(); }
       setTimeout(function(){ var i=el("chatIn"); if(i) i.focus(); },250);
     } else { p.classList.remove("open"); el("chatFab").setAttribute("aria-expanded","false"); }
   }

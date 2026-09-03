@@ -1,25 +1,37 @@
 rules_version = '2';
+// HeavenDigital — owner is claimed once from the admin panel and stored in settings/store.adminUid.
+// Bootstrap: while settings/store has no adminUid, any signed-in user may claim it (first come, first served).
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Catalog: anyone can READ products (needed for the storefront),
-    // ONLY the admin UID can create/update/delete.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/settings/store)
+        && get(/databases/$(database)/documents/settings/store).data.adminUid == request.auth.uid;
+    }
+    function ownerless() {
+      return request.auth != null
+        && ( !exists(/databases/$(database)/documents/settings/store)
+             || !("adminUid" in get(/databases/$(database)/documents/settings/store).data) );
+    }
     match /products/{id} {
       allow read: if true;
-      allow write: if request.auth != null
-                   && request.auth.uid == "PASTE_YOUR_ADMIN_UID_HERE";
+      allow create, update, delete: if isAdmin();
     }
-
-    // Store settings (announcement bar, coupon): public read, admin-only write.
-    match /settings/{doc} {
+    match /settings/{id} {
       allow read: if true;
-      allow write: if request.auth != null
-                   && request.auth.uid == "PASTE_YOUR_ADMIN_UID_HERE";
+      allow create: if isAdmin() || ownerless();
+      allow update: if isAdmin() || ownerless();
+      allow delete: if false;
     }
-
-    // Everything else: locked.
-    match /{document=**} {
-      allow read, write: if false;
+    match /users/{uid} {
+      allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
+      allow create, update: if request.auth != null && request.auth.uid == uid;
+      allow delete: if false;
+    }
+    match /orders/{oid} {
+      allow read: if request.auth != null && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAdmin();
     }
   }
 }
