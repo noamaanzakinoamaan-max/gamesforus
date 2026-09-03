@@ -606,6 +606,16 @@ img{max-width:100%}
   .pm-dl{width:calc(100% - 20px)}
   .pm-ov{padding:10px}
 }
+
+/* ---- admin orders ---- */
+.pill.pay{background:rgba(245,192,68,.16);color:var(--gold);border:1px solid rgba(245,192,68,.4)}
+.pill.can{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.35)}
+.ord-it{font-size:12.5px;color:var(--mut);line-height:1.55;margin:2px 0 0;white-space:pre-line}
+.ord-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.ord-top b{font-family:var(--mono);font-size:13.5px}
+.ord-top span{font-size:11.5px;color:var(--mut)}
+.ord-buyer{font-size:12px;color:var(--mut);word-break:break-all}
+.ord-amt{font-family:var(--mono);font-weight:800;color:var(--gold);font-size:15px}
 </style>
 </head>
 <body>
@@ -1215,7 +1225,7 @@ function applySettings(){
   ["brand","whatsapp","upiId","email","instagram","hours"].forEach(k=>{ if(s[k]) CONFIG[k]=s[k]; });
   document.title=CONFIG.brand+" — PSN, Xbox & PC game accounts at up to 90% off";
 }
-const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null, adminMsg:null, adPlat:"all" };
+const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all" };
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length) p.forEach(x=>state.products[x.id]=x); else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
   try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
@@ -1660,7 +1670,23 @@ function vAdmin(){
     <div class="stat"><b>${inr(value)}</b><span>Inventory at sale price</span></div>
   </div>
   ${out?'<div class="demo-note" style="margin:0 0 16px"><b>'+out+' product(s) are out of stock</b> and hidden from the buy buttons. Restock below.</div>':''}
+  ${(setTimeout(()=>{ if(state.fbReady&&state.user&&!state.ordersLoaded) loadAdminOrders(); else if(state.ordersLoaded) renderOrders(); },30), "")}
   ${!state.settings.adminUid?'<div class="demo-note" style="margin:0 0 16px"><b>One-time:</b> make this account the store owner — nobody else will be able to claim it after you.<div class="paybtns"><button class="btn btn-sm" data-claim-owner>🔒 Claim owner with this account</button></div><div id="claimMsg"></div></div>':''}
+  <div class="panel" style="margin-bottom:18px">
+    <h3>Orders</h3>
+    <div class="stats">
+      <div class="stat"><b id="ordTotal">–</b><span>Orders</span></div>
+      <div class="stat"><b id="ordRev">–</b><span>Revenue (paid+)</span></div>
+      <div class="stat"><b id="ordPend">–</b><span>Pending</span></div>
+      <div class="stat"><b id="ordToday">–</b><span>Today</span></div>
+    </div>
+    <div class="filters" style="margin:0 0 12px;flex-wrap:wrap" id="ordChips"></div>
+    <div class="paybtns" style="margin:0 0 12px">
+      <button class="btn btn-sm" data-load-orders>↻ Refresh orders</button>
+      <button class="btn btn-ghost btn-sm" data-add-order>＋ Add order (WhatsApp)</button>
+    </div>
+    <div id="ordersList"><p class="sub" style="margin:0">Loading orders…</p></div>
+  </div>
   <div class="panel" style="margin-bottom:18px">
     <h3>Firestore catalog</h3>
     <p class="hint" style="margin-top:0">Firestore holds <b>${state.fsCount||0}</b> product(s) · local catalog has <b>${Object.keys(state._seedProducts||all).length}</b>. <b>Upload once</b> to make your catalog live and manageable from any device. ${deletedIds().length?'<b>'+deletedIds().length+' deleted</b> item(s) can be restored.':''}</p>
@@ -1725,6 +1751,72 @@ function vAdmin(){
       <div class="plist-m" id="adminCards"></div>
     </div>
   </div>`;
+}
+/* ---- orders dashboard ---- */
+function ordPill(st){
+  const map={pending:["pending","off"],paid:["paid","pay"],delivered:["delivered","on"],cancelled:["cancelled","can"],refunded:["refunded","can"]};
+  const m=map[(st||"pending").toLowerCase()]||[st,"off"];
+  return '<span class="pill '+m[1]+'">'+esc(m[0].toUpperCase())+'</span>';
+}
+function ordActions(o){
+  const st=(o.status||"pending").toLowerCase(); const b=[];
+  const btn=(label,stat,cls)=>'<button class="btn '+cls+' btn-sm" data-ord-status="'+o.oid+'|'+stat+'">'+label+'</button>';
+  if(st==="pending"){ b.push(btn("\u2713 Mark paid","paid","")); b.push(btn("\u2715 Cancel","cancelled","btn-ghost")); }
+  else if(st==="paid"){ b.push(btn("\u2318 Mark delivered","delivered","")); b.push(btn("\u21A9 Refund","refunded","btn-ghost")); }
+  else if(st==="delivered"){ b.push(btn("\u21A9 Refund","refunded","btn-ghost")); }
+  return b.join("");
+}
+function renderOrders(){
+  const box=$("#ordersList"); if(!box) return;
+  const all=state.orders;
+  const rev=all.filter(o=>["paid","delivered"].includes((o.status||"").toLowerCase())).reduce((a,o)=>a+(o.total||0),0);
+  const pend=all.filter(o=>(o.status||"pending")==="pending").length;
+  const t0=new Date(); t0.setHours(0,0,0,0);
+  const today=all.filter(o=>(o.ts||0)>=t0.getTime()).length;
+  const set=(id,v)=>{ const e=$(id); if(e) e.textContent=v; };
+  set("#ordTotal",all.length); set("#ordRev",inr(rev)); set("#ordPend",pend); set("#ordToday",today);
+  const counts={all:all.length,pending:pend,paid:all.filter(o=>o.status==="paid").length,delivered:all.filter(o=>o.status==="delivered").length,cancelled:all.filter(o=>["cancelled","refunded"].includes(o.status)).length};
+  const chips=$("#ordChips");
+  if(chips) chips.innerHTML=["all","pending","paid","delivered","cancelled"].map(k=>'<button class="fbtn'+(state.ordFilter===k?" on":"")+'" data-ordfilter="'+k+'">'+k[0].toUpperCase()+k.slice(1)+(k!=="all"?" ("+counts[k]+")":" ("+counts.all+")")+'</button>').join("");
+  let rows=all;
+  if(state.ordFilter==="cancelled") rows=all.filter(o=>["cancelled","refunded"].includes(o.status));
+  else if(state.ordFilter!=="all") rows=all.filter(o=>(o.status||"pending")===state.ordFilter);
+  rows=rows.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  if(!rows.length){ box.innerHTML='<p class="sub" style="margin:0">No orders here yet. Signed-in buyers\' checkouts land here automatically — add WhatsApp orders with "＋ Add order".</p>'; return; }
+  box.innerHTML=rows.map(o=>'<div class="acard">'+
+    '<div class="ord-top"><b>'+esc(o.oid||"?")+'</b><span>'+(o.ts?new Date(o.ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</span>'+ordPill(o.status)+'</div>'+
+    '<div class="ord-buyer">'+esc(o.email||"")+(o.wa?" · WhatsApp "+esc(o.wa):"")+(o.name?" · "+esc(o.name):"")+'</div>'+
+    (o.items&&o.items.length?'<p class="ord-it">'+esc(o.items.join("\n"))+'</p>':'')+
+    '<div class="ord-top" style="margin-top:4px"><span class="ord-amt">'+inr(o.total||0)+'</span><span class="rowbtns">'+ordActions(o)+'</span></div>'+
+  '</div>').join("");
+}
+async function loadAdminOrders(){
+  if(!(state.fbReady&&state.user)) return;
+  const box=$("#ordersList"); if(box&&!state.ordersLoaded) box.innerHTML='<p class="sub" style="margin:0">Loading…</p>';
+  try{
+    const snap=await firebase.firestore().collection("orders").orderBy("ts","desc").limit(100).get();
+    state.orders=snap.docs.map(d=>d.data());
+    state.ordersLoaded=true; renderOrders();
+  }catch(err){
+    const m=String(err.message||"");
+    if(box) box.innerHTML='<p class="sub" style="margin:0">Could not load orders'+(m.includes("index")||m.includes("Index")?" — Firestore is building an index, retry in a minute":": "+esc(m.slice(0,80)))+'.</p>';
+  }
+}
+function openOrderModal(){
+  $("#modalRoot").innerHTML=
+  '<div class="pm-ov" id="pmOv" onclick="if(event.target===this)pmClose()">'+
+  '<div class="pm-dl" role="dialog" aria-modal="true"><div class="pm-hd"><div><b>Add order (WhatsApp / walk-in)</b><span>Log orders you take on chat so they appear in revenue</span></div>'+
+  '<button class="pm-x" onclick="pmClose()" aria-label="Close">\u2715</button></div>'+
+  '<div class="pm-bd">'+
+  '<div><label class="pm-l" for="mo-name">Customer name</label><input class="f" id="mo-name" placeholder="Aditya"></div>'+
+  '<div><label class="pm-l" for="mo-wa">Customer WhatsApp</label><input class="f" id="mo-wa" inputmode="numeric" placeholder="9198XXXXXX"></div>'+
+  '<div><label class="pm-l" for="mo-items">Items (one per line)</label><textarea class="f" id="mo-items" rows="3" placeholder="1\u00D7 Marvel\'s Spider-Man 2 \u2014 PS5 (Primary)"></textarea></div>'+
+  '<div class="pm-grid"><div><label class="pm-l" for="mo-total">Total (\u20B9)</label><input class="f" id="mo-total" type="number" min="0" inputmode="numeric"></div>'+
+  '<div><label class="pm-l" for="mo-status">Status</label><select class="f" id="mo-status"><option value="pending">Pending</option><option value="paid">Paid</option><option value="delivered">Delivered</option></select></div></div>'+
+  '</div>'+
+  '<div class="pm-ft"><div id="mo-msg" class="err"></div><button class="btn btn-ghost btn-sm" onclick="pmClose()">Cancel</button><button class="btn btn-sm" data-mo-save>Save order</button></div>'+
+  '</div></div>';
+  document.body.style.overflow="hidden";
 }
 function renderAdminTable(){
   const tb=$("#adminRows"), mc=$("#adminCards"); if(!tb&&!mc) return;
@@ -2140,6 +2232,33 @@ document.addEventListener("click", async function(e){
     return;
   }
   if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
+  if((el=q("[data-ordfilter]"))){ state.ordFilter=el.dataset.ordfilter; renderOrders(); return; }
+  if((el=q("[data-load-orders]")) && state.fbReady && state.user){ state.ordersLoaded=false; await loadAdminOrders(); return; }
+  if((el=q("[data-add-order]")) && state.fbReady && state.user){ openOrderModal(); return; }
+  if((el=q("[data-mo-save]")) && state.fbReady && state.user){
+    const g=v=>($(v)||{}).value;
+    const items=(g("#mo-items")||"").split("\n").map(x=>x.trim()).filter(Boolean);
+    const total=Math.max(0,parseInt(g("#mo-total"),10)||0);
+    const msg=$("#mo-msg");
+    if(!items.length||!total){ if(msg) msg.textContent="Add at least one item and the total."; return; }
+    const oid="HD-"+Math.random().toString(36).slice(2,7).toUpperCase();
+    el.disabled=true;
+    try{
+      await firebase.firestore().collection("orders").doc(oid).set({uid:"manual", email:(g("#mo-name")||"").trim()||"WhatsApp order", wa:(g("#mo-wa")||"").trim(), name:(g("#mo-name")||"").trim(), items:items, total:total, oid:oid, ts:Date.now(), status:g("#mo-status")||"pending"});
+      state.orders.unshift({uid:"manual", email:(g("#mo-name")||"").trim()||"WhatsApp order", wa:(g("#mo-wa")||"").trim(), name:(g("#mo-name")||"").trim(), items:items, total:total, oid:oid, ts:Date.now(), status:g("#mo-status")||"pending"});
+      state.ordersLoaded=true; renderOrders(); pmClose(); toast("Order "+oid+" saved");
+    }catch(err){ if(msg) msg.textContent="Save failed: "+err.message; el.disabled=false; }
+    return;
+  }
+  if((el=q("[data-ord-status]")) && state.fbReady && state.user){
+    const parts=el.dataset.ordStatus.split("|"); const oid=parts[0], st=parts[1];
+    try{
+      await firebase.firestore().collection("orders").doc(oid).set({status:st, updatedAt:Date.now()},{merge:true});
+      const o=state.orders.find(x=>x.oid===oid); if(o) o.status=st;
+      renderOrders(); toast(oid+" \u2192 "+st);
+    }catch(err){ toast("Failed: "+err.message); }
+    return;
+  }
   if((el=q("[data-adplat]"))){ state.adPlat=el.dataset.adplat; document.querySelectorAll("[data-adplat]").forEach(b=>b.classList.toggle("on", b.dataset.adplat===state.adPlat)); renderAdminTable(); return; }
   if((el=q("[data-save-store]")) && state.fbReady && state.user){
     const s={brand:($("#st-brand")||{}).value||CONFIG.brand, whatsapp:($("#st-wa")||{}).value||CONFIG.whatsapp, upiId:($("#st-upi")||{}).value||CONFIG.upiId,
