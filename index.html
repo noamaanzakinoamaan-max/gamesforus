@@ -566,6 +566,26 @@ label.pm-l{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;t
   .pm-pricegrid{grid-template-columns:1fr}
   .pm-ft{position:sticky;bottom:0;background:#12151d}
 }
+
+/* ---- admin mobile catalog ---- */
+.plist-m{display:none}
+.acard{border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;background:var(--srf)}
+.ac-top{display:flex;gap:10px;align-items:flex-start}
+.ac-th{width:52px;height:52px;flex:0 0 52px;border-radius:10px;object-fit:cover;border:1px solid var(--line);background:#0a0d13}
+.ac-mono{width:52px;height:52px;flex:0 0 52px;border-radius:10px;border:1px solid var(--line);display:grid;place-items:center;font-family:var(--mono);color:var(--gold);font-size:14px;background:rgba(255,255,255,.03)}
+.ac-t{flex:1;min-width:0}
+.ac-t b{font-size:13.5px;line-height:1.35;color:var(--tx);display:block}
+.ac-t span{font-size:11px;color:var(--mut)}
+.ac-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.ac-prices{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-family:var(--mono);font-size:14px}
+.ac-prices s{color:var(--mut);font-size:11.5px}
+.ac-prices .t2l{font-size:12px}
+.ac-stock{font-size:12px;color:var(--mut)}
+.ac-stock button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--gold);border-radius:8px;padding:2px 8px;font-size:11px;cursor:pointer;margin-left:6px}
+.ac-act{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ac-act .btn{padding:9px 4px;font-size:12px;min-height:38px}
+@media(max-width:940px){ .plist-m{display:flex;flex-direction:column;gap:10px} }
+@media(min-width:941px){ .plist-m{display:none} }
 </style>
 </head>
 <body>
@@ -1167,7 +1187,7 @@ function fallbackCopy(txt,done){const ta=document.createElement("textarea");ta.v
 /* ============ state ============ */
 const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
 const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true};
-const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null, adminMsg:null };
+const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null, adminMsg:null, adPlat:"all" };
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length) p.forEach(x=>state.products[x.id]=x); else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
   try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
@@ -1633,18 +1653,22 @@ function vAdmin(){
     </div>
     <div class="panel">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Products (${all.length})</h3><button class="btn btn-sm" data-add-product>＋ Add product</button></div>
+      <div class="filters" style="margin:2px 0 12px">${["all","psn","pc","xbox"].map(k=>{const n=k==="all"?all.length:all.filter(p=>p.platform===k).length;const lb=k==="all"?"All":k==="psn"?"PSN":k==="pc"?"PC / Steam":"Xbox";return '<button class="fbtn'+(state.adPlat===k?" on":"")+'" data-adplat="'+k+'">'+lb+' ('+n+')</button>';}).join("")}</div>
       <label for="ad-search" style="margin-top:0">Search</label>
       <input class="f" id="ad-search" placeholder="Filter by title…" oninput="renderAdminTable()">
       <div class="tblwrap"><table class="ptable"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+      <div class="plist-m" id="adminCards"></div>
     </div>
   </div>`;
 }
 function renderAdminTable(){
-  const tb=$("#adminRows"); if(!tb) return;
+  const tb=$("#adminRows"), mc=$("#adminCards"); if(!tb&&!mc) return;
   const q=($("#ad-search")&&$("#ad-search").value.toLowerCase())||"";
-  const rows=Object.values(state.products).filter(p=>p.title.toLowerCase().includes(q)).sort((a,b)=>(b.featured===true)-(a.featured===true));
-  if(!rows.length){ tb.innerHTML='<tr><td colspan="5" style="color:var(--mut)">No products. Add one above.</td></tr>'; return; }
-  tb.innerHTML=rows.map(p=>'<tr>'+
+  let rows=Object.values(state.products).filter(p=>p.title.toLowerCase().includes(q));
+  if(state.adPlat&&state.adPlat!=="all") rows=rows.filter(p=>p.platform===state.adPlat);
+  rows.sort((a,b)=>(b.featured===true)-(a.featured===true));
+  if(!rows.length){ if(tb) tb.innerHTML='<tr><td colspan="5" style="color:var(--mut)">No products match.</td></tr>'; if(mc) mc.innerHTML='<p class="sub" style="margin:0">No products match.</p>'; return; }
+  if(tb) tb.innerHTML=rows.map(p=>'<tr>'+
     '<td class="ttl" title="'+esc(p.title)+'">'+esc(p.title)+'<br><span style="color:var(--mut);font-size:11px">'+esc((PLATFORMS[p.platform]||{}).name||p.platform)+' · '+esc(p.region||"")+'</span></td>'+
     '<td><span style="font-family:var(--mono)">'+inr(p.price)+'</span><br><s style="color:var(--mut);font-size:11px">'+inr(p.mrp)+'</s>'+(p.p2?'<br><span style="color:var(--gold);font-size:11px">T2 '+inr(p.p2)+'</span>':'')+'</td>'+
     '<td>'+p.stock+' <button class="rm" data-stockdec="'+p.id+'" title="Reduce stock by 1">−1</button></td>'+
@@ -1653,6 +1677,21 @@ function renderAdminTable(){
     '<button class="btn btn-ghost btn-sm" data-toggle-active="'+p.id+'">'+(p.active!==false?"Hide":"Show")+'</button>'+
     '<button class="btn btn-ghost btn-sm" data-toggle-feat="'+p.id+'">'+(p.featured?"Unfeature":"Feature")+'</button>'+
     '<button class="btn btn-danger btn-sm" data-del="'+p.id+'">Delete</button></div></td></tr>').join("");
+  if(mc) mc.innerHTML=rows.map(p=>{
+    const nm=(PLATFORMS[p.platform]||{}).mono||"?";
+    const thumb=p.img?'<img class="ac-th" src="'+esc(p.img)+'" alt="" loading="lazy" onerror="this.outerHTML=\'<span class=ac-mono>'+nm+'</span\'">':'<span class="ac-mono">'+nm+'</span>';
+    return '<div class="acard">'+
+    '<div class="ac-top">'+thumb+
+    '<div class="ac-t"><b>'+esc(p.title)+'</b><span>'+esc((PLATFORMS[p.platform]||{}).name||p.platform)+' · '+esc(p.region||"Global")+'</span>'+
+    '<span class="ac-pills">'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+(p.featured?'<span class="pill feat">FEAT</span>':'')+(p.tag?'<span class="pill">'+esc(p.tag)+'</span>':'')+'</span></div></div>'+
+    '<div class="ac-prices">'+inr(p.price)+' <s>'+inr(p.mrp)+'</s>'+(p.p2?'<span class="t2l">T2 '+inr(p.p2)+'</span>':'')+
+    '<span class="ac-stock">Stock: '+p.stock+'<button data-stockdec="'+p.id+'">−1</button></span></div>'+
+    '<div class="ac-act"><button class="btn btn-ghost btn-sm" data-edit="'+p.id+'">Edit</button>'+
+    '<button class="btn btn-ghost btn-sm" data-toggle-active="'+p.id+'">'+(p.active!==false?"Hide":"Show")+'</button>'+
+    '<button class="btn btn-ghost btn-sm" data-toggle-feat="'+p.id+'">'+(p.featured?"Unfeat":"Feat")+'</button>'+
+    '<button class="btn btn-danger btn-sm" data-del="'+p.id+'">Del</button></div>'+
+    '</div>';
+  }).join("");
 }
 
 
@@ -1986,6 +2025,7 @@ document.addEventListener("click", async function(e){
     return;
   }
   if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
+  if((el=q("[data-adplat]"))){ state.adPlat=el.dataset.adplat; document.querySelectorAll("[data-adplat]").forEach(b=>b.classList.toggle("on", b.dataset.adplat===state.adPlat)); renderAdminTable(); return; }
   if((el=q("[data-pm-save]")) && state.fbReady && state.user){
     const g=v=>($(v)||{}).value;
     const id=el.dataset.pmSave||null;
