@@ -753,9 +753,6 @@ img{max-width:100%}
 
 <footer class="site-foot">
   <div class="wrap">
-<<<<<<< Updated upstream
-  <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
-=======
   <div class="foot-badges" style="margin-bottom:6px"><span style="color:var(--gold);font-weight:800">FREE GUIDES:</span>
       <a href="guides/how-to-buy-ps5-games-cheap-india.html" style="color:var(--mut)">How to buy PS5 games cheap</a> ·
       <a href="guides/psn-secondary-vs-primary-explained.html" style="color:var(--mut)">Secondary vs Primary</a> ·
@@ -763,7 +760,6 @@ img{max-width:100%}
       <a href="guides/pc-games-steam-account-offline-online.html" style="color:var(--mut)">PC offline vs online</a> ·
       <a href="guides/is-buying-game-accounts-safe.html" style="color:var(--mut)">Is it safe?</a></div>
     <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
->>>>>>> Stashed changes
     <div class="foot-in">
       <div class="foot-brand">
         <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
@@ -2177,10 +2173,6 @@ function vReviews(){
 /* ---- order tracking ---- */
 const TK_STEPS=[["pending","Order placed"], ["paid","Payment verified"], ["delivered","Delivered — game on its way to your WhatsApp"]];
 function vTrack(){
-<<<<<<< Updated upstream
-=======
-  setTimeout(()=>{ const b=$("#trackGoBtn"); if(b) b.click(); },30);
->>>>>>> Stashed changes
   return `<div class="sec-head rv" style="padding-top:26px;margin-bottom:6px"><div><h2>Track your order</h2><p class="sub">Real-time status — the same board our team works from.</p></div></div>
   <div class="panel" style="max-width:520px">
     <div class="couprow"><input class="f" id="trackGoInput" placeholder="HD-XXXXX" style="text-transform:uppercase" value="${esc((location.hash.split("?")[1]||"").replace("id=",""))}"><button class="btn btn-sm" id="trackGoBtn" data-track-go2>Track</button></div>
@@ -2516,19 +2508,6 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-add-product]")) && state.fbReady && state.user){ openProdModal(null); return; }
   if((el=q("[data-ordfilter]"))){ state.ordFilter=el.dataset.ordfilter; renderOrders(); return; }
   if((el=q("[data-rvwfilter]"))){ state.rvwFilter=parseInt(el.dataset.rvwfilter,10)||0; route(); return; }
-  if(q("[data-track-go]") || q("[data-track-go2]")){ trackGo(); return; }
-  if((el=q("[data-home-search]"))){ const v=($("#homeQ")||{}).value||""; location.hash="#/search"+(v?"?q="+encodeURIComponent(v):""); route(); return; }
-  if((el=q("[data-share]"))){
-    const p=byId(el.dataset.share); if(!p) return;
-    const url=location.href.split("?")[0];
-    const text=p.title+" — "+inr(p.price)+" ("+offPct(p)+"% off) on "+CONFIG.brand+" ✅ 30-day warranty, guided setup";
-    if(navigator.share){ navigator.share({title:document.title,text:text,url:url}).catch(()=>{}); }
-    else if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text+"\n"+url).then(()=>toast("Deal copied — paste it to a friend!"),()=>toast(url)); }
-    else toast(url);
-    return;
-  }
-<<<<<<< Updated upstream
-=======
   if((el=q("[data-ref-apply]")) && state.fbReady){
     const code=($("#refCode")||{}).value.trim().toUpperCase();
     const msg=()=>document.querySelector(".coup-ok, #couponMsg");
@@ -2553,7 +2532,17 @@ document.addEventListener("click", async function(e){
     else if(navigator.clipboard) navigator.clipboard.writeText(text).then(()=>toast("Copied — paste it to a friend!"),()=>{});
     return;
   }
->>>>>>> Stashed changes
+  if(q("[data-track-go]") || q("[data-track-go2]")){ trackGo(); return; }
+  if((el=q("[data-home-search]"))){ const v=($("#homeQ")||{}).value||""; location.hash="#/search"+(v?"?q="+encodeURIComponent(v):""); route(); return; }
+  if((el=q("[data-share]"))){
+    const p=byId(el.dataset.share); if(!p) return;
+    const url=location.href.split("?")[0];
+    const text=p.title+" — "+inr(p.price)+" ("+offPct(p)+"% off) on "+CONFIG.brand+" ✅ 30-day warranty, guided setup";
+    if(navigator.share){ navigator.share({title:document.title,text:text,url:url}).catch(()=>{}); }
+    else if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(text+"\n"+url).then(()=>toast("Deal copied — paste it to a friend!"),()=>toast(url)); }
+    else toast(url);
+    return;
+  }
   if((el=q("[data-load-orders]")) && state.fbReady && state.user){ state.ordersLoaded=false; await loadAdminOrders(); return; }
   if((el=q("[data-add-order]")) && state.fbReady && state.user){ openOrderModal(); return; }
   if((el=q("[data-mo-save]")) && state.fbReady && state.user){
