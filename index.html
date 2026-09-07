@@ -849,7 +849,7 @@ const SEED = [
  {id:"pc-6-game-bundle", img:"img/8b90e56718e4.webp", platform:"pc", kind:"account", title:"6-Game Bundle — PC", region:"Global", games:["6 top PC games — ask us for this month's lineup"], price:599, mrp:9999, stock:3, tag:"Bundle", featured:true, active:true},
  {id:"pc-warhammer-sm2-gold", img:"img/05a3f56c4410.png", platform:"pc", kind:"account", title:"Warhammer 40,000: Space Marine 2 Gold — PC", region:"Global", games:["Space Marine 2 Gold Edition"], price:1599, mrp:4599, stock:2, tag:"", p2:2079, featured:false, active:true},
  /* ---- Xbox ---- */
- {id:"xbox-gpu-lifetime", platform:"xbox", kind:"account", title:"Xbox Game Pass Ultimate — Lifetime (400+ games)", region:"Global", games:["Game Pass Ultimate library — 400+ games","EA Play"], price:899, mrp:9999, stock:5, tag:"Bestseller", featured:true, active:true, img:"img/22fd6a3a3370.jpg"},
+ {id:"xbox-gpu-lifetime", platform:"xbox", kind:"account", title:"Xbox Game Pass Ultimate — Long-Term Account (400+ games)", region:"Global", games:["Game Pass Ultimate library — 400+ games","EA Play"], price:899, mrp:9999, stock:5, tag:"Bestseller", featured:true, active:true, img:"img/22fd6a3a3370.jpg"},
  {id:"xbox-gpu-1m", platform:"xbox", kind:"subscription", title:"Xbox Game Pass Ultimate — 1 Month", region:"India", games:["Game Pass Ultimate · 1 Month"], price:549, mrp:749, stock:8, tag:"", featured:false, active:true, img:"img/22fd6a3a3370.jpg"},
  {id:"psn-gta-v", platform:"psn", kind:"account", title:"GTA V — PS5", region:"Global", games:["GTA V"], price:499, mrp:1499, stock:3, tag:"Hot", p2:899,
   img:"img/acd56e2712c1.png", featured:false, active:true},
@@ -1371,7 +1371,7 @@ window.REVIEWS=window.REVIEWS||[];
 const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
 const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true,
   brand:CONFIG.brand, whatsapp:CONFIG.whatsapp, upiId:CONFIG.upiId, email:CONFIG.email, instagram:CONFIG.instagram, hours:CONFIG.hours,
-  chatIntro:"", chatQA:"", adminUid:"", ownerEmail:"", gaId:"", cfToken:""};
+  chatIntro:"", chatQA:"", adminUid:"", ownerEmail:"", gaId:"", cfToken:"", dealEnds:""};
 function applySettings(){
   const s=state.settings||{};
   ["brand","whatsapp","upiId","email","instagram","hours"].forEach(k=>{ if(s[k]) CONFIG[k]=s[k]; });
@@ -1554,7 +1554,7 @@ function vHome(){
         <div class="layer" data-depth="10"><div class="ring"></div></div>
         <div class="layer" data-depth="22"><div class="gcard gc1 floaty"><img class="gimg" src="img/1c13fc05be39.png" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>PC · Steam account</span><span>${inr(299)}</span></div><div class="gbot"><div class="g">Black Myth: Wukong</div><div class="p">Save ${inr(3300)} · 92% off</div></div></div></div>
         <div class="layer" data-depth="32"><div class="gcard gc2 floaty"><img class="gimg" src="img/fbff5cd4f82a.webp" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>PSN · Subscription</span><span>${inr(499)}</span></div><div class="gbot"><div class="g">PS Plus Extra · 1 Month</div><div class="p">Save ${inr(3500)} · 87% off</div></div></div></div>
-        <div class="layer" data-depth="16"><div class="gcard gc3 floaty"><img class="gimg" src="img/d82390370b1a.jpg" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>Xbox · Game Pass</span><span>${inr(899)}</span></div><div class="gbot"><div class="g">Game Pass Lifetime · 400+ games</div><div class="p">Save ${inr(9100)} · 91% off</div></div></div></div>
+        <div class="layer" data-depth="16"><div class="gcard gc3 floaty"><img class="gimg" src="img/d82390370b1a.jpg" alt="" loading="lazy" onerror="this.remove()"><div class="gov"></div><div class="row"><span>Xbox · Game Pass</span><span>${inr(899)}</span></div><div class="gbot"><div class="g">Game Pass Long-Term · 400+ games</div><div class="p">Save ${inr(9100)} · 91% off</div></div></div></div>
       </div>
     </div>
     <div>
@@ -1609,7 +1609,7 @@ function vHome(){
   </section>
 
   <section class="sec">
-    <div class="sec-head rv"><div><h2>Crazy deals right now</h2><p class="sub">Up to 92% off. When they're gone, they're gone.</p></div>${state.settings.couponOn?'<span class="timer" id="dealTimer" title="Coupon window — resets daily at IST midnight"></span>':""}</div>
+    <div class="sec-head rv"><div><h2>Crazy deals right now</h2><p class="sub">Up to 92% off. When they're gone, they're gone.</p></div>${state.settings.dealEnds?'<span class="timer" id="dealTimer" title="Real promotion deadline — same moment for everyone"></span>':""}</div>
     <div class="grid">${deals.map(cardHTML).join("")}</div>
   </section>
 
@@ -1915,6 +1915,8 @@ function vAdmin(){
           <div><label for="set-pct">Discount %</label><input class="f" id="set-pct" type="number" min="1" max="90" value="${esc(state.settings.couponPercent)}"></div>
         </div>
         <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="set-on" ${state.settings.couponOn?"checked":""}> Coupon active</label>
+        <label for="set-dealends" style="margin-top:14px">Deal countdown — real end time (honest timer; empty = hidden)</label>
+        <input class="f" id="set-dealends" placeholder="2026-09-30T23:59:00+05:30" value="${esc(state.settings.dealEnds||'')}">
         <div class="paybtns"><button class="btn btn-sm" data-save-settings>Save offer settings</button></div>
         <div id="setMsg"></div>
       </div>
@@ -2448,20 +2450,23 @@ function initMotion(scope){
       card.addEventListener("pointerleave",()=>{ card.style.transform=""; });
     });
   }
-  /* deal countdown → next IST midnight */
+  /* deal countdown → owner-set REAL deadline (absolute timestamp; never resets on refresh) */
   if(dealInt) clearInterval(dealInt);
   const tEl=$("#dealTimer");
   if(tEl){
-    const code=state.settings.couponCode||"HEAVEN10";
-    const tick=()=>{
-      const now=new Date();
-      const ist=new Date(now.toLocaleString("en-US",{timeZone:"Asia/Kolkata"}));
-      const end=new Date(ist); end.setHours(24,0,0,0);
-      let s=Math.max(0,Math.floor((end-ist)/1000));
-      const h=String(Math.floor(s/3600)).padStart(2,"0"), m=String(Math.floor(s%3600/60)).padStart(2,"0"), ss=String(s%60).padStart(2,"0");
-      tEl.textContent=code+" ends in "+h+":"+m+":"+ss;
-    };
-    tick(); dealInt=setInterval(tick,1000);
+    const endTs=Date.parse(state.settings.dealEnds||"");
+    if(!endTs||Date.now()>=endTs){ tEl.remove(); }
+    else{
+      const code=state.settings.couponCode||"HEAVEN10";
+      const tick=()=>{
+        let s=Math.floor((endTs-Date.now())/1000);
+        if(s<=0){ tEl.remove(); clearInterval(dealInt); return; }
+        const d=Math.floor(s/86400); s%=86400;
+        const hh=String(Math.floor(s/3600)).padStart(2,"0"), mm=String(Math.floor(s%3600/60)).padStart(2,"0"), s2=String(s%60).padStart(2,"0");
+        tEl.textContent=code+" ends in "+(d?d+"d ":"")+hh+":"+mm+":"+s2;
+      };
+      tick(); dealInt=setInterval(tick,1000);
+    }
   }
 }
 
@@ -2562,7 +2567,7 @@ document.addEventListener("click", async function(e){
   }
   if(q("[data-logout]") && state.fbReady){ await firebase.auth().signOut(); toast("Logged out"); return; }
   if(q("[data-save-settings]") && state.fbReady && state.user){
-    const s={announce:($("#set-announce")||{}).value||"", couponCode:(($("#set-code")||{}).value||"").toUpperCase(), couponPercent:Math.max(1,Math.min(90,parseInt(($("#set-pct")||{}).value,10)||10)), couponOn:!!($("#set-on")||{}).checked};
+    const s={announce:($("#set-announce")||{}).value||"", couponCode:(($("#set-code")||{}).value||"").toUpperCase(), couponPercent:Math.max(1,Math.min(90,parseInt(($("#set-pct")||{}).value,10)||10)), couponOn:!!($("#set-on")||{}).checked, dealEnds:($("#set-dealends")||{}).value||""};
     try{ await firebase.firestore().collection("settings").doc("store").set(s,{merge:true}); state.settings={...state.settings,...s}; renderAnnounce(); saveLocal(); const m=$("#setMsg"); if(m) m.innerHTML='<div class="ok-note">Saved — live on the site now.</div>'; }
     catch(err){ const m=$("#setMsg"); if(m) m.innerHTML='<div class="err">Save failed: '+esc(err.message)+'</div>'; }
     return;
@@ -2818,7 +2823,7 @@ route();
    {k:["human","agent","person","support","talk","whatsapp","contact"],a:"WhatsApp us — a real human (who actually games) replies during "+HRS+". Orders always get priority.",c:[["Open WhatsApp",null]]},
    {k:["hi","hello","hey","yo","namaste","start"],a:"Hey! 👋 Ask me anything — delivery time, safety, warranty, payments… or tap a question below.",c:[]},
    {k:["price","cost","rate"],a:"Every listing shows its live price and discount right on the card. Many PC accounts start at ₹299, PSN accounts from ₹399, and PS Plus/Game Pass subscriptions from ₹499. Which game are you eyeing?",c:[["Browse PC","#/pc"],["Browse PS5","#/psn"],["Browse Xbox","#/xbox"]]},
-   {k:["xbox","game pass"],a:"Xbox Game Pass Ultimate gives you 400+ games — we have Lifetime and monthly options, delivered on WhatsApp in minutes.",c:[["Browse Xbox","#/xbox"]]},
+   {k:["xbox","game pass"],a:"Xbox Game Pass Ultimate gives you 400+ games — we have long-term and monthly options, delivered on WhatsApp in minutes.",c:[["Browse Xbox","#/xbox"]]},
    {k:["thank","thanks","ok","great","nice"],a:"Anytime! 🙌 If you're ready, the bestsellers are one tap away — and if anything's unclear, I'm here.",c:[["See bestsellers","#/"]]}
   ];
   var FALLS=0, opened=false;
