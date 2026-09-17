@@ -1429,8 +1429,18 @@ function initAnalytics(){
   }catch(e){}
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0 };
+/* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore) */
+function enforcePricePolicy(){
+  Object.values(state.products).forEach(p=>{
+    if(p && p.platform==="pc"){
+      if(!(p.price<599)) p.price=499;
+      if(p.p2 && p.p2>=599) p.p2=549;
+    }
+  });
+}
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length){ p.forEach(x=>state.products[x.id]=x); SEED.forEach(x=>{ if(!state.products[x.id]) state.products[x.id]=x; }); } else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
+  enforcePricePolicy();
   try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
 }
 function saveLocal(){
@@ -1485,6 +1495,7 @@ function initFirebase(){
       Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]=state._seedProducts[k]; });
       if(!snap.empty){ snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]=d.data(); }); state.source="firestore"; }
       state.fsCount=snap.size; state.products=merged;
+      enforcePricePolicy();
       renderAnnounce();
       if(routeNow().startsWith("/admin")) renderAdminTable(); else route();
     });
@@ -2847,7 +2858,7 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-sync-up]"))){ syncCatalog(el); return; }
   if((el=q("[data-restore-deleted]"))){
     localStorage.setItem("hd_deleted_v1","[]");
-    if(state._seedProducts){ const merged={}; Object.keys(state._seedProducts).forEach(k=>merged[k]=state._seedProducts[k]); state.products=merged; }
+    if(state._seedProducts){ const merged={}; Object.keys(state._seedProducts).forEach(k=>merged[k]=state._seedProducts[k]); state.products=merged; } enforcePricePolicy();
     toast("Deleted products restored"); route(); return;
   }
   if((el=q("[data-filter]"))){ catFilter=el.dataset.filter; route(); const f=document.querySelector(".filters"); if(f) f.scrollIntoView({block:"nearest"}); return; }
