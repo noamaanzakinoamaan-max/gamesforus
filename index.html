@@ -26,20 +26,20 @@
 <meta property="og:title" content="HeavenDigital — game accounts at up to 90% off">
 <meta property="og:description" content="PSN, Xbox & PC accounts with top games included. WhatsApp delivery, 30-day warranty, UPI accepted.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://noamaanzakinoamaan-max.github.io/gamesforus/">
-<meta property="og:image" content="https://noamaanzakinoamaan-max.github.io/gamesforus/img/17e93c0ec4b0.webp">
+<meta property="og:url" content="https://heavendigital.store/">
+<meta property="og:image" content="https://heavendigital.store/img/17e93c0ec4b0.webp">
 <meta property="og:site_name" content="HeavenDigital">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="HeavenDigital — game accounts at up to 90% off">
 <meta name="twitter:description" content="PSN, Xbox & PC accounts with top games included. WhatsApp delivery, 30-day warranty, UPI.">
-<meta name="twitter:image" content="https://noamaanzakinoamaan-max.github.io/gamesforus/img/17e93c0ec4b0.webp">
+<meta name="twitter:image" content="https://heavendigital.store/img/17e93c0ec4b0.webp">
 <meta name="robots" content="index, follow, max-image-preview:large">
-<link rel="canonical" href="https://noamaanzakinoamaan-max.github.io/gamesforus/">
+<link rel="canonical" href="https://heavendigital.store/">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
- {"@type":"Organization","@id":"https://noamaanzakinoamaan-max.github.io/gamesforus/#org","name":"HeavenDigital","url":"https://noamaanzakinoamaan-max.github.io/gamesforus/","description":"HeavenDigital sells PSN, Xbox and PC game accounts with top titles included — delivered on WhatsApp in minutes across India, with a 30-day replacement warranty.","areaServed":"IN","contactPoint":{"@type":"ContactPoint","contactType":"customer support","areaServed":"IN","availableLanguage":["en","hi"]}},
- {"@type":"WebSite","@id":"https://noamaanzakinoamaan-max.github.io/gamesforus/#site","url":"https://noamaanzakinoamaan-max.github.io/gamesforus/","name":"HeavenDigital","publisher":{"@id":"https://noamaanzakinoamaan-max.github.io/gamesforus/#org"}},
- {"@type":"FAQPage","@id":"https://noamaanzakinoamaan-max.github.io/gamesforus/#faq","mainEntity":[
+ {"@type":"Organization","@id":"https://heavendigital.store/#org","name":"HeavenDigital","url":"https://heavendigital.store/","description":"HeavenDigital sells PSN, Xbox and PC game accounts with top titles included — delivered on WhatsApp in minutes across India, with a 30-day replacement warranty.","areaServed":"IN","contactPoint":{"@type":"ContactPoint","contactType":"customer support","areaServed":"IN","availableLanguage":["en","hi"]}},
+ {"@type":"WebSite","@id":"https://heavendigital.store/#site","url":"https://heavendigital.store/","name":"HeavenDigital","publisher":{"@id":"https://heavendigital.store/#org"}},
+ {"@type":"FAQPage","@id":"https://heavendigital.store/#faq","mainEntity":[
    {"@type":"Question","name":"What am I actually buying on HeavenDigital?","acceptedAnswer":{"@type":"Answer","text":"A game account with the game already on it — not a redeem code. Credentials are delivered on WhatsApp and the team guides your download step by step until you are playing."}},
    {"@type":"Question","name":"How fast is delivery?","acceptedAnswer":{"@type":"Answer","text":"Under 10 minutes during support hours (10am–11pm IST) after payment verification. Night orders are delivered first thing in the morning."}},
    {"@type":"Question","name":"Is buying a game account safe?","acceptedAnswer":{"@type":"Answer","text":"Every account is tested before delivery and every order carries a 30-day replacement warranty — replacement or refund, your choice."}},
@@ -695,6 +695,33 @@ img{max-width:100%}
 .searchbar input{flex:1}
 .sortsel{max-width:180px;padding:9px 12px;border-radius:12px;font-size:13px}
 @media(max-width:700px){.sortsel{max-width:44%}}
+
+/* ═══════ HD device-compatibility layer v4 — phones → 4K ═══════ */
+
+/* Landscape phones & short windows (iPhone/Android landscape, split-screen) */
+@media (max-height:560px) and (orientation:landscape){
+  .hero{padding:16px 0 12px;gap:18px}
+  .hero h1{margin:4px 0}
+}
+
+/* Large laptops & small desktops ≥1440px (MacBook Pro/Air 1512–1728, 1440p) */
+@media (min-width:1440px){
+  .wrap{max-width:1220px}
+}
+
+/* Full-HD monitors ≥1920px — wider stage, 5-across bestsellers, 4-across reviews */
+@media (min-width:1920px){
+  .wrap{max-width:1320px}
+  h2{font-size:clamp(24px,1.7vw,34px)}
+  .bscard{flex-basis:18.4%;min-width:18.4%}
+  .rvw{flex:0 0 24%;min-width:24%}
+}
+
+/* 4K & ultrawide ≥2560px */
+@media (min-width:2560px){
+  .wrap{max-width:1440px}
+  body{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -2344,7 +2371,7 @@ const ROUTES={
   "/privacy":{t:"Privacy policy",v:()=>vPolicy("privacy")}
 };
 function routeNow(){ return (location.hash.replace(/^#/,"")||"/").split("?")[0]; }
-const BASESEO="https://noamaanzakinoamaan-max.github.io/gamesforus/";
+const BASESEO="https://heavendigital.store/";
 function ldSet(obj){ const el=document.getElementById("ld-dyn"); if(el) el.textContent=JSON.stringify(obj); }
 function metaSet(name,val,attr){ let el=document.head.querySelector((attr?"property":"")+'[name="'+name+'"]'); if(!el&&attr) el=document.head.querySelector('[property="'+name+'"]'); if(el) el.setAttribute(attr?"content":"content", val); }
 function canonicalSet(u){ let el=document.head.querySelector('link[rel="canonical"]'); if(el) el.href=u; }

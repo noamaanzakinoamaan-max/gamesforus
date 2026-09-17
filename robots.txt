@@ -27,7 +27,7 @@ User-agent: cohere-ai
 Allow: /
 
 # Machine-readable fact sheets for LLMs
-# https://noamaanzakinoamaan-max.github.io/gamesforus/llms.txt
-# https://noamaanzakinoamaan-max.github.io/gamesforus/llms-full.txt
+# https://heavendigital.store/llms.txt
+# https://heavendigital.store/llms-full.txt
 
-Sitemap: https://noamaanzakinoamaan-max.github.io/gamesforus/sitemap.xml
+Sitemap: https://heavendigital.store/sitemap.xml
