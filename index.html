@@ -813,6 +813,7 @@ img{max-width:100%}
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" defer></script>
 <script src="firebase-config.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 
 <script src="reviews.js"></script>
 <script>
@@ -2313,6 +2314,34 @@ function searchLive(v){
   out.innerHTML=searchHtml(searchMatches(v));
   try{ history.replaceState(null,"","#/search"+(v?"?q="+encodeURIComponent(v):"")); }catch(e){}
 }
+/* ============ email receipts (EmailJS — works without a backend) ============ */
+/* To enable: create a free account at emailjs.com, build the template from
+   EMAILJS-SETUP.md, then fill these 3 values. Empty values = feature off. */
+const EMAILJS={publicKey:"", serviceId:"", templateId:""};
+function sendReceiptEmail(oid, lines, total, disc, refOff){
+  if(!EMAILJS.publicKey || !EMAILJS.serviceId || !EMAILJS.templateId) return;
+  if(!window.emailjs || !state.user || !state.user.email) return;
+  const name=(state.user.displayName||"").trim() || (state.user.email.split("@")[0]||"there");
+  const params={
+    to_email: state.user.email,
+    to_name: name,
+    order_id: oid,
+    items: lines.join("\n") + (disc?("\nCoupon discount: −"+inr(disc)):"") + (refOff?("\nReferral discount: −"+inr(refOff)):""),
+    total: inr(total),
+    upi_id: CONFIG.upiId,
+    upi_name: CONFIG.brand,
+    brand: CONFIG.brand,
+    hours: CONFIG.hours,
+    whatsapp: "+"+CONFIG.whatsapp.replace(/^91/,"").replace(/(\d{5})(\d{5})/,"$1 $2")
+  };
+  try{
+    emailjs.init({publicKey:EMAILJS.publicKey});
+    emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, params)
+      .then(()=>console.log("[receipt] email sent for "+oid))
+      .catch(e=>console.warn("[receipt] send failed:", e && e.text || e));
+  }catch(e){ console.warn("[receipt] skipped:", e && e.message); }
+}
+
 /* ============ checkout ============ */
 function openCheckout(){
   const ids=Object.keys(cart); if(!ids.length) return;
@@ -2343,6 +2372,7 @@ function openCheckout(){
   if(state.user && window.firebase){
     try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending", refBy:state.refBy||null},{merge:true}).catch(()=>{}); }catch(e){}
   }
+  try{ sendReceiptEmail(oid, lines, total, disc, refOff); }catch(e){}
   state.refBy=null; state.refOff=0;
   document.body.style.overflow="hidden";
   const ov=$("[data-overlay]"); if(ov) ov.addEventListener("click",e=>{if(e.target===ov) closeModal();});
