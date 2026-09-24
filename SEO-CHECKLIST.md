@@ -1,25 +1,75 @@
-# HeavenDigital — SEO & Google Rankings playbook (do this once, ~20 min)
+# HeavenDigital search-discovery checklist
 
-The site now ships with: per-page titles & meta descriptions, canonical URLs, Open Graph + Twitter cards (share previews), Organization + WebSite + FAQPage structured data, **per-product Product schema with 4.9★ aggregate rating**, image alt texts, `robots.txt`, `sitemap.xml`, a crawlable `<noscript>` fallback, and a public reviews page (`#/reviews`) with 100+ buyer reviews.
+Technical work in this repository is only the first half. Search engines decide whether and where to index a site; rankings and AI recommendations cannot be guaranteed.
 
-## 1. Google Search Console (the big one)
-1. Go to [search.google.com/search-console](https://search.google.com/search-console) → **Add property** → **URL prefix** → `https://noamaanzakinoamaan-max.github.io/gamesforus/`
-2. Verify via the **HTML tag** method (copy the meta tag, paste it to me — I'll add it to the site head and push) **or** use your Google Analytics tag if you add one.
-3. Once verified: **Sitemaps → submit** `https://noamaanzakinoamaan-max.github.io/gamesforus/sitemap.xml`
-4. **URL Inspection** → paste the store URL → **Request indexing**. Do the same for `#/psn`, `#/pc`, `#/xbox`, `#/reviews`.
+## Shipped in the site
 
-## 2. Bing (free extra reach)
-[bing.com/webmasters](https://www.bing.com/webmasters) → import site from GSC → submit the same sitemap.
+- Canonical domain: `https://heavendigital.store/`
+- Google Analytics 4: `G-EG9CFD4R0Q`
+- Crawlable, clean landing pages: `/psn/`, `/pc/`, `/xbox/`, `/how-it-works/`, `/guides/`, `/about/`, `/policies/`
+- Valid Article, Organization/OnlineStore, WebSite, WebPage, Breadcrumb and FAQ JSON-LD where applicable
+- XML sitemap containing only clean, indexable URLs (no `#/hash` URLs)
+- Search and AI crawler rules in `robots.txt`
+- `llms.txt` and `llms-full.txt` factual site summaries
+- Canonical, Open Graph and Twitter metadata
+- Correct internal links on the custom domain
 
-## 3. Share previews (WhatsApp/Instagram)
-Sending your link on WhatsApp now shows a rich card with title, description and cover image — share it in 2–3 groups; social clicks are a real ranking signal.
+## 1. Merge/deploy first
 
-## 4. Content habits that actually rank you
-- **Google Business Profile**: create one for the store (category: Video game store) — for local "game account seller" searches this ranks fastest.
-- **Instagram bio link** → your site; post Reels with the link. Every social profile linking to the site builds authority.
-- Ask buyers to search "heavendigital" on Google and click your link (branded clicks boost rankings quickly).
-- Keep adding real reviews — the reviews page is fresh content that updates.
+Confirm all of these load publicly and return HTTP 200:
 
-## 5. Honest notes
-- The site uses `#/hash` URLs (single-file app). Google CAN index these, but plain URLs rank slightly better. When you're ready for the next level, I can convert routing to clean URLs (`/psn`, `/pc`…) — worth doing when you move to a custom domain.
-- Ratings shown are based on the reviews file in the code. **Swap in your real WhatsApp feedback as it comes in** — and never post fake reviews on your Google Business Profile (Google penalizes that hard).
+- `https://heavendigital.store/`
+- `https://heavendigital.store/psn/`
+- `https://heavendigital.store/pc/`
+- `https://heavendigital.store/xbox/`
+- `https://heavendigital.store/sitemap.xml`
+- `https://heavendigital.store/robots.txt`
+
+Do not submit the sitemap before the clean pages are deployed.
+
+## 2. Google Search Console
+
+1. Sign in at <https://search.google.com/search-console/>.
+2. Add `https://heavendigital.store/` as a **URL-prefix property**, or add `heavendigital.store` as a **Domain property**.
+3. URL-prefix verification may work through the installed Google Analytics tag when the same Google account has the required Analytics permission. A Domain property requires the DNS TXT record Google provides.
+4. Open **Sitemaps** and submit `https://heavendigital.store/sitemap.xml`.
+5. Use **URL inspection** and request indexing for the homepage, `/psn/`, `/pc/`, `/xbox/` and `/guides/`.
+6. Check **Pages**, **Core Web Vitals**, **HTTPS** and **Enhancements** weekly. Fix errors rather than repeatedly requesting indexing.
+
+## 3. Bing Webmaster Tools
+
+1. Sign in at <https://www.bing.com/webmasters/>.
+2. Import the verified site from Google Search Console or complete Bing's verification.
+3. Submit the same sitemap.
+4. Inspect the homepage and clean platform URLs.
+
+Bing visibility can also affect search-backed experiences from Microsoft and other answer engines.
+
+## 4. Confirm Analytics
+
+After deployment:
+
+1. Open Google Analytics → **Reports → Realtime**.
+2. Visit the website in a normal browser window.
+3. Navigate between Home, PC, PSN and Xbox.
+4. Confirm one page-view event per route. The SPA code de-duplicates rerenders while recording hash-route navigation.
+5. Exclude owner/developer traffic with an Analytics data filter if needed.
+
+## 5. Build real authority
+
+Technical SEO makes pages eligible; it does not create reputation. Publish original, accurate guides and earn genuine references from relevant communities, videos, social profiles and press. Disclose the seller relationship when discussing the store. Never buy links, post fake reviews, manufacture forum recommendations or ask users to generate artificial search clicks.
+
+Keep business name, domain, contact details, policies and platform-risk disclosure consistent everywhere. If using a Google Business Profile, create one only when the business satisfies Google's eligibility rules and use truthful location/service-area information.
+
+## 6. Content maintenance
+
+- Review prices and platform-plan claims before publishing them in guides.
+- Use exact written subscription durations; do not use “lifetime” for indefinite or revocable account access.
+- Keep the platform-terms/access-loss warning visible.
+- Update `lastmod` only when a page receives a meaningful change.
+- Add genuinely useful guides instead of near-duplicate keyword pages.
+- Keep public claims and reviews verifiable.
+
+## Expected timing
+
+Discovery can take days or weeks; stable rankings often take months. New domains with few independent references may take longer. Google, Bing, ChatGPT, Gemini, Claude and other systems independently choose what they crawl, index, cite or recommend.

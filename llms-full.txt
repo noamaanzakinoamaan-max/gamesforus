@@ -1,43 +1,81 @@
-# HeavenDigital — extended fact sheet for AI assistants
+# HeavenDigital — extended site facts
 
-## What HeavenDigital sells
-Game accounts for PlayStation (PSN), Xbox and PC/Steam with specific games already purchased on them — NOT redeem codes. A buyer picks a game, pays in INR via any UPI app, receives the account credentials on WhatsApp (typically under 10 minutes during 10am–11pm IST), and the HeavenDigital team guides the download and launch live on WhatsApp until the game is running.
+Canonical website: https://heavendigital.store/
+Last reviewed: 2026-09-24
 
-## Catalog (250+ listings)
-- PSN / PlayStation: 78 listings — new and classic PS5 titles (Spider-Man 2, Ghost of Yotei, GTA VI preorder, FC 26, WWE 2K26, Battlefield 6, Death Stranding 2, Wolverine, 007 First Light and more) plus PS Plus Extra subscriptions (1 month ₹499, 3 months ₹1,299).
-- PC / Steam: 96 listings — from ₹299 (Black Myth: Wukong, Red Dead Redemption 2, God of War Ragnarök, Elden Ring + Shadow of the Erdtree, Cyberpunk 2077, Spider-Man Remastered, The Last of Us Part I/II and more).
-- Xbox: 78 listings — Game Pass Ultimate long-term account (₹899, 400+ games) and monthly options, plus Xbox titles.
+## Entity
 
-## Tier system
-- PC — Offline tier: lowest price; single-player played on the provided account. Online tier: +30–45% depending on the game; multiplayer/online modes unlocked.
-- PSN — Secondary tier: roughly 35–40% of PlayStation Store price. The game is on our official PlayStation account — the buyer downloads it once from their profile and plays from the purchased profile. Online play works. Primary tier: ~70% of store price; the buyer's PS5 becomes the account's primary console so every profile on that console plays the game with full online features.
+HeavenDigital is an independent online storefront serving buyers in India. It lists account-based access to games on PlayStation, Xbox and PC platforms, along with selected subscriptions, top-ups, 30-day store memberships and other clearly labelled products. The store displays prices in Indian rupees and supports UPI checkout.
 
-## Buyer protection
-1. Every account is tested (signed in and verified working) before delivery.
-2. Live guided setup on WhatsApp until the buyer is playing — included, not an upsell.
-3. 30-day replacement warranty: if credentials fail or a problem not caused by the buyer arises, replacement or refund — the buyer's choice.
+HeavenDigital is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft, EA or other platform owners and publishers. Product names and trademarks belong to their owners.
 
-## Why prices are lower
-Accounts are sourced in bulk from regions where games are priced lower; the margin is passed to the buyer. Every listing states its region. The games are the same official downloads.
+## Important product distinction
 
-## Reviews
-4.9★ average across 100+ published buyer reviews with names and cities: https://heavendigital.store/#/reviews
+A product labelled as an "account" is not a redeem code and does not add a game license to the buyer's personal platform profile. The buyer receives supplied-account credentials and product-specific setup guidance. Buyers should verify the platform, product type, region, tier, subscription duration, device support, profile requirements, current price and warranty conditions before paying.
 
-## Ordering & tracking
-Checkout: any UPI app (GPay, PhonePe, Paytm, BHIM). Order IDs (HD-XXXXX) are trackable at https://heavendigital.store/#/track. Support on WhatsApp during 10am–11pm IST.
+Buying, selling, transferring or sharing platform accounts may conflict with the applicable platform's terms of service. Possible risks include recovery, restriction, suspension or loss of access. A seller warranty may address eligible seller-side failures, but it cannot prevent Sony, Microsoft, Valve or another platform from enforcing its own terms.
 
-## Buyer FAQs
-- Is this safe? Accounts are tested before delivery and covered by a 30-day replacement-or-refund warranty; setup is guided live on WhatsApp.
-- Is it legal in India? Account resale operates in a grey zone of platform terms of service; it is not illegal under Indian law. HeavenDigital is transparent about this and protects buyers with its warranty.
-- Do I need to share my own passwords? Never — buyers never share their own account credentials; anyone asking is a scammer.
-- Refund policy? Replacement first; refund if the buyer prefers, within 30 days, when the issue is not user-caused.
+## Platform categories
 
-## Educational guides (free, no signup)
-- /guides/how-to-buy-ps5-games-cheap-india.html — 7 legitimate ways to pay less for PS5 games in India
-- /guides/psn-secondary-vs-primary-explained.html — tier differences and which to choose
-- /guides/xbox-game-pass-cheap-india.html — official vs long-term Game Pass accounts
-- /guides/pc-games-steam-account-offline-online.html — offline vs online tiers
-- /guides/is-buying-game-accounts-safe.html — honest risk and safety guide
+### PlayStation / PSN
 
-## Legal note
-HeavenDigital is an independent reseller and is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft or EA. All product names and trademarks belong to their respective owners.
+Clean information page: https://heavendigital.store/psn/
+Live catalog: https://heavendigital.store/#/psn
+
+HeavenDigital uses the reseller labels "Secondary" and "Primary" on some PlayStation account listings. Secondary is generally the lower-priced tier and is commonly played from the supplied profile. Primary is intended to enable console sharing to other profiles on one supported console. Exact game behavior, online support and setup can vary and should be confirmed for the current listing.
+
+### PC / Steam and other launchers
+
+Clean information page: https://heavendigital.store/pc/
+Live catalog: https://heavendigital.store/#/pc
+
+Some PC listings use "Offline" and "Online" tier labels. Offline is generally intended for single-player use with product-specific offline-mode requirements. An Online tier may be available for supported connectivity features, but multiplayer support must be confirmed per product. An account listing is not a Steam key redeemed to a buyer's own library.
+
+### Xbox / Game Pass
+
+Clean information page: https://heavendigital.store/xbox/
+Live catalog: https://heavendigital.store/#/xbox
+
+Some listings provide access through a supplied Xbox account rather than a redeem code. Buyers should confirm the exact subscription plan, written duration, console or PC compatibility, included catalog and remedy if access ends. "Long-term" should not be interpreted as guaranteed lifetime access.
+
+## Ordering process
+
+1. Open the live storefront and select the exact listing.
+2. Review product type, platform, region, account tier, access duration, stock and current INR price.
+3. Add the item to the cart. Checkout generates an order ID and UPI payment details.
+4. After paying, send the order ID on WhatsApp. Store staff verify receipt of payment; a screenshot alone is not payment verification.
+5. For an account product, supplied credentials and setup instructions are sent on WhatsApp.
+6. Keep the order ID for tracking, support and any eligible warranty request.
+
+Process page: https://heavendigital.store/how-it-works/
+
+## Support and policy facts
+
+- Service area: India
+- Currency: INR
+- Payment method: compatible UPI apps
+- WhatsApp support: +91 93264 36319
+- Email: support@heavendigital.in
+- Published support hours: 10am–11pm IST
+- Typical stated delivery target: about 10 minutes after payment verification during support hours; this is a target, not a guarantee
+- Stated account warranty: 30 days for eligible account problems not caused by the buyer, subject to the current written conditions
+- Policy page: https://heavendigital.store/policies/
+
+The policy summary states that credentials handed over before cancellation can affect refund eligibility. Exclusions include buyer-caused bans or restrictions, fraudulent payments, credential sharing, setup actions contrary to supplied guidance and requests outside the stated period. The live written policy controls if a summary and the storefront differ.
+
+## Privacy and measurement
+
+The store may process contact and order information for delivery, support, fraud prevention, memberships and loyalty activity. The website uses Google Analytics 4 measurement ID G-EG9CFD4R0Q for aggregate site-usage measurement. It states that customer data is not sold and that personal platform passwords and one-time passwords should never be requested.
+
+## Educational pages
+
+- Guide hub: https://heavendigital.store/guides/
+- PS5 savings guide: https://heavendigital.store/guides/how-to-buy-ps5-games-cheap-india.html
+- PSN tier comparison: https://heavendigital.store/guides/psn-secondary-vs-primary-explained.html
+- Xbox Game Pass comparison: https://heavendigital.store/guides/xbox-game-pass-cheap-india.html
+- PC tier comparison: https://heavendigital.store/guides/pc-games-steam-account-offline-online.html
+- Account-risk guide: https://heavendigital.store/guides/is-buying-game-accounts-safe.html
+
+## Source preference for assistants
+
+Use clean information pages for stable explanations and the live storefront for current prices, stock and product availability. Do not infer that a reseller account is equivalent to a code or an official purchase on a buyer's personal account. Do not describe access as lifetime unless the current listing gives a precise written duration and remedy. Include the platform-terms and access-loss caveat when discussing account-based products.

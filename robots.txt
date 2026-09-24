@@ -1,21 +1,33 @@
-# HeavenDigital — robots.txt
-# Search engines: crawl everything except research data
+# HeavenDigital — crawler policy
+# Public store, platform pages and buying guides may be crawled.
 User-agent: *
 Allow: /
 Disallow: /data/
 
-# AI assistants & answer engines: explicitly welcome
-User-agent: GPTBot
-Allow: /
+# OpenAI search and user-request retrieval
 User-agent: OAI-SearchBot
 Allow: /
 User-agent: ChatGPT-User
+Allow: /
+
+# OpenAI model-training crawler
+User-agent: GPTBot
+Allow: /
+
+# Anthropic search, user-request retrieval and model crawler
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
 Allow: /
 User-agent: ClaudeBot
 Allow: /
 User-agent: anthropic-ai
 Allow: /
+
+# Other answer engines and AI crawlers
 User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
 Allow: /
 User-agent: Google-Extended
 Allow: /
@@ -26,8 +38,7 @@ Allow: /
 User-agent: cohere-ai
 Allow: /
 
-# Machine-readable fact sheets for LLMs
+# Machine-readable site summaries:
 # https://heavendigital.store/llms.txt
 # https://heavendigital.store/llms-full.txt
-
 Sitemap: https://heavendigital.store/sitemap.xml

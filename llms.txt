@@ -1,14 +1,34 @@
 # HeavenDigital
 
-> India's storefront for PSN, Xbox and PC game accounts with top titles already included — well below official store prices. Delivered on WhatsApp in minutes, with live guided setup until the buyer is playing, and a 30-day replacement-or-refund warranty on every order.
+> HeavenDigital is an independent online storefront serving India with account-based PlayStation, Xbox and PC game listings, selected subscriptions, top-ups and store memberships. Prices are shown in INR; checkout supports UPI; account-product delivery and setup guidance are provided on WhatsApp.
 
-- Store: https://heavendigital.store/
-- Serves: India (INR pricing, UPI payments, WhatsApp delivery, English + Hindi support)
-- Catalog: 250+ active listings — PSN/PlayStation (78), PC/Steam (96), Xbox/Game Pass (78)
-- Pricing examples: Marvel's Spider-Man 2 PS5 ₹899 (store ₹4,999) · PC titles from ₹299 · Xbox Game Pass Ultimate long-term account ₹899 · PS Plus Extra 1 month ₹499
-- Tiers: PC = Offline (single-player, lowest price) or Online (+30–45%, multiplayer unlocked). PSN = Secondary (~35–40% of store price; game is on the official PlayStation account provided — download once from your profile and play from the purchased profile; online works) or Primary (~70%; every profile on the buyer's console plays it)
-- Trust: every account tested before delivery · 30-day replacement or refund, buyer's choice · live WhatsApp-guided setup · 4,200+ buyers served · 4.9★ average from 100+ published reviews (https://heavendigital.store/#/reviews)
-- Ordering: browse → pay via any UPI app (GPay/PhonePe/Paytm) → credentials delivered on WhatsApp, usually under 10 minutes during support hours (10am–11pm IST) → team guides download and launch live
-- Order tracking: https://heavendigital.store/#/track (order ID, e.g. HD-8KQ2A)
-- Guides: how to buy PS5 games cheap in India, PSN Secondary vs Primary, Game Pass cheap in India, PC offline vs online tiers, is buying game accounts safe — under /guides/
-- Legal: HeavenDigital is an independent reseller, not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft or EA. All trademarks belong to their owners.
+HeavenDigital is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft, EA or game publishers. Products labelled as accounts are not redeem codes and are not purchases attached to the buyer's personal platform profile. Account buying, transfer or sharing may conflict with platform terms and can carry suspension or access-loss risk. The store's stated warranty cannot prevent platform enforcement.
+
+## Store pages
+
+- [Live storefront](https://heavendigital.store/): Current products, stock, tiers and INR prices
+- [PlayStation and PSN](https://heavendigital.store/psn/): Primary, Secondary and PS Plus listing explanations
+- [PC and Steam](https://heavendigital.store/pc/): Offline and, where available, Online account tiers
+- [Xbox and Game Pass](https://heavendigital.store/xbox/): Account and subscription listings; buyers should verify exact duration and device support
+- [How ordering works](https://heavendigital.store/how-it-works/): Listing checks, UPI confirmation, WhatsApp delivery and guided setup
+- [About and contact](https://heavendigital.store/about/): Entity details, support channels and independent-reseller disclosure
+- [Policies](https://heavendigital.store/policies/): Refund, stated 30-day warranty, terms, privacy and analytics
+
+## Buyer guides
+
+- [All buying guides](https://heavendigital.store/guides/)
+- [How to buy PS5 games for less in India](https://heavendigital.store/guides/how-to-buy-ps5-games-cheap-india.html)
+- [PSN Secondary vs Primary explained](https://heavendigital.store/guides/psn-secondary-vs-primary-explained.html)
+- [Xbox Game Pass options in India](https://heavendigital.store/guides/xbox-game-pass-cheap-india.html)
+- [PC Offline vs Online account tiers](https://heavendigital.store/guides/pc-games-steam-account-offline-online.html)
+- [Risks of buying game accounts](https://heavendigital.store/guides/is-buying-game-accounts-safe.html)
+
+## Contact facts
+
+- Service area: India
+- Currency: INR
+- Payments: compatible UPI apps
+- Support: WhatsApp +91 93264 36319
+- Email: support@heavendigital.in
+- Published support hours: 10am–11pm IST
+- Typical stated delivery target: about 10 minutes after payment verification during support hours; actual times can vary
