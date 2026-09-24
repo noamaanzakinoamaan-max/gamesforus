@@ -861,14 +861,14 @@ const SEED = [
  {id:"psn-fc26", platform:"psn", kind:"account", title:"EA SPORTS FC 26 — PS5 & PS4", region:"India", games:["EA SPORTS FC 26"], price:1499, mrp:7999, stock:3, tag:"Trending", p2:2699, featured:true, active:true, img:"img/e417d484d820.png"},
  {id:"psn-fc27", platform:"psn", kind:"account", title:"EA SPORTS FC 27 — PS5 & PS4", region:"India", games:["EA SPORTS FC 27"], price:1699, mrp:4499, stock:4, tag:"New Release", p2:2999, featured:true, active:true, img:"img/fc27-cover.png"},
  {id:"psn-crimson-desert", platform:"psn", kind:"account", title:"Crimson Desert — PS5", region:"India", games:["Crimson Desert"], price:1099, mrp:4999, stock:4, tag:"New Release", p2:1899, featured:true, active:true, img:"img/crimson-desert-cover.png"},
- {id:"psn-control-resonant", platform:"psn", kind:"account", title:"CONTROL Resonant — PS5", region:"India", games:["CONTROL Resonant"], price:1299, mrp:5999, stock:3, tag:"New Release", p2:2499, featured:true, active:true, img:"img/control-resonant-cover.jpg"},
- {id:"psn-blood-of-dawnwalker", platform:"psn", kind:"account", title:"The Blood of Dawnwalker — PS5", region:"India", games:["The Blood of Dawnwalker"], price:1499, mrp:6999, stock:3, tag:"New Release", p2:2999, featured:true, active:true, img:"img/blood-of-dawnwalker-cover.jpg"},
+ {id:"psn-control-resonant", platform:"psn", kind:"account", title:"CONTROL Resonant — PS5", region:"India", games:["CONTROL Resonant"], price:1299, mrp:5999, stock:3, tag:"Bestseller", p2:2499, featured:true, active:true, img:"img/control-resonant-cover.jpg"},
+ {id:"psn-blood-of-dawnwalker", platform:"psn", kind:"account", title:"The Blood of Dawnwalker — PS5", region:"India", games:["The Blood of Dawnwalker"], price:1499, mrp:6999, stock:3, tag:"Bestseller", p2:2999, featured:true, active:true, img:"img/blood-of-dawnwalker-cover.jpg"},
  {id:"psn-ff16", img:"img/4666f4386f6d.jpg", platform:"psn", kind:"account", title:"Final Fantasy XVI — PS5", region:"India", games:["Final Fantasy XVI"], price:999, mrp:5999, stock:3, tag:"Deal", p2:1999, featured:false, active:true},
  {id:"psn-wolverine", platform:"psn", kind:"account", title:"Marvel's Wolverine — PS5", region:"India", games:["Marvel's Wolverine"], price:1399, mrp:4999, stock:2, tag:"New Release", p2:2519, featured:true, active:true, img:"img/5bc87779b227.jpg"},
  {id:"psn-gta-6", platform:"psn", kind:"account", title:"Grand Theft Auto VI — PS5 (Preorder)", region:"India", games:["Grand Theft Auto VI"], price:1999, mrp:7999, stock:5, tag:"Preorder", featured:false, active:true, img:"img/236e8dfe7df7.webp"},
  {id:"psn-007-first-light", platform:"psn", kind:"account", title:"007 First Light — PS5", region:"India", games:["007 First Light"], price:2699, mrp:6999, stock:2, tag:"New Release", p2:1099, featured:false, active:true, img:"img/585a355a3599.png"},
  {id:"psn-ac-black-flag", platform:"psn", kind:"account", title:"Assassin's Creed Black Flag Resynced — PS5", region:"India", games:["AC Black Flag Resynced"], price:1799, mrp:6999, stock:3, tag:"Trending", p2:3599, featured:false, active:true, img:"img/eba96f66a04c.webp"},
- {id:"psn-ghost-of-yotei", platform:"psn", kind:"account", title:"Ghost of Yotei — PS5", region:"India", games:["Ghost of Yotei"], price:2499, mrp:6999, stock:2, tag:"New Release", p2:1099, featured:true, active:true, img:"img/9524759650d5.png"},
+ {id:"psn-ghost-of-yotei", platform:"psn", kind:"account", title:"Ghost of Yotei — PS5", region:"India", games:["Ghost of Yotei"], price:1099, mrp:6999, stock:2, tag:"New Release", p2:2499, featured:true, active:true, img:"img/9524759650d5.png"},
  {id:"psn-battlefield-6", platform:"psn", kind:"account", title:"Battlefield 6 — PS5", region:"India", games:["Battlefield 6"], price:1999, mrp:6999, stock:3, tag:"Trending", p2:899, featured:false, active:true, img:"img/5619835a90cb.png"},
  {id:"psn-death-stranding-2", platform:"psn", kind:"account", title:"Death Stranding 2: On the Beach — PS5", region:"India", games:["Death Stranding 2"], price:1499, mrp:6999, stock:2, tag:"", p2:2849, featured:false, active:true, img:"img/41c49c8ff070.png"},
  {id:"psn-wwe-2k26", platform:"psn", kind:"account", title:"WWE 2K26 — PS5", region:"India", games:["WWE 2K26"], price:1499, mrp:7999, stock:2, tag:"New Release", p2:2699, featured:false, active:true, img:"img/daeb008e1075.webp"},
@@ -1465,13 +1465,21 @@ function trackPageView(){
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0 };
 /* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore) */
-function enforcePricePolicy(){
-  Object.values(state.products).forEach(p=>{
-    if(p && p.platform==="pc"){
+const CATALOG_OVERRIDES = {
+  "psn-control-resonant": {tag:"Bestseller"},
+  "psn-blood-of-dawnwalker": {tag:"Bestseller"},
+  "psn-ghost-of-yotei": {price:1099, p2:2499}
+};
+function enforcePricePolicy(products=state.products){
+  Object.values(products).forEach(p=>{
+    if(!p) return;
+    if(p.platform==="pc"){
       if(!(p.price<599)) p.price=499;
       if(p.p2 && p.p2>=599) p.p2=549;
     }
+    if(CATALOG_OVERRIDES[p.id]) Object.assign(p, CATALOG_OVERRIDES[p.id]);
   });
+  return products;
 }
 function loadLocal(){
   try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length){ p.forEach(x=>state.products[x.id]=x); SEED.forEach(x=>{ if(!state.products[x.id]) state.products[x.id]=x; }); } else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
@@ -1524,11 +1532,18 @@ function initFirebase(){
       if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; applySettings(); renderAnnounce(); route(); }
     });
     db.collection("products").onSnapshot(snap=>{
-      if(!state._seedProducts) state._seedProducts=Object.assign({},state.products);
+      if(!state._seedProducts){
+        state._seedProducts={};
+        SEED.forEach(p=>{ state._seedProducts[p.id]={...p}; });
+        enforcePricePolicy(state._seedProducts);
+      }
       const del=deletedIds();
       const merged={};
-      Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]=state._seedProducts[k]; });
-      if(!snap.empty){ snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]=d.data(); }); state.source="firestore"; }
+      Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]={...state._seedProducts[k]}; });
+      if(!snap.empty){
+        snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]={...(merged[d.id]||{}),...d.data(),id:d.id}; });
+        state.source="firestore";
+      }
       state.fsCount=snap.size; state.products=merged;
       enforcePricePolicy();
       renderAnnounce();
@@ -1538,9 +1553,12 @@ function initFirebase(){
 }
 async function fsAdd(data){
   const db=firebase.firestore();
-  data.id = data.id || (data.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)+"-"+Math.random().toString(36).slice(2,6));
-  await db.collection("products").doc(data.id).set(data, {merge:true});
-  return data.id;
+  const product={...data};
+  product.id = product.id || (product.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)+"-"+Math.random().toString(36).slice(2,6));
+  enforcePricePolicy({[product.id]:product});
+  await db.collection("products").doc(product.id).set(product, {merge:true});
+  state.products[product.id]={...(state.products[product.id]||{}),...product};
+  return product.id;
 }
 window.addEventListener("load", initFirebase);
 /* deleted-product tombstones (so a Firestore delete doesn't get resurrected by the local seed) */
