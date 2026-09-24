@@ -336,6 +336,14 @@ input.f:focus,textarea.f:focus,select.f:focus{outline:none;border-color:var(--go
 .empty{text-align:center;padding:60px 0;color:var(--mut)}
 .empty b{display:block;color:var(--tx);font-size:20px;margin-bottom:6px}
 .empty .btn{margin-top:14px}
+
+/* ============ memberships, mystery drops & loyalty ============ */
+.club-hero{margin:28px 0 20px;padding:34px;border:1px solid rgba(245,192,68,.25);border-radius:24px;background:radial-gradient(circle at 85% 20%,rgba(245,192,68,.16),transparent 35%),linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.015));overflow:hidden}
+.club-hero h1{font-size:clamp(32px,6vw,62px);line-height:1;margin:8px 0 14px;max-width:780px}.club-hero p{max-width:720px;color:var(--mut);font-size:16px;line-height:1.7}.eyebrow{font:800 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.club-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.club-card{position:relative;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--srf);overflow:hidden}.club-card.pop{border-color:rgba(245,192,68,.55);box-shadow:0 16px 50px rgba(245,192,68,.1)}.club-card h3{font-size:24px;margin:8px 0}.club-card .club-price{font:800 34px var(--mono);color:var(--gold)}.club-card .club-price small{font:500 12px var(--sans);color:var(--mut)}.club-card ul{padding:0;list-style:none;display:grid;gap:10px;margin:18px 0}.club-card li{font-size:13px;color:var(--mut)}.club-card li:before{content:'✓';color:var(--gold);font-weight:900;margin-right:8px}
+.disclosure{border-left:3px solid var(--gold);background:rgba(245,192,68,.07);padding:14px 16px;border-radius:0 12px 12px 0;color:var(--mut);font-size:13px;line-height:1.65}.loyalty-panel{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}.points-orb{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;text-align:center;background:radial-gradient(circle at 35% 30%,#ffe7a0,var(--gold) 45%,#8a5b08);color:#171005;font:900 26px var(--mono);box-shadow:0 12px 40px rgba(245,192,68,.25)}.points-orb small{display:block;font:800 9px var(--sans);letter-spacing:.08em}
+@media(max-width:760px){.club-hero{padding:24px 18px}.club-grid{grid-template-columns:1fr}.loyalty-panel{grid-template-columns:1fr}.points-orb{width:78px;height:78px}}
+
 /* ============ admin ============ */
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
 .stat{background:var(--srf);border:1px solid var(--line);border-radius:14px;padding:14px;backdrop-filter:blur(8px)}
@@ -754,6 +762,7 @@ img{max-width:100%}
       <a href="#/pc" data-nav="/pc">PC</a>
       <a href="#/psn" data-nav="/psn">PSN</a>
       <a href="#/xbox" data-nav="/xbox">Xbox</a>
+      <a href="#/membership" data-nav="/membership">Membership</a>
       <a href="#/search" data-nav="/search">🔍 Search</a>
       <a href="#/how" data-nav="/how">How it works</a>
       <a href="#/faq" data-nav="/faq">FAQ</a>
@@ -793,7 +802,7 @@ img{max-width:100%}
         <p class="foot-blurb">Level up your gaming experience — PSN, Xbox and PC accounts with the titles you actually want, priced for India, delivered on WhatsApp, backed by a 30-day warranty.</p>
         <div class="paychips"><span class="pay">UPI</span><span class="pay">GPay</span><span class="pay">PhonePe</span><span class="pay">Paytm</span><span class="pay">Cards</span></div>
       </div>
-      <div><h4>Shop</h4><a href="#/pc">PC accounts</a><a href="#/psn">PSN accounts</a><a href="#/xbox">Xbox accounts</a><a href="#/how">How it works</a></div>
+      <div><h4>Shop</h4><a href="#/pc">PC accounts</a><a href="#/psn">PSN accounts</a><a href="#/xbox">Xbox accounts</a><a href="#/membership">Membership &amp; Mystery Games</a><a href="#/how">How it works</a></div>
       <div><h4>Company</h4><a href="#/about">About us</a><a href="#/contact">Contact</a><a href="#/faq">FAQ</a></div>
       <div><h4>Legal</h4><a href="#/refund-policy">Refund &amp; warranty</a><a href="#/terms">Terms of service</a><a href="#/privacy">Privacy policy</a></div>
     </div>
@@ -1369,6 +1378,17 @@ const SEED = [
  {id:"psn-gt-alan-wake-2", platform:"psn", kind:"account", title:"‍ Alan Wake 2 — PS5", region:"India (as supplied)", games:["‍ Alan Wake 2"], price:1199, mrp:2699, stock:3, tag:"", p2:799, featured:false, active:true, img:"img/gt/alan-wake-2.jpg"},
  {id:"psn-gt-pragmata", platform:"psn", kind:"account", title:"‍ Pragmata ‍ — PS5", region:"India (as supplied)", games:["‍ Pragmata ‍"], price:1899, mrp:4199, stock:3, tag:"", p2:1099, featured:false, active:true, img:"img/gt/pragmata.jpg"},
 
+ /* ---- HeavenDigital memberships (30 days) ---- */
+ {id:"member-silver-30d", platform:"subs", kind:"membership", collection:"membership", title:"Silver Membership — 30 Days", region:"India", games:["2× loyalty points on completed orders","₹50 welcome coupon","Member-only weekly deals","Priority WhatsApp support"], price:149, mrp:149, stock:999, tag:"Membership", featured:true, active:true, img:"img/membership-silver.svg"},
+ {id:"member-gold-30d", platform:"subs", kind:"membership", collection:"membership", title:"Gold Membership — 30 Days", region:"India", games:["3× loyalty points on completed orders","5% monthly member coupon (up to ₹150)","Early access to limited stock","Priority WhatsApp support"], price:349, mrp:349, stock:999, tag:"Most Popular", featured:true, active:true, img:"img/membership-gold.svg"},
+ {id:"member-platinum-30d", platform:"subs", kind:"membership", collection:"membership", title:"Platinum Membership — 30 Days", region:"India", games:["5× loyalty points on completed orders","10% monthly member coupon (up to ₹300)","First access to new releases","VIP WhatsApp support"], price:699, mrp:699, stock:999, tag:"VIP", featured:true, active:true, img:"img/membership-platinum.svg"},
+ /* ---- Transparent mystery game drops ---- */
+ {id:"mystery-starter-99", platform:"subs", kind:"mystery", collection:"mystery", title:"Starter Mystery Game — ₹99", region:"PC · ask for other platforms", games:["1 random game from the current prize pool","Minimum listed store value ₹149","AAA-tier chance: 1%","Bonus: store coupon or licensed partner perk when available"], price:99, mrp:99, stock:100, tag:"Mystery", featured:false, active:true, img:"img/mystery-box.svg"},
+ {id:"mystery-gamer-199", platform:"subs", kind:"mystery", collection:"mystery", title:"Gamer Mystery Game — ₹199", region:"PC · ask for other platforms", games:["1 random game from the current prize pool","Minimum listed store value ₹249","AAA-tier chance: 3%","Bonus: store coupon or licensed partner perk when available"], price:199, mrp:199, stock:100, tag:"Mystery", featured:false, active:true, img:"img/mystery-box.svg"},
+ {id:"mystery-pro-399", platform:"subs", kind:"mystery", collection:"mystery", title:"Pro Mystery Game — ₹399", region:"PC · ask for other platforms", games:["1 random game from the current prize pool","Minimum listed store value ₹499","AAA-tier chance: 8%","Bonus: store coupon or licensed partner perk when available"], price:399, mrp:399, stock:75, tag:"Popular", featured:false, active:true, img:"img/mystery-box.svg"},
+ {id:"mystery-elite-699", platform:"subs", kind:"mystery", collection:"mystery", title:"Elite Mystery Game — ₹699", region:"PC · ask for other platforms", games:["1 random game from the current prize pool","Minimum listed store value ₹899","AAA-tier chance: 15%","Bonus: store coupon or licensed partner perk when available"], price:699, mrp:699, stock:50, tag:"High Value", featured:false, active:true, img:"img/mystery-box.svg"},
+ {id:"mystery-ultimate-999", platform:"subs", kind:"mystery", collection:"mystery", title:"Ultimate Mystery Game — ₹999", region:"PC · ask for other platforms", games:["1 random game from the current prize pool","Minimum listed store value ₹1,299","AAA-tier chance: 25%","Bonus: store coupon or licensed partner perk when available"], price:999, mrp:999, stock:30, tag:"Best Odds", featured:false, active:true, img:"img/mystery-box.svg"},
+
 ];
 
 /* ============ helpers ============ */
@@ -1382,7 +1402,7 @@ const PLATFORMS = {
   pc:  {name:"PC", long:"PC / Steam", mono:"PC", cls:"pc"},
   subs:{name:"Extras", long:"Subscriptions & top-ups", mono:"+", cls:"pc"}
 };
-const KINDS = {account:"Game account", subscription:"Subscription", wallet:"Wallet top-up"};
+const KINDS = {account:"Game account", subscription:"Subscription", wallet:"Wallet top-up", membership:"Store membership", mystery:"Mystery game"};
 const REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const FINE = window.matchMedia("(pointer: fine)").matches;
 const buzz = ms => { try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
@@ -1565,7 +1585,7 @@ function cardHTML(p){
     (p.tag?'<span class="tag">'+esc(p.tag)+'</span>':'')+
     '<h3 class="card-title"><a href="#/p/'+p.id+'">'+esc(p.title)+'</a></h3>'+
     ((chips||more)?'<div class="gchips">'+chips+more+'</div>':'')+
-    '<div class="save">Save '+inr(saveAmt(p))+'</div>'+stockLine(p)+
+    (saveAmt(p)?'<div class="save">Save '+inr(saveAmt(p))+'</div>':'')+stockLine(p)+
     '<div class="card-foot"><span class="price">'+(p.p2?'<i class="t2l" style="font-style:normal;font-size:10px;margin-right:5px">FROM</i>':'')+inr(p.price)+'<s class="mrp">'+inr(p.mrp)+'</s></span>'+
     (p.stock>0?'<button class="btn btn-sm" data-add="'+p.id+'" aria-label="Add '+esc(p.title)+' to cart">Add</button>':'<span class="stock-low">Sold out</span>')+
     '</div></div></article>';
@@ -1641,6 +1661,16 @@ function vHome(){
       <a class="colcard rv" href="#/psn"><span class="ic ic-ps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 12h10M12 7v10"/></svg></span><b>PlayStation</b><span>${count("psn")} listings — PS5 + PS Plus</span></a>
       <a class="colcard rv" href="#/xbox"><span class="ic ic-xb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M8 16c2-4 6-4 8-8M16 16c-2-4-6-4-8-8"/></svg></span><b>Xbox</b><span>${count("xbox")} listings — Game Pass</span></a>
       <a class="colcard rv" href="#/how"><span class="ic ic-sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></span><b>How it works</b><span>Guided setup &amp; warranty</span></a>
+    </div>
+  </section>
+
+
+  <section class="sec">
+    <div class="sec-head rv"><div><span class="eyebrow">New at HeavenDigital</span><h2>Memberships &amp; mystery game drops</h2><p class="sub">Multiply your points with Silver, Gold or Platinum — or try a transparent mystery drop from ₹99.</p></div><a class="see-all" href="#/membership">Explore all →</a></div>
+    <div class="club-grid">
+      <a class="club-card rv" href="#/membership" style="text-decoration:none"><span class="eyebrow">MEMBERSHIP</span><h3>HeavenDigital Club</h3><p class="sub">Member deals, priority help and up to 5× loyalty points.</p><span class="see-all">Plans from ₹149 →</span></a>
+      <a class="club-card rv pop" href="#/membership" style="text-decoration:none"><span class="eyebrow">MYSTERY DROPS</span><h3>Could be your next favourite</h3><p class="sub">Five price tiers with clear value floors and published AAA-tier odds.</p><span class="see-all">Drops from ₹99 →</span></a>
+      <a class="club-card rv" href="#/account" style="text-decoration:none"><span class="eyebrow">HEAVEN POINTS</span><h3>100 points = ₹50 off</h3><p class="sub">Earn 1 point per ₹10 on completed orders. Redeem from your account.</p><span class="see-all">View rewards →</span></a>
     </div>
   </section>
 
@@ -1724,17 +1754,39 @@ function vCatalog(pl){
   <div class="sec-head rv" style="padding-top:26px;margin-bottom:10px"><div>
     <h2>${P.long}</h2><p class="sub">${items.length} listing${items.length!==1?"s":""} · region stated on every account · 30-day warranty</p>
   </div></div>
-  <div class="filters rv" style="flex-wrap:wrap;align-items:center">${fb("all","All")}${kinds.includes("account")?fb("account","Accounts"):""}${kinds.includes("subscription")?fb("subscription","Subscriptions"):""}${kinds.includes("wallet")?fb("wallet","Top-ups"):""}<select class="f sortsel" onchange="setSort(this.value)" aria-label="Sort listings">
+  <div class="filters rv" style="flex-wrap:wrap;align-items:center">${fb("all","All")}${kinds.includes("account")?fb("account","Accounts"):""}${kinds.includes("subscription")?fb("subscription","Subscriptions"):""}${kinds.includes("wallet")?fb("wallet","Top-ups"):""}${kinds.includes("membership")?fb("membership","Memberships"):""}${kinds.includes("mystery")?fb("mystery","Mystery games"):""}<select class="f sortsel" onchange="setSort(this.value)" aria-label="Sort listings">
       ${[["feat","Sort: Featured"],["lo","Price: Low → High"],["hi","Price: High → Low"],["disc","Biggest discount"]].map(o=>'<option value="'+o[0]+'"'+((state.sortBy||"feat")===o[0]?" selected":"")+'>'+o[1]+'</option>').join("")}
     </select></div>
   <div class="grid">${items.map(cardHTML).join("")||'<p class="sub">Nothing here yet — new stock lands soon.</p>'}</div>
   <div class="cta-band rv"><div><h2>Can't find your game?</h2><p>Message us the title — if it exists, we'll source it.</p></div><a class="btn" href="#/contact">Ask on WhatsApp</a></div>`;
 }
 
+
+function vMembership(){
+  const memberships=Object.values(state.products).filter(p=>p.active!==false&&p.collection==="membership").sort((a,b)=>a.price-b.price);
+  const mystery=Object.values(state.products).filter(p=>p.active!==false&&p.collection==="mystery").sort((a,b)=>a.price-b.price);
+  const tierCards=memberships.map((p,i)=>'<article class="club-card rv '+(i===1?'pop':'')+'">'+(i===1?'<span class="tag">MOST POPULAR</span>':'<span class="eyebrow">30-DAY PLAN</span>')+'<h3>'+esc(p.title.replace(' — 30 Days',''))+'</h3><div class="club-price">'+inr(p.price)+' <small>/ 30 days</small></div><ul>'+(p.games||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><button class="btn btn-block" data-add="'+p.id+'">Choose '+esc(p.title.split(' ')[0])+'</button></article>').join('');
+  return `<section class="club-hero rv"><span class="eyebrow">HeavenDigital Club</span><h1>More games. Better rewards. Your tier.</h1><p>Join for 30 days to multiply the loyalty points you earn, unlock member coupons and move to the front of the support queue. No automatic renewal — renew only when you want.</p><div class="paybtns"><button class="btn" type="button" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">Compare plans</button><button class="btn btn-ghost" type="button" onclick="document.getElementById('drops').scrollIntoView({behavior:'smooth'})">Open mystery games</button></div></section>
+  <section class="sec" id="plans"><div class="sec-head rv"><div><h2>Silver, Gold or Platinum</h2><p class="sub">Membership is activated after payment confirmation on WhatsApp.</p></div></div><div class="club-grid">${tierCards}</div></section>
+  <section class="sec"><div class="panel loyalty-panel rv"><div class="points-orb">100<small>POINTS</small></div><div><span class="eyebrow">Heaven Points</span><h2 style="margin:5px 0 8px">Earn while you play</h2><p class="sub" style="margin:0">Earn <b>1 point per ₹10</b> on every completed order. <b>100 points = ₹50 off</b>. Redeem from 100 points, up to 20% of an order. Member multipliers apply while your plan is active. Points have no cash value and cancelled or refunded orders earn nothing.</p></div></div></section>
+  <section class="sec" id="drops"><div class="sec-head rv"><div><h2>Mystery game drops</h2><p class="sub">Five price levels. Every purchase receives a game; higher tiers have better published AAA-tier odds.</p></div></div><div class="grid">${mystery.map(cardHTML).join('')}</div><div class="disclosure rv" style="margin-top:16px"><b>Know before you buy:</b> the exact title is random and revealed after payment. Odds shown on each listing apply per box and do not guarantee an AAA title. Tell us your platform before fulfilment. Duplicate handling and the current prize pool are confirmed on WhatsApp before purchase. Bonus perks are store coupons or lawfully licensed partner offers only — we never provide, sell or share third-party login credentials. Mystery purchases are final after the title is revealed except where the delivered item is invalid or consumer law requires otherwise.</div></section>`;
+}
+
 function vProduct(id){
   const p=byId(id);
   if(!p) return v404();
   const P=PLATFORMS[p.platform]||PLATFORMS.pc;
+  const isMember=p.collection==="membership", isMystery=p.collection==="mystery";
+  const fulfilment=isMember
+    ? '<div class="dlv">'+CHECK+' Plan activated on your account after WhatsApp confirmation</div><div class="dlv">'+CHECK+' No auto-renewal — 30 days, then you choose whether to renew</div><div class="dlv">'+CHECK+' Loyalty multiplier starts after activation</div>'
+    : isMystery
+    ? '<div class="dlv">'+CHECK+' A game is included with every purchase</div><div class="dlv">'+CHECK+' Published AAA-tier odds apply per box — no guarantee</div><div class="dlv">'+CHECK+' Platform and current prize pool confirmed before fulfilment</div>'
+    : '<div class="dlv">'+CHECK+' Credentials delivered on WhatsApp — usually under 10 minutes</div><div class="dlv">'+CHECK+' We guide your download &amp; setup live, until you are playing</div><div class="dlv">'+CHECK+' 30-day replacement warranty included</div>';
+  const howItWorks=isMember
+    ? '<ol><li>Pay via UPI and confirm on WhatsApp.</li><li>Sign in or create your free HeavenDigital customer account.</li><li>We activate your 30-day tier and confirm its start and end date.</li></ol>'
+    : isMystery
+    ? '<ol><li>Before paying, confirm your platform and view the current prize pool on WhatsApp.</li><li>Pay via UPI; we randomly select one eligible title from that pool.</li><li>The title is revealed and delivered. Odds do not guarantee an AAA title.</li></ol><p><b>Important:</b> bonuses are store coupons or licensed partner perks only. No third-party account credentials are included.</p>'
+    : '<ol><li>Pay via UPI and confirm payment on WhatsApp.</li><li>We verify payment and send you the account credentials on WhatsApp.</li><li>Our team guides you step by step through downloading and starting the game, live until you are playing.</li></ol>';
   pdOpt="base";
   const related=Object.values(state.products).filter(x=>x.active!==false&&x.platform===p.platform&&x.id!==p.id).slice(0,4);
   const sticky = p.stock>0 ?
@@ -1747,7 +1799,7 @@ function vProduct(id){
       ${p.tag?'<span class="tag">'+esc(p.tag)+'</span>':''}
       <h1>${esc(p.title)}</h1>
       <div class="sub" style="margin-top:2px">${KINDS[p.kind]||"Account"} · Region: ${esc(p.region||"Global")} · Delivered on WhatsApp</div>
-      <div class="pd-price">${inr(p.price)}<s>${inr(p.mrp)}</s><span class="saveb">Save ${inr(saveAmt(p))} (${offPct(p)}%)</span></div>
+      <div class="pd-price">${inr(p.price)}${saveAmt(p)?'<s>'+inr(p.mrp)+'</s><span class="saveb">Save '+inr(saveAmt(p))+' ('+offPct(p)+'%)</span>':''}</div>
       ${p.p2?`<div class="vopts" id="vopts" role="radiogroup" aria-label="Choose your tier">
         <button class="vopt on" type="button" data-opt="base" data-price="${p.price}" data-desc="${esc(tierDesc(p,false))}"><span>${optLabel(p,false)}</span><b>${inr(p.price)}</b><i>${tierShort(p,false)}</i></button>
         <button class="vopt" type="button" data-opt="p2" data-price="${p.p2}" data-desc="${esc(tierDesc(p,true))}"><span>${optLabel(p,true)}</span><b>${inr(p.p2)}</b><i>${tierShort(p,true)}</i></button>
@@ -1759,14 +1811,12 @@ function vProduct(id){
         <button class="btn btn-ghost" data-buynow="${p.id}" ${p.stock>0?"":"disabled"}>Buy now</button>
         <button class="btn btn-ghost" data-share="${p.id}" aria-label="Share this deal">↗ Share</button>
       </div>
-      <div class="dlv">${CHECK} Credentials delivered on WhatsApp — usually under 10 minutes</div>
-      <div class="dlv">${CHECK} We guide your download &amp; setup live, till you're playing</div>
-      <div class="dlv">${CHECK} 30-day replacement warranty included</div>
+      ${fulfilment}
       <h3 class="gamehead">What's included</h3>
       <div class="gchips">${(p.games||[]).map(g=>'<span class="gchip">'+esc(g)+'</span>').join("")}</div>
-      <details class="acc" open><summary>How it works</summary><div class="acc-body"><ol><li>Pay via UPI and tap "I've paid" on WhatsApp.</li><li>We verify payment and send you the account credentials on WhatsApp.</li><li>Our team guides you step by step through downloading and starting the game — live, till you're playing.</li></ol></div></details>
-      <details class="acc"><summary>Download &amp; setup guide</summary><div class="acc-body">${downloadGuide(p.platform)}</div></details>
-      <details class="acc"><summary>Warranty &amp; support</summary><div class="acc-body">30-day replacement warranty: if credentials fail or the account develops problems not caused by you, message us with your order ID — we replace the account or refund your money, your choice. Issues caused by not following the setup guidance we provide may not be covered.</div></details>
+      <details class="acc" open><summary>How it works</summary><div class="acc-body">${howItWorks}</div></details>
+      ${(!isMember&&!isMystery)?'<details class="acc"><summary>Download &amp; setup guide</summary><div class="acc-body">'+downloadGuide(p.platform)+'</div></details>':''}
+      <details class="acc"><summary>${isMystery?'Mystery drop terms':'Warranty &amp; support'}</summary><div class="acc-body">${isMystery?'The exact title is random and final after reveal. If the delivered item is invalid, we replace it or refund. Duplicate handling is confirmed against the current pool before payment. Published odds apply independently to each purchase.':'30-day replacement warranty: if credentials fail or the account develops problems not caused by you, message us with your order ID — we replace the account or refund your money, your choice. Issues caused by not following the setup guidance we provide may not be covered.'}</div></details>
     </div>
   </div>
   ${sticky}
@@ -1827,6 +1877,8 @@ function vFaq(){
    ["What if the account stops working?","30-day warranty: message us with your order ID and a description. Replacement or refund, your choice. See the refund page for what's covered."],
    ["Can I buy games for a friend?","Yes — accounts make great gifts. Just order normally and share it after setup — we guide the whole process."],
    ["Bulk or reseller orders?","Yes — cafés, gifting, resellers. WhatsApp us quantities for pricing."],
+   ["How do Heaven Points work?","Earn 1 point per ₹10 on completed orders. 100 points = ₹50 off, redeemable from 100 points for up to 20% of an order. Silver, Gold and Platinum multiply points while active. Cancelled and refunded orders earn nothing."],
+   ["What can I get in a mystery game drop?","One random eligible game from the prize pool confirmed on WhatsApp before payment. Every tier publishes its minimum pool value and AAA-tier chance. Odds apply per purchase and never guarantee an AAA title. We do not include third-party login credentials."],
    ["How do I reach support?","WhatsApp is fastest (button below), or email "+esc(CONFIG.email)+". Replies in minutes during "+esc(CONFIG.hours)+"."]
   ];
   return '<div class="sec-head rv" style="padding-top:26px;margin-bottom:12px"><div><h2>Frequently asked questions</h2><p class="sub">Everything about buying accounts, safety, delivery and warranty.</p></div></div>'+
@@ -1867,13 +1919,13 @@ function vPolicy(kind){
     '<h3>Not covered</h3><ul><li>Account bans or restrictions arising from how you use the account after handover (cheating, payment chargebacks you initiate on the platform, sharing credentials).</li><li>Not following the setup guidance we provide, in ways that lock you out.</li><li>Requests made after the 30-day window.</li></ul>'+
     '<h3>How to claim</h3><p>WhatsApp us with your order ID, what happened, and when. Claims are answered during '+esc(CONFIG.hours)+', usually same day.</p>'],
    "terms":["Terms of service",'<p>Last updated: September 2026 · By ordering you agree to these terms.</p>'+
-    '<h3>What we sell</h3><p>Game accounts, subscriptions and top-ups for PlayStation, Xbox and PC platforms. We are an independent reseller, not affiliated with Sony, Microsoft, Valve, Ubisoft or EA; trademarks belong to their owners.</p>'+
+    '<h3>What we sell</h3><p>Game accounts, subscriptions, top-ups, 30-day store memberships and clearly labelled mystery game products for PlayStation, Xbox and PC platforms. We are an independent reseller, not affiliated with Sony, Microsoft, Valve, Ubisoft or EA; trademarks belong to their owners.</p>'+    '<h3>Mystery game products</h3><p>Each mystery purchase receives at least one eligible game from the prize pool confirmed before payment. The exact title is selected randomly and published AAA-tier odds apply independently per purchase; they are not a guarantee. Mystery products are final after reveal except for an invalid item or where consumer law requires otherwise. Any bonus is a store coupon or lawfully licensed partner perk — never third-party login credentials.</p>'+    '<h3>Memberships &amp; loyalty</h3><p>Memberships run for 30 days and do not auto-renew. Base rewards earn 1 point per ₹10 on completed, non-refunded orders; 100 points can be claimed for ₹50 off, from 100 points and up to 20% of an order. Points have no cash value. Active Silver, Gold and Platinum plans earn the multiplier shown on their listing.</p>'+
     '<h3>Orders &amp; delivery</h3><p>Credentials are delivered to the WhatsApp number you provide, normally within 10 minutes during support hours ('+esc(CONFIG.hours)+'). You are responsible for providing a reachable number and following the setup guidance we share.</p>'+
     '<h3>Acceptable use</h3><p>No fraudulent payments, no chargeback abuse, no reselling in violation of platform terms. Fraudulent orders are cancelled and reported.</p>'+
     '<h3>Pricing</h3><p>All prices in INR, inclusive of applicable taxes. Prices may change without notice; checkout price is final.</p>'+
     '<h3>Contact</h3><p>'+esc(CONFIG.email)+'</p>'],
    "privacy":["Privacy policy",'<p>Last updated: September 2026 · We collect the minimum needed to deliver your order.</p>'+
-    '<h3>What we collect</h3><p>Your name, WhatsApp number and order details. That\'s it.</p>'+
+    '<h3>What we collect</h3><p>Your name, WhatsApp number, order details, membership status and loyalty activity. That\'s it.</p>'+
     '<h3>What we never collect</h3><p>We never see your card or UPI credentials — payment providers handle that. We never ask for passwords or OTPs to your existing accounts.</p>'+
     '<h3>How it\'s used</h3><p>Only to deliver orders, provide support and honour warranties. We do not sell your data.</p>'+
     '<h3>Deletion</h3><p>Email '+esc(CONFIG.email)+' with your order ID and we delete your data within 7 days (beyond what law requires us to keep).</p>']
@@ -2006,7 +2058,7 @@ function vAdmin(){
     </div>
     <div class="panel">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3 style="margin:0">Products (${all.length})</h3><button class="btn btn-sm" data-add-product>＋ Add product</button></div>
-      <div class="filters" style="margin:2px 0 12px;flex-wrap:wrap">${["all","psn","pc","xbox"].map(k=>{const n=k==="all"?all.length:all.filter(p=>p.platform===k).length;const lb=k==="all"?"All":k==="psn"?"PSN":k==="pc"?"PC / Steam":"Xbox";return '<button class="fbtn'+(state.adPlat===k?" on":"")+'" data-adplat="'+k+'">'+lb+' ('+n+')</button>';}).join("")}</div>
+      <div class="filters" style="margin:2px 0 12px;flex-wrap:wrap">${["all","psn","pc","xbox","subs"].map(k=>{const n=k==="all"?all.length:all.filter(p=>p.platform===k).length;const lb=k==="all"?"All":k==="psn"?"PSN":k==="pc"?"PC / Steam":k==="xbox"?"Xbox":"Memberships / Extras";return '<button class="fbtn'+(state.adPlat===k?" on":"")+'" data-adplat="'+k+'">'+lb+' ('+n+')</button>';}).join("")}</div>
       <label for="ad-search" style="margin-top:0">Search</label>
       <input class="f" id="ad-search" placeholder="Filter by title…" oninput="renderAdminTable()">
       <div class="tblwrap"><table class="ptable"><thead><tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminRows"></tbody></table></div>
@@ -2147,7 +2199,7 @@ function openProdModal(id){
   '<div class="pm-full"><label class="pm-l" for="pm-title">Title</label><input class="f" id="pm-title" value="'+(p?esc(p.title):"")+'" placeholder="Black Myth: Wukong \u2014 PC"></div>'+
   '<div class="pm-grid">'+
   '<div><label class="pm-l" for="pm-platform">Platform</label><select class="f" id="pm-platform" onchange="pmTierLabels()">'+Object.entries(PLATFORMS).map(([k,v])=>'<option value="'+k+'"'+((p?p.platform:"pc")===k?" selected":"")+'>'+esc(v.long)+'</option>').join("")+'</select></div>'+
-  '<div><label class="pm-l" for="pm-kind">Type</label><select class="f" id="pm-kind">'+["account","subscription","wallet"].map(k=>'<option value="'+k+'"'+((p?p.kind:"account")===k?" selected":"")+'>'+KINDS[k]+'</option>').join("")+'</select></div>'+
+  '<div><label class="pm-l" for="pm-kind">Type</label><select class="f" id="pm-kind">'+["account","subscription","wallet","membership","mystery"].map(k=>'<option value="'+k+'"'+((p?p.kind:"account")===k?" selected":"")+'>'+KINDS[k]+'</option>').join("")+'</select></div>'+
   '<div><label class="pm-l" for="pm-region">Region</label><input class="f" id="pm-region" value="'+esc(p?(p.region||"Global"):"Global")+'" placeholder="India / Global / US"></div>'+
   '<div><label class="pm-l" for="pm-tag">Badge</label><select class="f" id="pm-tag">'+tags.map(t=>'<option value="'+t+'"'+((p?(p.tag||""):"")==t?" selected":"")+'>'+(t||"\u2014 none \u2014")+'</option>').join("")+'</select></div>'+
   '</div>'+
@@ -2246,14 +2298,45 @@ async function ensureRefCode(){
     window.__myRef=u; renderRefBox(u);
   }catch(e){ renderRefBox(null); }
 }
+function loyaltyFromOrders(orders, redeemed){
+  const done=orders.filter(o=>(o.status||"").toLowerCase()==="delivered").slice().sort((a,b)=>(a.ts||0)-(b.ts||0));
+  let earned=0, multiplier=1, expiry=0, tier="Free";
+  done.forEach(o=>{
+    const ts=o.ts||0;
+    if(ts>expiry){ multiplier=1; tier="Free"; }
+    const lines=Array.isArray(o.items)?o.items:[];
+    const membership=lines.join(" ").match(/(Silver|Gold|Platinum) Membership/i);
+    earned+=Math.floor(Number(o.total||0)/10)*multiplier;
+    if(membership){
+      tier=membership[1][0].toUpperCase()+membership[1].slice(1).toLowerCase();
+      multiplier=tier==="Platinum"?5:tier==="Gold"?3:2;
+      expiry=Math.max(expiry,ts)+30*24*60*60*1000;
+    }
+  });
+  const used=Math.max(0,Number(redeemed||0));
+  return {earned,used,available:Math.max(0,earned-used),multiplier:(Date.now()<=expiry?multiplier:1),tier:(Date.now()<=expiry?tier:"Free"),expiry:(Date.now()<=expiry?expiry:0)};
+}
+function renderLoyalty(L){
+  state.loyalty=L;
+  const stat=$("#mo-points"); if(stat) stat.textContent=String(L.available);
+  const box=$("#loyaltyBox"); if(!box) return;
+  const value=Math.floor(L.available/100)*50;
+  box.innerHTML='<div class="points-orb">'+L.available+'<small>POINTS</small></div><div><span class="eyebrow">'+esc(L.tier)+' TIER'+(L.multiplier>1?' · '+L.multiplier+'× ACTIVE':'')+'</span><h3 style="margin:5px 0 6px">Your rewards are worth up to '+inr(value)+'</h3><p class="sub" style="margin:0 0 12px">1 point per ₹10 spent · 100 points = ₹50 off · redeem from 100 points · maximum 20% of an order.'+(L.expiry?' Your '+esc(L.tier)+' benefits run through '+new Date(L.expiry).toLocaleDateString("en-IN")+'.':'')+'</p>'+(L.available>=100?'<button class="btn btn-sm" data-redeem-points>Claim points on WhatsApp</button>':'<a class="btn btn-ghost btn-sm" href="#/membership">Earn faster with membership</a>')+'</div>';
+}
+
 async function loadMyOrders(){
   if(!state.user) return;
   try{ ensureRefCode(); }catch(e){}
   const box=$("#myOrders"); if(!box) return;
   try{
-    const snap=await firebase.firestore().collection("orders").where("uid","==",state.user.uid).get();
-    const arr=snap.docs.map(d=>d.data()).sort((a,b)=>(b.ts||0)-(a.ts||0));
-    const spent=arr.reduce((a,o)=>a+(o.total||0),0);
+    const results=await Promise.all([
+      firebase.firestore().collection("orders").where("uid","==",state.user.uid).get(),
+      firebase.firestore().collection("users").doc(state.user.uid).get()
+    ]);
+    const arr=results[0].docs.map(d=>d.data()).sort((a,b)=>(b.ts||0)-(a.ts||0));
+    const profile=results[1].exists?results[1].data():{};
+    const spent=arr.filter(o=>["paid","delivered"].includes((o.status||"").toLowerCase())).reduce((a,o)=>a+(o.total||0),0);
+    renderLoyalty(loyaltyFromOrders(arr,profile.pointsRedeemed||0));
     const c=$("#mo-count"), s=$("#mo-spent");
     if(c) c.textContent=arr.length; if(s) s.textContent=inr(spent);
     if(!box) return;
@@ -2399,6 +2482,7 @@ const ROUTES={
   "/psn":{t:"PSN & PlayStation game accounts",v:()=>vCatalog("psn")},
   "/xbox":{t:"Xbox & Game Pass accounts",v:()=>vCatalog("xbox")},
   "/subs":{t:"Subscriptions & top-ups",v:()=>vCatalog("subs")},
+  "/membership":{t:"Memberships, rewards & mystery games",v:vMembership},
   "/cart":{t:"Your cart",v:vCart},
   "/account":{t:"Your account",v:vAccount},
   "/how":{t:"How buying works",v:vHow},
@@ -2435,7 +2519,7 @@ function route(){
         offers:{"@type":"Offer",priceCurrency:"INR",price:String(p.price),availability:(p.stock>0?"https://schema.org/InStock":"https://schema.org/OutOfStock"),url:BASESEO+"#/p/"+p.id}});
     }
     app.innerHTML=vProduct(h.slice(3));
-    base=p?"/"+p.platform:"/";
+    base=p?(p.collection?"/membership":"/"+p.platform):"/";
   } else if(ROUTES[h]){
     document.title=ROUTES[h].t+" — "+CONFIG.brand;
     metaSet("description",(ROUTES[h].t+" — delivered on WhatsApp in minutes across India. 30-day replacement warranty, UPI payments, guided setup."));
@@ -2601,6 +2685,13 @@ function initMotion(scope){
 /* ============ events ============ */
 document.addEventListener("click", async function(e){
   const q=s=>e.target.closest(s); let el;
+  if((el=q("[data-redeem-points]"))){
+    const L=state.loyalty||{available:0};
+    const usable=Math.floor(L.available/100)*100;
+    if(usable<100){ toast("You need at least 100 points"); return; }
+    const msg="Hi HeavenDigital! I want to claim my Heaven Points.\nEmail: "+(state.user&&state.user.email||"")+"\nAvailable points shown: "+L.available+"\nPlease apply up to "+usable+" points to my next eligible order (maximum 20% of order value).";
+    window.open("https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(msg),"_blank","noopener"); return;
+  }
   if((el=q("[data-add]"))){
     const p=byId(el.dataset.add);
     if(p&&p.stock>0){ cartAdd(el.dataset.add,1); toast("Added to cart"); buzz(12);
@@ -2894,6 +2985,8 @@ route();
    {k:["hi","hello","hey","yo","namaste","start"],a:"Hey! 👋 Ask me anything — delivery time, safety, warranty, payments… or tap a question below.",c:[]},
    {k:["price","cost","rate"],a:"Every listing shows its live price and discount right on the card. Many PC accounts start at ₹299, PSN accounts from ₹399, and PS Plus/Game Pass subscriptions from ₹499. Which game are you eyeing?",c:[["Browse PC","#/pc"],["Browse PS5","#/psn"],["Browse Xbox","#/xbox"]]},
    {k:["xbox","game pass"],a:"Xbox Game Pass Ultimate gives you 400+ games — we have long-term and monthly options, delivered on WhatsApp in minutes.",c:[["Browse Xbox","#/xbox"]]},
+   {k:["membership","silver","gold","platinum","loyalty","points","rewards"],a:"HeavenDigital Club has 30-day Silver, Gold and Platinum plans with 2×, 3× or 5× loyalty points, member coupons and priority support. Base rewards earn 1 point per ₹10; 100 points = ₹50 off.",c:[["See memberships","#/membership"],["My points","#/account"]]},
+   {k:["mystery","box","random","aaa","drop"],a:"Every mystery drop includes one random game from the prize pool confirmed before payment. Five tiers start at ₹99, with clear value floors and published AAA-tier odds. An AAA title is possible, never guaranteed.",c:[["See mystery drops","#/membership"],["Ask on WhatsApp",null]]},
    {k:["thank","thanks","ok","great","nice"],a:"Anytime! 🙌 If you're ready, the bestsellers are one tap away — and if anything's unclear, I'm here.",c:[["See bestsellers","#/"]]}
   ];
   var FALLS=0, opened=false;
