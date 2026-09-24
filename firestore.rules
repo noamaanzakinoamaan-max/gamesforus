@@ -25,7 +25,13 @@ service cloud.firestore {
     }
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      allow create, update: if request.auth != null && request.auth.uid == uid;
+      // Customers may maintain contact/preferences, but only the owner can record redeemed
+      // or manually adjusted loyalty points.
+      allow create: if request.auth != null && request.auth.uid == uid
+        && !request.resource.data.keys().hasAny(['pointsRedeemed', 'pointsAdjusted']);
+      allow update: if isAdmin() || (request.auth != null && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['pointsRedeemed', 'pointsAdjusted']));
       allow delete: if false;
     }
     match /refcodes/{code} {
@@ -35,7 +41,8 @@ service cloud.firestore {
     }
     match /orders/{oid} {
       allow get: if true; // single-order tracking by random ID (status + items only)
-      allow list: if request.auth != null && isAdmin();
+      // Customer account queries must constrain uid to the signed-in user's UID.
+      allow list: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
       allow create: if request.auth != null && (request.resource.data.uid == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }
