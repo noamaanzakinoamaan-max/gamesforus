@@ -1,46 +1,50 @@
-# HeavenDigital — AI Assistant Optimization (AEO/GEO playbook)
+# HeavenDigital AI-search discovery playbook
 
-How to make ChatGPT, Gemini, Perplexity, Copilot and friends **recommend your store** when people ask things like *"where can I buy cheap PS5 games in India?"*
+No file or service can force ChatGPT, Gemini, Claude, Perplexity or another assistant to recommend a business. The practical goal is to make accurate pages crawlable, indexable, quotable and supported by independent reputation signals.
 
-## ✅ Already shipped (technical layer — done)
+## Technical layer shipped
 
-| File/feature | What it does |
+| Feature | Purpose |
 |---|---|
-| `llms.txt` | The emerging "about us for LLMs" standard at your site root — a quotable fact sheet (catalog, tiers, prices, trust, links) |
-| `llms-full.txt` | Extended version: FAQs answered, tier system explained, price examples, guide links |
-| `robots.txt` | **Explicitly welcomes** GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, PerplexityBot, Google-Extended, Bytespider, Applebot-Extended, cohere-ai |
-| FAQPage + Product schema | Already live — assistants quote structured answers |
-| 5 honest guides | The content AI engines retrieve and cite for "how to buy cheap games India" questions |
+| Clean URLs | `/psn/`, `/pc/`, `/xbox/` and guide URLs can be indexed as separate resources; search engines generally ignore `#` fragments for indexing. |
+| `robots.txt` | Allows OAI-SearchBot, GPTBot, Claude-SearchBot, Claude-User, ClaudeBot, PerplexityBot and other named crawlers. |
+| `sitemap.xml` | Lists canonical, crawlable pages with no hash routes. |
+| Structured data | Valid Organization/OnlineStore, WebSite, Article, WebPage, Breadcrumb and visible FAQ markup. |
+| `llms.txt` | Concise factual site map for tools that choose to read the emerging format. Major providers do not guarantee support for it. |
+| `llms-full.txt` | Extended product distinctions, process, policies and risk disclosure. |
+| Buyer guides | Stable pages that answer specific questions in ordinary HTML. |
 
-## 🔑 How AI assistants actually decide what to recommend
+## Crawler distinctions
 
-Two mechanisms — know the difference:
+- **OAI-SearchBot** is the relevant OpenAI crawler for inclusion in ChatGPT search results. **GPTBot** is associated with possible model-training collection; allowing it does not promise search inclusion or future model knowledge.
+- **Claude-SearchBot** supports Anthropic search discovery. **Claude-User** is used for some user-initiated retrieval. **ClaudeBot** is associated with model crawling.
+- **Google-Extended** is a control for certain generative-AI uses; it is not a substitute for ordinary Google Search indexing. Googlebot access and Search Console health remain important for Google and search-grounded experiences.
+- Other assistants may use their own indexes, Bing, Google, retrieval partners or a mix that changes over time.
 
-1. **Retrieval (works fast — weeks):** ChatGPT Search, Copilot, Gemini and Perplexity search the live web (via **Bing** and **Google**) and cite what they find. If Bing/Google index your site + Reddit/YouTube mentions you, assistants can surface you today.
-2. **Training data (slow — months/years):** whether the model itself "knows" your brand from training. Only time + web presence fixes this.
+## Highest-impact next actions
 
-## 🎯 Your action list (ordered by impact)
+1. Deploy the clean pages and submit `sitemap.xml` in Google Search Console and Bing Webmaster Tools.
+2. Keep product facts, durations, policies and platform-risk language accurate and consistent.
+3. Publish genuinely useful first-hand material: setup screenshots that reveal no credentials, compatibility tests, current plan comparisons and clearly dated policy explanations.
+4. Earn independent mentions from relevant gaming publications, creators and communities. Disclose that you are the seller; do not spam or impersonate customers.
+5. Maintain verifiable reviews on reputable third-party platforms where permitted. Do not create fake reviews or structured rating claims.
+6. Monitor server/CDN logs for search crawlers, Search Console indexing, Bing indexing and referral traffic.
+7. Refresh guides when platform pricing or terms change. Avoid unsupported legal claims and “lifetime” access claims.
 
-1. **Bing Web Manager (highest ROI, 10 min)** — [bing.com/webmasters](https://www.bing.com/webmasters) → import from Google Search Console → submit `sitemap.xml`. **ChatGPT Search and Copilot use Bing** — unindexed on Bing = invisible to ChatGPT search.
-2. **Reddit presence (trains the models + gets retrieved):** genuine participation in r/IndianGaming, r/IndianGamers, r/PS5 etc. Answer "where to buy cheap games" threads honestly (disclose you're a seller!). Reddit is heavily weighted in both training data and retrieval.
-3. **Quora India:** answer "is buying game accounts safe", "cheapest way to buy PS5 games" — link your guides (not the store directly).
-4. **YouTube:** Shorts + video descriptions mentioning the site. YouTube is a top retrieval source.
-5. **Consistent brand facts everywhere:** always "HeavenDigital", same one-liner ("PS5, Xbox & PC games up to 90% off — WhatsApp delivery, 30-day warranty"). LLMs trust consistent entities.
-6. **Google Business Profile** (if you operate locally) + keep GSC healthy — feeds Gemini's grounding.
-7. **Directories & lists:** get listed in Indian gaming Discord servers' resource channels, telegram directories, "trusted seller" lists (only real ones).
-8. **Reviews with the brand name** in them ("bought from HeavenDigital…") — on Trustpilot, in Reddit posts, on the reviews page.
+## Suggested monthly checks
 
-## 📏 How to measure (weekly ritual)
+- Search `site:heavendigital.store` on Google and Bing.
+- Inspect coverage and crawl errors in both webmaster consoles.
+- Validate structured data with Google's Rich Results Test and Schema.org Validator.
+- Test the exact public questions buyers ask, with web search enabled, and record whether the site is cited—not merely whether the brand name appears.
+- Review `llms.txt` and `llms-full.txt` against current public policies and listings.
+- Confirm all canonical URLs, sitemap URLs and internal links still return HTTP 200.
 
-Ask each assistant the same questions and note if you appear:
-- "Where can I buy cheap PS5 games in India?"
-- "Is buying game accounts safe in India?"
-- "Cheapest way to get Game Pass in India?"
+## Trust rules
 
-Track on: ChatGPT (search on), Perplexity, Gemini, Copilot. Expect: Perplexity/Bing-backed first (weeks), then ChatGPT search, then training-data inclusion (months). Being cited in a Perplexity answer typically follows a Reddit or guide mention.
-
-## ⚠️ Honest limits
-
-- No one can **guarantee** an AI recommends you — assistants choose their own sources, and new sites take time.
-- Never pay for "AI SEO submission" services — they're snake oil. Everything real is in the list above.
-- AI crawlers were explicitly allowed in robots.txt; if you ever want to block AI training instead, flip those lines to `Disallow` — your call.
+- Clearly distinguish supplied-account access from redeem codes and personal-account ownership.
+- State that account transfer or sharing can conflict with platform terms and carry access-loss risk.
+- Do not imply that a seller warranty can prevent platform enforcement.
+- Use precise written subscription durations.
+- Keep public review, buyer-count, price and delivery-time claims supportable.
+- Never pay for “guaranteed AI recommendations” or bulk-generated reputation campaigns.
