@@ -650,6 +650,7 @@ img{max-width:100%}
 /* ---- admin orders ---- */
 .pill.pay{background:rgba(245,192,68,.16);color:var(--gold);border:1px solid rgba(245,192,68,.4)}
 .pill.can{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.35)}
+.pill.edit{background:rgba(96,165,250,.14);color:#93c5fd;border:1px solid rgba(96,165,250,.34)}
 .ord-it{font-size:12.5px;color:var(--mut);line-height:1.55;margin:2px 0 0;white-space:pre-line}
 .ord-top{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
 .ord-top b{font-family:var(--mono);font-size:13.5px}
@@ -853,7 +854,7 @@ const SEED = [
  /* ---- PSN ---- (img = poster; remove/replace freely in admin) */
  {id:"psn-psplus-extra-1m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 1 Month", region:"India", games:["PS Plus Extra · 1 Month"], price:499, mrp:3999, stock:9, tag:"New Arrival", featured:true, active:true, img:"img/17e93c0ec4b0.webp"},
  {id:"psn-psplus-extra-3m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 3 Months", region:"India", games:["PS Plus Extra · 3 Months"], price:1299, mrp:3999, stock:6, tag:"", featured:false, active:true, img:"img/17e93c0ec4b0.webp"},
- {id:"psn-spiderman-2", platform:"psn", kind:"account", title:"Marvel's Spider-Man 2 — PS5", region:"India", games:["Marvel's Spider-Man 2"], price:899, mrp:4999, stock:3, tag:"Bestseller", p2:1799, featured:true, active:true, img:"img/423ba8c9e4b7.png"},
+ {id:"psn-spiderman-2", platform:"psn", kind:"account", title:"Marvel's Spider-Man 2 — PS5", region:"India", games:["Marvel's Spider-Man 2"], price:899, mrp:4999, stock:3, tag:"Bestseller", p2:1799, featured:false, active:true, img:"img/423ba8c9e4b7.png"},
  {id:"psn-until-dawn", img:"img/022b38eb3cf4.jpg", platform:"psn", kind:"account", title:"Until Dawn — PS4/PS5", region:"India", games:["Until Dawn"], price:1499, mrp:3999, stock:3, tag:"", p2:899, featured:false, active:true},
  {id:"psn-silent-hill-2", img:"img/35eefe7c632e.png", platform:"psn", kind:"account", title:"Silent Hill 2 — PS5/PS4", region:"India", games:["Silent Hill 2"], price:1499, mrp:3999, stock:3, tag:"", p2:799, featured:false, active:true},
  {id:"psn-wwe-2k24", img:"img/b0c3e99cff39.png", platform:"psn", kind:"account", title:"WWE 2K24 — PS5", region:"India", games:["WWE 2K24"], price:1499, mrp:7999, stock:2, tag:"Deal", p2:2849, featured:false, active:true},
@@ -1464,20 +1465,30 @@ function trackPageView(){
   }catch(e){}
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0 };
-/* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore) */
+/* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore).
+   Anything the owner edits in the admin panel is stamped with adminEdited/adminFields and is never
+   rewritten here again: an owner's price, badge or toggle always beats the shipped defaults. */
 const CATALOG_OVERRIDES = {
   "psn-control-resonant": {tag:"Bestseller"},
   "psn-blood-of-dawnwalker": {tag:"Bestseller"},
-  "psn-ghost-of-yotei": {price:1099, p2:2499}
+  "psn-ghost-of-yotei": {price:1099, p2:2499},
+  "psn-spiderman-2": {featured:false}
 };
+/* was this exact field last set by the owner in the admin panel? */
+function ownerEdited(p, field){
+  if(!p || !p.adminEdited) return false;
+  const f=p.adminFields;
+  return Array.isArray(f) ? f.indexOf(field)>-1 : true;
+}
 function enforcePricePolicy(products=state.products){
   Object.values(products).forEach(p=>{
     if(!p) return;
     if(p.platform==="pc"){
-      if(!(p.price<599)) p.price=499;
-      if(p.p2 && p.p2>=599) p.p2=549;
+      if(!ownerEdited(p,"price") && !(p.price<599)) p.price=499;
+      if(!ownerEdited(p,"p2") && p.p2 && p.p2>=599) p.p2=549;
     }
-    if(CATALOG_OVERRIDES[p.id]) Object.assign(p, CATALOG_OVERRIDES[p.id]);
+    const ov=CATALOG_OVERRIDES[p.id];
+    if(ov) Object.keys(ov).forEach(k=>{ if(!ownerEdited(p,k)) p[k]=ov[k]; });
   });
   return products;
 }
@@ -1551,13 +1562,24 @@ function initFirebase(){
     });
   }catch(e){ console.warn("Firebase init failed:", e); }
 }
-async function fsAdd(data){
+/* Owner edit → Firestore. `changed` lists the fields the owner actually touched so the runtime
+   price policy and the catalog sync both know to leave them alone from now on. */
+const ADMIN_META=["id","adminEdited","adminFields","updatedAt"];
+async function fsAdd(data, changed){
   const db=firebase.firestore();
   const product={...data};
   product.id = product.id || (product.title.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)+"-"+Math.random().toString(36).slice(2,6));
+  const prev=state.products[product.id]||{};
+  const touched=(Array.isArray(changed)&&changed.length?changed:Object.keys(product)).filter(k=>ADMIN_META.indexOf(k)<0);
+  const known=Array.isArray(prev.adminFields)?prev.adminFields:[];
+  product.adminEdited=true;
+  product.adminFields=known.concat(touched.filter(k=>known.indexOf(k)<0));
+  product.updatedAt=Date.now();
   enforcePricePolicy({[product.id]:product});
   await db.collection("products").doc(product.id).set(product, {merge:true});
   state.products[product.id]={...(state.products[product.id]||{}),...product};
+  if(state._seedProducts && state._seedProducts[product.id]) state._seedProducts[product.id]={...state._seedProducts[product.id],...product};
+  saveLocal();
   return product.id;
 }
 window.addEventListener("load", initFirebase);
@@ -1568,17 +1590,39 @@ async function syncCatalog(btn){
   if(!(state.fbReady&&state.user)){ toast("Log in as owner first"); return; }
   btn.disabled=true; const msg=$("#syncMsg");
   const set=m=>{ if(msg) msg.innerHTML='<p class="hint">'+m+'</p>'; };
-  const items=Object.values(state._seedProducts||state.products);
-  const db=firebase.firestore(); let done=0;
+  const db=firebase.firestore(), del=deletedIds();
   try{
-    for(let i=0;i<items.length;i+=400){
+    set("Checking what's already live…");
+    const live={};
+    (await db.collection("products").get()).forEach(d=>{ live[d.id]=d.data()||{}; });
+    /* Upload what the panel is actually showing (seed + Firestore + your edits) — never the raw
+       seed. Uploading the seed is what used to revert edited prices like 007 First Light. */
+    const catalog={};
+    Object.keys(state._seedProducts||{}).forEach(id=>{ catalog[id]={...state._seedProducts[id]}; });
+    Object.keys(state.products||{}).forEach(id=>{ catalog[id]={...(catalog[id]||{}),...state.products[id]}; });
+    const payloads=[]; let kept=0;
+    Object.keys(catalog).forEach(id=>{
+      const p=catalog[id];
+      if(!p || del.indexOf(id)>-1) return;
+      const doc=live[id];
+      if(doc && (doc.adminEdited || p.adminEdited)){
+        /* Owner-managed listing: only add fields Firestore is missing, never overwrite a value you set. */
+        const add={}; let n=0;
+        Object.keys(p).forEach(k=>{ if(!(k in doc)){ add[k]=p[k]; n++; } });
+        if(n) payloads.push([id,add]); else kept++;
+        return;
+      }
+      payloads.push([id,{...p,id:id}]);
+    });
+    let done=0;
+    for(let i=0;i<payloads.length;i+=400){
       const batch=db.batch();
-      items.slice(i,i+400).forEach(p=>batch.set(db.collection("products").doc(p.id), p, {merge:true}));
+      payloads.slice(i,i+400).forEach(row=>batch.set(db.collection("products").doc(row[0]), row[1], {merge:true}));
       await batch.commit();
-      done+=Math.min(400,items.length-i);
-      set("Uploading… "+done+" / "+items.length);
+      done+=Math.min(400,payloads.length-i);
+      set("Uploading… "+done+" / "+payloads.length);
     }
-    set("✅ Catalog synced — Firestore now holds "+done+" products and is the live source. Edits in the panel go live instantly.");
+    set("✅ Catalog synced — "+(payloads.length+kept)+" listing(s) live on Firestore"+(kept?", "+kept+" of your edited listing(s) left exactly as you set them":"")+". Edits in the panel go live instantly.");
     toast("Catalog uploaded");
   }catch(err){ set("❌ "+err.message+" — most likely the Firestore rules aren't published with your UID yet, or the database region/type is wrong. Fix and retry."); }
   btn.disabled=false;
@@ -2177,7 +2221,7 @@ function renderAdminTable(){
     '<td class="ttl" title="'+esc(p.title)+'">'+esc(p.title)+'<br><span style="color:var(--mut);font-size:11px">'+esc((PLATFORMS[p.platform]||{}).name||p.platform)+' · '+esc(p.region||"")+'</span></td>'+
     '<td><span style="font-family:var(--mono)">'+inr(p.price)+'</span><br><s style="color:var(--mut);font-size:11px">'+inr(p.mrp)+'</s>'+(p.p2?'<br><span style="color:var(--gold);font-size:11px">T2 '+inr(p.p2)+'</span>':'')+'</td>'+
     '<td>'+p.stock+' <button class="rm" data-stockdec="'+p.id+'" title="Reduce stock by 1">−1</button></td>'+
-    '<td>'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+' '+(p.featured?'<span class="pill feat">FEAT</span>':'')+'</td>'+
+    '<td>'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+' '+(p.featured?'<span class="pill feat">FEAT</span>':'')+(p.adminEdited?' <span class="pill edit" title="Your edits are protected from catalog sync">EDITED</span>':'')+'</td>'+
     '<td><div class="rowbtns"><button class="btn btn-ghost btn-sm" data-edit="'+p.id+'">Edit</button>'+
     '<button class="btn btn-ghost btn-sm" data-toggle-active="'+p.id+'">'+(p.active!==false?"Hide":"Show")+'</button>'+
     '<button class="btn btn-ghost btn-sm" data-toggle-feat="'+p.id+'">'+(p.featured?"Unfeature":"Feature")+'</button>'+
@@ -2188,7 +2232,7 @@ function renderAdminTable(){
     return '<div class="acard">'+
     '<div class="ac-top">'+thumb+
     '<div class="ac-t"><b>'+esc(p.title)+'</b><span>'+esc((PLATFORMS[p.platform]||{}).name||p.platform)+' · '+esc(p.region||"Global")+'</span>'+
-    '<span class="ac-pills">'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+(p.featured?'<span class="pill feat">FEAT</span>':'')+(p.tag?'<span class="pill">'+esc(p.tag)+'</span>':'')+'</span></div></div>'+
+    '<span class="ac-pills">'+(p.active!==false?'<span class="pill on">LIVE</span>':'<span class="pill off">HIDDEN</span>')+(p.featured?'<span class="pill feat">FEAT</span>':'')+(p.adminEdited?'<span class="pill edit">EDITED</span>':'')+(p.tag?'<span class="pill">'+esc(p.tag)+'</span>':'')+'</span></div></div>'+
     '<div class="ac-prices">'+inr(p.price)+' <s>'+inr(p.mrp)+'</s>'+(p.p2?'<span class="t2l">T2 '+inr(p.p2)+'</span>':'')+
     '<span class="ac-stock">Stock: '+p.stock+'<button data-stockdec="'+p.id+'">−1</button></span></div>'+
     '<div class="ac-act"><button class="btn btn-ghost btn-sm" data-edit="'+p.id+'">Edit</button>'+
@@ -2948,6 +2992,7 @@ document.addEventListener("click", async function(e){
   }
   if((el=q("[data-pm-save]")) && state.fbReady && state.user){
     const g=v=>($(v)||{}).value;
+    const chk=v=>!!(($(v)||{}).checked);   /* checkboxes report .checked — .value is always "on" */
     const id=el.dataset.pmSave||null;
     const plat=g("#pm-platform")||"pc";
     const data={
@@ -2959,14 +3004,14 @@ document.addEventListener("click", async function(e){
       stock:Math.max(0,parseInt(g("#pm-stock"),10)||0),
       games:(g("#pm-games")||"").split(",").map(x=>x.trim()).filter(Boolean),
       img:(g("#pm-img")||"").trim(),
-      featured:!!g("#pm-featured"), active:!!g("#pm-active")
+      featured:chk("#pm-featured"), active:chk("#pm-active")
     };
     const msg=$("#pm-msg");
     if(!data.title||!data.price){ if(msg) msg.textContent="Title and the main price are required."; return; }
     el.disabled=true;
     try{
-      if(id){ const p=byId(id); await fsAdd({...p,...data,id:id}); toast("Product updated — live"); }
-      else{ await fsAdd(data); toast("Product added — live on site"); }
+      if(id){ const p=byId(id); await fsAdd({...p,...data,id:id}, Object.keys(data)); toast("Product updated — live"); }
+      else{ await fsAdd(data, Object.keys(data)); toast("Product added — live on site"); }
       pmClose(); route();
     }catch(err){ if(msg) msg.textContent="Save failed: "+err.message; el.disabled=false; }
     return;
@@ -2974,17 +3019,17 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-edit]")) && state.fbReady && state.user){ openProdModal(el.dataset.edit); return; }
   if((el=q("[data-toggle-active]")) && state.fbReady && state.user){
     const p=byId(el.dataset.toggleActive); if(!p) return;
-    try{ await fsAdd({...p, active:p.active===false}); toast(p.active===false?"Shown":"Hidden"); }catch(err){ toast("Failed: "+err.message); }
+    try{ await fsAdd({...p, active:p.active===false}, ["active"]); toast(p.active===false?"Shown":"Hidden"); }catch(err){ toast("Failed: "+err.message); }
     return;
   }
   if((el=q("[data-toggle-feat]")) && state.fbReady && state.user){
     const p=byId(el.dataset.toggleFeat); if(!p) return;
-    try{ await fsAdd({...p, featured:!p.featured}); toast(p.featured?"Removed from featured":"Featured on homepage"); }catch(err){ toast("Failed: "+err.message); }
+    try{ await fsAdd({...p, featured:!p.featured}, ["featured"]); toast(p.featured?"Removed from featured":"Featured on homepage"); }catch(err){ toast("Failed: "+err.message); }
     return;
   }
   if((el=q("[data-stockdec]")) && state.fbReady && state.user){
     const p=byId(el.dataset.stockdec); if(!p||p.stock<=0) return;
-    try{ await fsAdd({...p, stock:p.stock-1}); toast("Stock −1"); }catch(err){ toast("Failed: "+err.message); }
+    try{ await fsAdd({...p, stock:p.stock-1}, ["stock"]); toast("Stock −1"); }catch(err){ toast("Failed: "+err.message); }
     return;
   }
   if((el=q("[data-del]")) && state.fbReady && state.user){
