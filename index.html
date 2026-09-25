@@ -658,6 +658,27 @@ img{max-width:100%}
 .ord-buyer{font-size:12px;color:var(--mut);word-break:break-all}
 .ord-amt{font-family:var(--mono);font-weight:800;color:var(--gold);font-size:15px}
 
+/* ---- admin customers ---- */
+.acard.cust{gap:12px}
+.cust-av{width:40px;height:40px;flex:0 0 40px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:15px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--gold-d)}
+.cust .ac-t b{font-size:14.5px}
+.cust-meta{display:block;font-size:11.5px;color:var(--mut);word-break:break-word;line-height:1.5}
+.cust-spend{text-align:right;font-family:var(--mono);font-weight:800;color:var(--gold);font-size:15px;white-space:nowrap}
+.cust-spend em{display:block;font-style:normal;font-family:var(--sans);font-size:10.5px;font-weight:600;color:var(--mut);white-space:normal}
+.cust-pts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0}
+.cust-pts div{min-width:0}
+.cust-pts b{display:block;font-family:var(--mono);font-size:16px;line-height:1.2}
+.cust-pts span{font-size:10.5px;color:var(--mut);font-weight:600}
+.cust-act{display:flex;gap:6px;flex-wrap:wrap}
+.cust-orders{display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:10px}
+.cust-ord{border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:rgba(255,255,255,.02)}
+#custList{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+@media(max-width:520px){
+  .cust-pts{grid-template-columns:repeat(2,1fr)}
+  .cust-spend{text-align:left}
+  .acard.cust .ac-top{flex-wrap:wrap}
+}
+
 /* ---- reviews ---- */
 .rvw{flex:0 0 84%;min-width:84%;scroll-snap-align:start;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
 .rvw .who{display:flex;align-items:center;gap:10px;margin-top:2px}
@@ -1464,7 +1485,8 @@ function trackPageView(){
     window.gtag("event","page_view",{send_to:window.__activeGaId||DEFAULT_GA_ID,page_location:location.href,page_path:path,page_title:document.title});
   }catch(e){}
 }
-const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0 };
+const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0,
+  customers:[], custLoaded:false, custFilter:"all", custQ:"", custOpen:{} };
 /* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore).
    Anything the owner edits in the admin panel is stamped with adminEdited/adminFields and is never
    rewritten here again: an owner's price, badge or toggle always beats the shipped defaults. */
@@ -2050,6 +2072,7 @@ function vAdmin(){
   </div>
   ${out?'<div class="demo-note" style="margin:0 0 16px"><b>'+out+' product(s) are out of stock</b> and hidden from the buy buttons. Restock below.</div>':''}
   ${(setTimeout(()=>{ if(state.fbReady&&state.user&&!state.ordersLoaded) loadAdminOrders(); else if(state.ordersLoaded) renderOrders(); },30), "")}
+  ${(setTimeout(()=>{ if(state.fbReady&&state.user&&!state.custLoaded) loadCustomers(); else if(state.custLoaded) renderCustomers(); },60), "")}
   ${!state.settings.adminUid?'<div class="demo-note" style="margin:0 0 16px"><b>One-time:</b> make this account the store owner — nobody else will be able to claim it after you.<div class="paybtns"><button class="btn btn-sm" data-claim-owner>🔒 Claim owner with this account</button></div><div id="claimMsg"></div></div>':''}
   <div class="panel" style="margin-bottom:18px">
     <h3>Orders</h3>
@@ -2126,11 +2149,20 @@ function vAdmin(){
         <div id="anMsg"></div>
       </div>
       <div class="panel" style="margin-bottom:18px">
-        <h3>Customers &amp; offers list</h3>
-        <p class="hint" style="margin-top:0">Buyers who create an account land here. Export the opted-in list to ping them on WhatsApp about new offers.</p>
-        <div class="stats"><div class="stat"><b id="custCount">–</b><span>Registered buyers</span></div><div class="stat"><b id="custOpt">–</b><span>Want offers</span></div></div>
-        <div class="paybtns"><button class="btn btn-sm" data-load-customers>↻ Load customers</button><button class="btn btn-ghost btn-sm" data-copy-emails>Copy opted-in emails</button></div>
+        <h3>Customers</h3>
+        <p class="hint" style="margin-top:0">Every buyer who registered an account — their past orders, spending, Heaven Points and contact details. Export the opted-in list to ping them on WhatsApp about new offers.</p>
+        <div class="stats">
+          <div class="stat"><b id="custCount">–</b><span>Registered buyers</span></div>
+          <div class="stat"><b id="custOpt">–</b><span>Want offers</span></div>
+          <div class="stat"><b id="custSpend">–</b><span>Customer spend</span></div>
+          <div class="stat"><b id="custPts">–</b><span>Points to redeem</span></div>
+        </div>
+        <div class="paybtns"><button class="btn btn-sm" data-load-customers>↻ Reload customers</button><button class="btn btn-ghost btn-sm" data-copy-emails>Copy opted-in contacts</button></div>
+        <label for="cust-search" style="margin-top:14px">Search</label>
+        <input class="f" id="cust-search" placeholder="Name, email, WhatsApp, order ID…" value="${esc(state.custQ||"")}" oninput="setCustQ(this.value)">
+        <div class="filters" style="margin:10px 0 2px;flex-wrap:wrap" id="custChips"></div>
         <div id="custMsg"></div>
+        <div id="custList"><p class="sub" style="margin:10px 0 0">Loading customers…</p></div>
         <div id="topRef"></div>
       </div>
     </div>
@@ -2193,6 +2225,127 @@ async function loadAdminOrders(){
     const m=String(err.message||"");
     if(box) box.innerHTML='<p class="sub" style="margin:0">Could not load orders'+(m.includes("index")||m.includes("Index")?" — Firestore is building an index, retry in a minute":": "+esc(m.slice(0,80)))+'.</p>';
   }
+}
+
+/* ---- registered customers ---- */
+function custWa(n){ const d=String(n||"").replace(/[^0-9]/g,""); if(!d) return ""; return d.length===10?"91"+d:d; }
+function custName(u){ return u.name||u.displayName||String(u.email||"").split("@")[0]||"Customer"; }
+function custDate(ts){ return ts?new Date(ts).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}):""; }
+/* Build one admin row per registered buyer: their orders, spend, tier and Heaven Points.
+   Points use the same loyaltyFromOrders() the buyer sees on their own account page. */
+function customerRow(u, orders){
+  const uid=u.uid||"", email=String(u.email||"").toLowerCase();
+  const mine=orders.filter(o=>(uid&&o.uid===uid)||(email&&String(o.email||"").toLowerCase()===email))
+                   .sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const paid=mine.filter(o=>["paid","delivered"].indexOf(String(o.status||"").toLowerCase())>-1);
+  const L=loyaltyFromOrders(mine, u.pointsRedeemed||0);
+  const adj=Number(u.pointsAdjusted||0);
+  const available=Math.max(0, L.available+adj);
+  const tier=L.tier&&L.tier!=="Free"?L.tier:(u.tier||u.membership||"Free");
+  return {
+    u:u, uid:uid||email, orders:mine, spent:paid.reduce((a,o)=>a+(o.total||0),0),
+    paidCount:paid.length, earned:L.earned, used:L.used, adj:adj, available:available,
+    tier:tier, expiry:L.expiry, multiplier:L.multiplier,
+    joined:u.createdAt||0, last:(mine[0]&&mine[0].ts)||0,
+    hay:[custName(u),u.email,u.wa,u.refCode,tier].concat(mine.map(o=>o.oid)).join(" ").toLowerCase()
+  };
+}
+async function loadCustomers(){
+  if(!(state.fbReady&&state.user)) return;
+  const msg=$("#custMsg"), box=$("#custList");
+  if(msg) msg.innerHTML="";
+  if(box&&!state.custLoaded) box.innerHTML='<p class="sub" style="margin:10px 0 0">Loading customers…</p>';
+  try{
+    const db=firebase.firestore();
+    const res=await Promise.all([
+      db.collection("users").get(),
+      db.collection("orders").orderBy("ts","desc").limit(500).get()
+    ]);
+    const users=res[0].docs.map(d=>({uid:d.id, ...(d.data()||{})}));
+    const orders=res[1].docs.map(d=>({oid:d.id, ...(d.data()||{})}));
+    window.__cust=users;
+    state.customers=users.map(u=>customerRow(u,orders));
+    state.custLoaded=true;
+    renderCustomers();
+  }catch(err){
+    state.custLoaded=false;
+    const m=String(err.message||"");
+    if(box) box.innerHTML="";
+    if(msg) msg.innerHTML='<div class="err">Could not load customers: '+esc(m.slice(0,110))+' — reading every buyer needs the published firestore.rules plus the owner claim.</div>';
+  }
+}
+function setCustQ(v){ state.custQ=v; renderCustomers(); }
+function custMatch(c){
+  if(state.custFilter==="members") return c.tier!=="Free";
+  if(state.custFilter==="offers") return !!c.u.optIn;
+  if(state.custFilter==="buyers") return c.orders.length>0;
+  if(state.custFilter==="points") return c.available>=100;
+  return true;
+}
+function custOrderLines(c){
+  if(!c.orders.length) return '<p class="sub" style="margin:0">No orders yet — this buyer registered but hasn\u2019t checked out.</p>';
+  return c.orders.map(o=>'<div class="cust-ord">'+
+    '<div class="ord-top"><b>'+esc(o.oid||"?")+'</b><span>'+(o.ts?new Date(o.ts).toLocaleString("en-IN",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"")+'</span>'+ordPill(o.status)+'</div>'+
+    ((o.items&&o.items.length)?'<p class="ord-it">'+esc(o.items.join("\n"))+'</p>':'')+
+    '<div class="ord-top" style="margin-top:2px"><span class="sub" style="font-size:11.5px">'+((o.items||[]).length)+' item(s)'+(o.refBy?' \u00B7 referral '+esc(o.refBy):'')+'</span><span class="ord-amt">'+inr(o.total||0)+'</span></div>'+
+  '</div>').join("");
+}
+function renderCustomers(){
+  const box=$("#custList"); if(!box) return;
+  const rows=state.customers||[];
+  const set=(id,v)=>{ const e=$(id); if(e) e.textContent=v; };
+  set("#custCount", rows.length);
+  set("#custOpt", rows.filter(c=>c.u.optIn).length);
+  set("#custSpend", inr(rows.reduce((a,c)=>a+c.spent,0)));
+  set("#custPts", rows.reduce((a,c)=>a+c.available,0));
+  const counts={all:rows.length, buyers:rows.filter(c=>c.orders.length>0).length, members:rows.filter(c=>c.tier!=="Free").length,
+                points:rows.filter(c=>c.available>=100).length, offers:rows.filter(c=>c.u.optIn).length};
+  const labels={all:"All", buyers:"With orders", members:"Members", points:"Can redeem", offers:"Want offers"};
+  const chips=$("#custChips");
+  if(chips) chips.innerHTML=["all","buyers","members","points","offers"].map(k=>'<button class="fbtn'+((state.custFilter||"all")===k?" on":"")+'" data-custfilter="'+k+'">'+labels[k]+" ("+counts[k]+")"+'</button>').join("");
+  const tr=$("#topRef");
+  if(tr){
+    const top=rows.filter(c=>c.u.refCode&&(c.u.earned||c.u.referrals)).sort((a,b)=>(b.u.earned||0)-(a.u.earned||0)).slice(0,5);
+    tr.innerHTML=top.length?'<h3 style="margin:18px 0 6px">Top referrers</h3>'+top.map(c=>'<div class="sumline"><span>'+esc(custName(c.u))+' · <b class="t2l">'+esc(c.u.refCode)+'</b> · '+(c.u.referrals||0)+' referral(s)</span><span>'+inr(c.u.earned||0)+' earned</span></div>').join(""):(state.custLoaded?'<p class="hint">No referrers yet — codes appear on each buyer\'s Account page.</p>':'');
+  }
+  if(!state.custLoaded){ box.innerHTML='<p class="sub" style="margin:10px 0 0">Loading customers…</p>'; return; }
+  if(!rows.length){ box.innerHTML='<p class="sub" style="margin:10px 0 0">No registered customers yet — buyers appear here the moment they create an account.</p>'; return; }
+  const q=String(state.custQ||"").toLowerCase().trim();
+  const list=rows.filter(c=>custMatch(c)&&(!q||c.hay.indexOf(q)>-1))
+                 .sort((a,b)=>(b.spent-a.spent)||(b.last-a.last)||(b.earned-a.earned));
+  if(!list.length){ box.innerHTML='<p class="sub" style="margin:10px 0 0">No customer matches that filter.</p>'; return; }
+  const open=state.custOpen||{};
+  box.innerHTML=list.map(c=>{
+    const u=c.u, wa=custWa(u.wa), nm=custName(u), tierOn=c.tier!=="Free";
+    const worth=Math.floor(c.available/100)*50;
+    return '<div class="acard cust">'+
+      '<div class="ac-top">'+
+        '<span class="cust-av">'+esc(nm.slice(0,1).toUpperCase())+'</span>'+
+        '<div class="ac-t"><b>'+esc(nm)+'</b>'+
+          '<span class="cust-meta">'+esc(u.email||"no email on file")+(u.wa?' \u00B7 WhatsApp '+esc(u.wa):'')+(c.joined?' \u00B7 joined '+esc(custDate(c.joined)):'')+'</span>'+
+          '<span class="ac-pills">'+
+            '<span class="pill '+(tierOn?"feat":"off")+'">'+esc(String(c.tier).toUpperCase())+(tierOn&&c.multiplier>1?" "+c.multiplier+"\u00D7":"")+'</span>'+
+            (u.optIn?'<span class="pill on">WANTS OFFERS</span>':'<span class="pill off">NO OFFERS</span>')+
+            (u.refCode?'<span class="pill pay">'+esc(u.refCode)+(u.referrals?" \u00B7 "+u.referrals:"")+'</span>':'')+
+            (c.expiry?'<span class="pill">TIER TO '+esc(new Date(c.expiry).toLocaleDateString("en-IN"))+'</span>':'')+
+          '</span>'+
+        '</div>'+
+        '<span class="cust-spend">'+inr(c.spent)+'<em>'+c.orders.length+' order'+(c.orders.length===1?"":"s")+(c.last?' \u00B7 last '+esc(custDate(c.last)):'')+'</em></span>'+
+      '</div>'+
+      '<div class="cust-pts">'+
+        '<div><b>'+c.earned+'</b><span>Points earned</span></div>'+
+        '<div><b>'+c.used+'</b><span>Redeemed</span></div>'+
+        '<div><b class="t2l">'+c.available+'</b><span>Available'+(c.adj?" (adj "+(c.adj>0?"+":"")+c.adj+")":"")+'</span></div>'+
+        '<div><b>'+inr(worth)+'</b><span>Reward value</span></div>'+
+      '</div>'+
+      '<div class="cust-act">'+
+        '<button class="btn btn-ghost btn-sm" data-cust-open="'+esc(c.uid)+'">'+(open[c.uid]?"Hide orders":"Orders ("+c.orders.length+")")+'</button>'+
+        (wa?'<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener" href="https://wa.me/'+esc(wa)+'">WhatsApp</a>':'')+
+        (u.email?'<a class="btn btn-ghost btn-sm" href="mailto:'+esc(u.email)+'">Email</a>':'')+
+      '</div>'+
+      (open[c.uid]?'<div class="cust-orders">'+custOrderLines(c)+'</div>':'')+
+    '</div>';
+  }).join("");
 }
 function openOrderModal(){
   $("#modalRoot").innerHTML=
@@ -2933,24 +3086,19 @@ document.addEventListener("click", async function(e){
     }catch(err){ const m=$("#anMsg"); if(m) m.innerHTML='<div class="err">'+esc(err.message)+'</div>'; }
     return;
   }
-  if((el=q("[data-load-customers]")) && state.fbReady && state.user){
-    const m=$("#custMsg"); if(m) m.innerHTML='<div class="hint">Loading…</div>';
-    try{
-      const snap=await firebase.firestore().collection("users").get();
-      const arr=snap.docs.map(d=>d.data());
-      window.__cust=arr;
-      const opt=arr.filter(u=>u.optIn);
-      const a=$("#custCount"), b=$("#custOpt");
-      if(a) a.textContent=arr.length; if(b) b.textContent=opt.length;
-      if(m) m.innerHTML='<div class="ok-note">'+arr.length+' customer(s), '+opt.length+' opted in. Use "Copy opted-in emails" then paste into WhatsApp/email.</div>';
-      const top=arr.filter(u=>u.refCode&&(u.earned||u.referrals)).sort((a,b)=>(b.earned||0)-(a.earned||0)).slice(0,5);
-      const tr=$("#topRef");
-      if(tr) tr.innerHTML=top.length?'<h3 style="margin:14px 0 6px">Top referrers</h3>'+top.map(u=>'<div class="sumline"><span>'+esc(u.name||u.email||"")+' · <b class="t2l">'+esc(u.refCode)+'</b> · '+(u.referrals||0)+' referral(s)</span><span>'+inr(u.earned||0)+' earned</span></div>').join(""):'<p class="hint">No referrers yet — codes appear on each buyer\'s Account page.</p>';
-    }catch(err){ if(m) m.innerHTML='<div class="err">'+esc(err.message)+' — reading all customers needs the updated rules + owner claim.</div>'; }
-    return;
+  if((el=q("[data-load-customers]")) && state.fbReady && state.user){ state.custLoaded=false; await loadCustomers(); return; }
+  if((el=q("[data-custfilter]"))){ state.custFilter=el.dataset.custfilter; renderCustomers(); return; }
+  if((el=q("[data-cust-open]"))){
+    const id=el.dataset.custOpen;
+    state.custOpen=state.custOpen||{};
+    state.custOpen[id]=!state.custOpen[id];
+    renderCustomers(); return;
   }
-  if((el=q("[data-copy-emails]")) && window.__cust){
-    const list=window.__cust.filter(u=>u.optIn).map(u=>[u.name||"",u.email||"",u.wa||""].filter(Boolean).join(" — "));
+  if((el=q("[data-copy-emails]")) && ((state.customers&&state.customers.length)||window.__cust)){
+    const src=(state.customers||[]).filter(c=>c.u.optIn);
+    const list=src.length
+      ? src.map(c=>[custName(c.u), c.u.email||"", c.u.wa||"", c.tier+" tier", c.orders.length+" order(s)", inr(c.spent)+" spent", c.available+" points"].filter(Boolean).join(" — "))
+      : (window.__cust||[]).filter(u=>u.optIn).map(u=>[u.name||"",u.email||"",u.wa||""].filter(Boolean).join(" — "));
     const txt=list.length?list.join("\n"):"No opted-in customers yet.";
     if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>toast("Copied "+list.length+" contact(s)"),()=>{});
     const m=$("#custMsg"); if(m) m.innerHTML='<div class="ok-note" style="white-space:pre-wrap">'+esc(txt)+'</div>';
