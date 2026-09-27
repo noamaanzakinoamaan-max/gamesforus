@@ -1486,7 +1486,7 @@ function trackPageView(){
   }catch(e){}
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0,
-  customers:[], custLoaded:false, custFilter:"all", custQ:"", custOpen:{}, checkout:null };
+  customers:[], custLoaded:false, custFilter:"all", custQ:"", custOpen:{}, checkout:null, productsUnsub:null };
 /* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore).
    Anything the owner edits in the admin panel is stamped with adminEdited/adminFields and is never
    rewritten here again: an owner's price, badge or toggle always beats the shipped defaults. */
@@ -1577,34 +1577,50 @@ function firebaseConfigured(){
   const c=window.FirebaseConfig;
   return !!(c && c.apiKey && !String(c.apiKey).includes("PASTE") && c.projectId && !String(c.projectId).includes("PASTE"));
 }
+function ensureSeedProducts(){
+  if(state._seedProducts) return;
+  state._seedProducts={};
+  SEED.forEach(p=>{ state._seedProducts[p.id]={...p}; });
+  enforcePricePolicy(state._seedProducts);
+}
+function mergeProductSnapshot(snap){
+  ensureSeedProducts();
+  const del=deletedIds();
+  const merged={};
+  Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]={...state._seedProducts[k]}; });
+  if(!snap.empty){
+    snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]={...(merged[d.id]||{}),...d.data(),id:d.id}; });
+    state.source="firestore";
+  }
+  state.fsCount=snap.size; state.products=merged;
+  enforcePricePolicy();
+  renderAnnounce();
+  if(routeNow().startsWith("/admin")) renderAdminTable(); else route();
+}
+function subscribeProductsForAdmin(){
+  if(state.productsUnsub || !(state.fbReady && window.firebase)) return;
+  try{ state.productsUnsub=firebase.firestore().collection("products").onSnapshot(mergeProductSnapshot); }
+  catch(e){ console.warn("Products subscription failed:", e); }
+}
+function unsubscribeProducts(){
+  try{ if(state.productsUnsub) state.productsUnsub(); }catch(e){}
+  state.productsUnsub=null;
+}
 function initFirebase(){
   if(!(window.firebase && firebaseConfigured())) return;
   try{
     firebase.initializeApp(window.FirebaseConfig);
     const db=firebase.firestore(), auth=firebase.auth();
     state.fbReady=true;
+    ensureSeedProducts();
     auth.onAuthStateChanged(u=>{ state.user=(u && !u.isAnonymous)?u:null; const r=routeNow(); if(r.startsWith("/admin")||r.startsWith("/account")) route(); });
     db.collection("settings").doc("store").onSnapshot(s=>{
       if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; applySettings(); renderAnnounce(); route(); }
     });
-    db.collection("products").onSnapshot(snap=>{
-      if(!state._seedProducts){
-        state._seedProducts={};
-        SEED.forEach(p=>{ state._seedProducts[p.id]={...p}; });
-        enforcePricePolicy(state._seedProducts);
-      }
-      const del=deletedIds();
-      const merged={};
-      Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]={...state._seedProducts[k]}; });
-      if(!snap.empty){
-        snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]={...(merged[d.id]||{}),...d.data(),id:d.id}; });
-        state.source="firestore";
-      }
-      state.fsCount=snap.size; state.products=merged;
-      enforcePricePolicy();
-      renderAnnounce();
-      if(routeNow().startsWith("/admin")) renderAdminTable(); else route();
-    });
+    /* Important for Firebase free tier: do NOT subscribe every shopper to the
+       whole products collection. With 300+ listings, each visit costs 300+ reads.
+       Only the private admin dashboard opens the realtime products listener. */
+    if(routeNow().startsWith("/admin") && state.user) subscribeProductsForAdmin();
   }catch(e){ console.warn("Firebase init failed:", e); }
 }
 /* Owner edit → Firestore. `changed` lists the fields the owner actually touched so the runtime
@@ -2934,6 +2950,8 @@ function socialSet(title,description,url,image){
 function route(){
   const h=routeNow();
   try{ initAnalytics(); }catch(e){}
+  const canAdminProducts=h==="/admin" && state.fbReady && state.user && (!state.settings.adminUid || state.user.uid===state.settings.adminUid);
+  if(canAdminProducts) subscribeProductsForAdmin(); else if(state.productsUnsub && !canAdminProducts) unsubscribeProducts();
   const app=$("#app");
   window.scrollTo(0,0);
   let base=h;
