@@ -1,37 +1,71 @@
-# Email Receipts — Setup Guide (EmailJS, ~15 minutes, free)
+# Order Email Alerts — Setup Guide (EmailJS, ~15 minutes, free)
 
-Your website now has the receipt-sending code built in. It sends an automatic
-"order received + payment instructions" email to the customer's inbox the moment
-they check out (signed-in customers — their email is already stored with every
-order). Until the 3 keys below are filled in, the feature stays silently off.
+The website now saves every checkout into Firebase before the buyer pays. EmailJS is optional, but it gives you inbox alerts when a new website order is created and can also email the buyer a receipt if they enter an email.
 
-**Free tier: 200 emails/month** — enough for launch (upgrade or move to the bot
-server later if you outgrow it).
+**Free tier: 200 emails/month** — enough for launch. If you grow past that, move alerts server-side with Resend, Firebase Functions, or a WhatsApp Business API provider.
 
 ---
 
-## Step 1 — Create the account (3 min)
+## Step 1 — Create the account
 
-1. Go to **emailjs.com** → Sign up (free, no card)
-2. Confirm your email
+1. Go to **emailjs.com** → Sign up.
+2. Confirm your email.
 
-## Step 2 — Connect your email address (3 min)
+## Step 2 — Connect your sending email
 
-1. Dashboard → **Email Services** → **Add New Service**
-2. Pick **Gmail** (or the provider you use)
-3. Connect the mailbox you want receipts sent FROM — ideally the shop's support
-   inbox (e.g. `heavendigital.store@gmail.com` or your support@ address)
-4. **Create Service** → copy the **Service ID** (looks like `service_xxxxxxx`)
+1. Dashboard → **Email Services** → **Add New Service**.
+2. Pick **Gmail** or your provider.
+3. Connect the mailbox you want emails sent FROM — ideally your support inbox.
+4. Copy the **Service ID**. It looks like `service_xxxxxxx`.
 
-## Step 3 — Create the receipt template (5 min)
+## Step 3 — Create the owner alert template
 
-1. **Email Templates** → **Create New Template**
-2. Set **Subject** to:
+1. **Email Templates** → **Create New Template**.
+2. Name it `HeavenDigital Owner Order Alert`.
+3. Set **Subject** to:
+
+```txt
+New order {{order_id}} — {{total}}
 ```
+
+4. Set **Content** to:
+
+```txt
+New website order received.
+
+Order ID: {{order_id}}
+Total: {{total}}
+
+Customer:
+Name: {{customer_name}}
+WhatsApp: {{customer_whatsapp}}
+Email: {{customer_email}}
+
+Items:
+{{items}}
+
+Checkout action: {{checkout_action}}
+
+Open admin dashboard:
+{{admin_url}}
+```
+
+5. In the template settings, make sure the recipient uses `{{to_email}}`.
+6. Save and copy the **Template ID**. It looks like `template_xxxxxxx`.
+
+## Step 4 — Optional buyer receipt template
+
+You can reuse the owner template ID for now, but a separate buyer receipt looks better.
+
+Subject:
+
+```txt
 Order {{order_id}} received — pay via UPI & get it in ~10 min
 ```
-3. Set **Content** to exactly this:
-```
+
+Content:
+
+```txt
 Hi {{to_name}},
 
 Your order is confirmed and waiting for payment.
@@ -55,41 +89,64 @@ Track anytime with order ID {{order_id}} on the website.
 Game on,
 {{brand}}
 ```
-4. **Save** → copy the **Template ID** (looks like `template_xxxxxxx`)
 
-## Step 4 — Get your Public Key (1 min)
+Save and copy this second **Template ID** if you create it.
 
-1. **Account** → **General** → copy the **Public Key** (looks like `AbC123...`)
+## Step 5 — Get your Public Key
 
-## Step 5 — Send me the 3 values
+EmailJS Dashboard → **Account** → **General** → copy the **Public Key**.
 
-Paste these in chat and I'll push them live (same flow as before):
+## Step 6 — Paste the values into `index.html`
 
+Find this line:
+
+```js
+const EMAILJS={publicKey:"", serviceId:"", templateId:"", customerTemplateId:"", ownerTemplateId:""};
 ```
-Public Key:
-Service ID:
-Template ID:
+
+For owner alerts only:
+
+```js
+const EMAILJS={
+  publicKey:"YOUR_PUBLIC_KEY",
+  serviceId:"service_xxxxxxx",
+  templateId:"",
+  ownerTemplateId:"template_owner_alert",
+  customerTemplateId:""
+};
 ```
 
-Once pushed, every checkout instantly emails the customer. Feature can be
-turned off anytime by blanking the keys.
+For owner alerts plus buyer receipts:
+
+```js
+const EMAILJS={
+  publicKey:"YOUR_PUBLIC_KEY",
+  serviceId:"service_xxxxxxx",
+  templateId:"",
+  ownerTemplateId:"template_owner_alert",
+  customerTemplateId:"template_buyer_receipt"
+};
+```
+
+`templateId` is kept for older installs. For new setup, prefer `ownerTemplateId` and `customerTemplateId` so the owner and buyer get the correct email copy.
 
 ---
 
-## FAQ
+## Important notes
 
-**Who receives emails?** Signed-in customers (their account email is already
-saved with the order). Guest checkouts don't share an email, so no receipt —
-they still get everything on WhatsApp.
+- Website orders still save to the admin dashboard even if EmailJS is blank.
+- EmailJS can send email alerts, but it cannot send WhatsApp messages automatically.
+- Automatic WhatsApp notifications require WhatsApp Business API or a backend service.
+- The EmailJS public key is designed to be visible in frontend code; keep service/template permissions limited in EmailJS.
 
-**Is the Public Key safe in the page source?** Yes, by design — it can only
-send YOUR one template, and EmailJS rate-limits it. Worst case someone abuses
-your 200/month quota (they can't read anything or send other content).
+## Test it
 
-**Later upgrade path:** when the WhatsApp bot server goes live, we can move
-receipts server-side (Resend — 3,000/month free, custom `@heavendigital.store`
-from-address, delivery logs) and also auto-send a "payment verified" email
-when you mark orders paid. EmailJS is the perfect launch bridge.
-
-**Test it:** once keys are in, create a test account on your own site with
-your own email → add any product → checkout → check your inbox.
+1. Deploy the updated website and Firestore rules.
+2. Add a product to cart.
+3. Proceed to checkout.
+4. Enter name + WhatsApp.
+5. Click **Save order & pay via UPI**.
+6. Check:
+   - Admin dashboard → Orders
+   - Your owner email inbox
+   - Buyer email inbox, if a buyer receipt template is configured
