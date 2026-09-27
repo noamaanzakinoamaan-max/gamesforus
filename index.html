@@ -2769,15 +2769,15 @@ async function persistWebsiteOrder(action, contact){
     return false;
   }
   const now=Date.now();
-  const auth=firebase.auth();
   try{
-    if(!auth.currentUser){
-      try{ await auth.signInAnonymously(); }catch(e){ console.warn("[checkout] anonymous auth unavailable; trying public order create", e && e.code || e); }
-    }
-    const u=auth.currentUser;
+    /* Guest checkout is allowed by firestore.rules, so do not create anonymous
+       Firebase Auth users here. Repeated test orders can hit Firebase Auth's
+       daily anonymous-sign-in quota and show "daily usage limits". */
+    const current=(firebase.auth&&firebase.auth().currentUser)||null;
+    const u=(current && !current.isAnonymous)?current:null;
     const order={
       uid:(u&&u.uid)||"guest",
-      guest:!(u&&!u.isAnonymous),
+      guest:!u,
       items:ch.lines,
       total:ch.total,
       oid:ch.oid,
