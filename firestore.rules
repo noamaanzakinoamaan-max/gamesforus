@@ -13,6 +13,53 @@ service cloud.firestore {
         && ( !exists(/databases/$(database)/documents/settings/store)
              || !("adminUid" in get(/databases/$(database)/documents/settings/store).data) );
     }
+    function shortString(v, max) {
+      return v is string && v.size() <= max;
+    }
+    function maybeShortString(d, key, max) {
+      return !(key in d) || d[key] == null || shortString(d[key], max);
+    }
+    function validWebsiteOrderCreate(oid) {
+      let d = request.resource.data;
+      return oid.matches('^HD-[A-Z0-9]{3,8}$')
+        && d.oid == oid
+        && d.keys().hasOnly(['uid', 'guest', 'items', 'total', 'oid', 'ts', 'updatedAt', 'status', 'source', 'refBy', 'coupon', 'discount', 'refOff', 'checkoutAction', 'contactProvided'])
+        && d.source == 'website'
+        && d.status == 'pending'
+        && d.contactProvided == true
+        && d.guest is bool
+        && shortString(d.uid, 100)
+        && (request.auth == null || d.uid == request.auth.uid || d.uid == 'guest')
+        && d.items is list
+        && d.items.size() > 0
+        && d.items.size() <= 25
+        && d.total is number
+        && d.total >= 0
+        && d.total <= 500000
+        && d.ts is number
+        && d.updatedAt is number
+        && (d.refBy == null || shortString(d.refBy, 40))
+        && (d.coupon == null || shortString(d.coupon, 40))
+        && d.discount is number
+        && d.refOff is number
+        && shortString(d.checkoutAction, 40);
+    }
+    function validOrderContactCreate(oid) {
+      let d = request.resource.data;
+      return oid.matches('^HD-[A-Z0-9]{3,8}$')
+        && d.oid == oid
+        && d.keys().hasOnly(['oid', 'name', 'wa', 'email', 'ts', 'updatedAt', 'source', 'checkoutAction'])
+        && shortString(d.name, 80)
+        && d.name.size() >= 2
+        && shortString(d.wa, 15)
+        && d.wa.matches('^[0-9]{10,15}$')
+        && maybeShortString(d, 'email', 120)
+        && d.ts is number
+        && d.updatedAt is number
+        && d.source == 'website'
+        && shortString(d.checkoutAction, 40);
+    }
+
     match /products/{id} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
@@ -43,8 +90,14 @@ service cloud.firestore {
       allow get: if true; // single-order tracking by random ID (status + items only)
       // Customer account queries must constrain uid to the signed-in user's UID.
       allow list: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
-      allow create: if request.auth != null && (request.resource.data.uid == request.auth.uid || isAdmin());
+      // Public website checkout creates a limited, non-sensitive order document.
+      // Buyer name/WhatsApp/email are written to /orderContacts/{oid}, which only the owner can read.
+      allow create: if isAdmin() || validWebsiteOrderCreate(oid);
       allow update, delete: if isAdmin();
+    }
+    match /orderContacts/{oid} {
+      allow read, update, delete: if isAdmin();
+      allow create: if isAdmin() || validOrderContactCreate(oid);
     }
   }
 }

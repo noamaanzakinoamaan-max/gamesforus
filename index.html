@@ -1486,7 +1486,7 @@ function trackPageView(){
   }catch(e){}
 }
 const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbReady:false, user:null, editing:null, editingObj:null,   adminMsg:null, adPlat:"all", orders:[], ordersLoaded:false, ordFilter:"all", refBy:null, refOff:0,
-  customers:[], custLoaded:false, custFilter:"all", custQ:"", custOpen:{} };
+  customers:[], custLoaded:false, custFilter:"all", custQ:"", custOpen:{}, checkout:null };
 /* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore).
    Anything the owner edits in the admin panel is stamped with adminEdited/adminFields and is never
    rewritten here again: an owner's price, badge or toggle always beats the shipped defaults. */
@@ -1583,7 +1583,7 @@ function initFirebase(){
     firebase.initializeApp(window.FirebaseConfig);
     const db=firebase.firestore(), auth=firebase.auth();
     state.fbReady=true;
-    auth.onAuthStateChanged(u=>{ state.user=u; const r=routeNow(); if(r.startsWith("/admin")||r.startsWith("/account")) route(); });
+    auth.onAuthStateChanged(u=>{ state.user=(u && !u.isAnonymous)?u:null; const r=routeNow(); if(r.startsWith("/admin")||r.startsWith("/account")) route(); });
     db.collection("settings").doc("store").onSnapshot(s=>{
       if(s.exists){ state.settings={...DEFAULT_SETTINGS,...s.data()}; applySettings(); renderAnnounce(); route(); }
     });
@@ -2229,7 +2229,7 @@ function renderOrders(){
   if(state.ordFilter==="cancelled") rows=all.filter(o=>["cancelled","refunded"].includes(o.status));
   else if(state.ordFilter!=="all") rows=all.filter(o=>(o.status||"pending")===state.ordFilter);
   rows=rows.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
-  if(!rows.length){ box.innerHTML='<p class="sub" style="margin:0">No orders here yet. Signed-in buyers\' checkouts land here automatically — add WhatsApp orders with "＋ Add order".</p>'; return; }
+  if(!rows.length){ box.innerHTML='<p class="sub" style="margin:0">No orders here yet. Website checkouts land here automatically after the buyer saves their order — add WhatsApp orders with "＋ Add order".</p>'; return; }
   box.innerHTML=rows.map(o=>'<div class="acard">'+
     '<div class="ord-top"><b>'+esc(o.oid||"?")+'</b><span>'+(o.ts?new Date(o.ts).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</span>'+ordPill(o.status)+(o.refBy?' <span class="pill pay">🎁 '+esc(o.refBy)+'</span>':'')+'</div>'+
     '<div class="ord-buyer">'+esc(o.email||"")+(o.wa?" · WhatsApp "+esc(o.wa):"")+(o.name?" · "+esc(o.name):"")+'</div>'+
@@ -2241,8 +2241,15 @@ async function loadAdminOrders(){
   if(!(state.fbReady&&state.user)) return;
   const box=$("#ordersList"); if(box&&!state.ordersLoaded) box.innerHTML='<p class="sub" style="margin:0">Loading…</p>';
   try{
-    const snap=await firebase.firestore().collection("orders").orderBy("ts","desc").limit(100).get();
-    state.orders=snap.docs.map(d=>d.data());
+    const db=firebase.firestore();
+    const ordersSnap=await db.collection("orders").orderBy("ts","desc").limit(100).get();
+    const orders=ordersSnap.docs.map(d=>({oid:d.id, ...(d.data()||{})}));
+    const contacts={};
+    try{
+      const contactsSnap=await db.collection("orderContacts").orderBy("ts","desc").limit(150).get();
+      contactsSnap.docs.forEach(d=>{ contacts[d.id]=d.data()||{}; });
+    }catch(e){ console.warn("[orders] contact merge skipped", e && e.message || e); }
+    state.orders=orders.map(o=>({...(contacts[o.oid]||{}), ...o, oid:o.oid}));
     state.ordersLoaded=true; renderOrders();
   }catch(err){
     const m=String(err.message||"");
@@ -2664,16 +2671,20 @@ function searchLive(v){
   out.innerHTML=searchHtml(searchMatches(v));
   try{ history.replaceState(null,"","#/search"+(v?"?q="+encodeURIComponent(v):"")); }catch(e){}
 }
-/* ============ email receipts (EmailJS — works without a backend) ============ */
-/* To enable: create a free account at emailjs.com, build the template from
-   EMAILJS-SETUP.md, then fill these 3 values. Empty values = feature off. */
-const EMAILJS={publicKey:"", serviceId:"", templateId:""};
-function sendReceiptEmail(oid, lines, total, disc, refOff){
-  if(!EMAILJS.publicKey || !EMAILJS.serviceId || !EMAILJS.templateId) return;
-  if(!window.emailjs || !state.user || !state.user.email) return;
-  const name=(state.user.displayName||"").trim() || (state.user.email.split("@")[0]||"there");
+/* ============ email receipts + owner order alerts (EmailJS — optional) ============ */
+/* To enable email alerts: create an EmailJS service/template, then fill these values.
+   Blank values keep checkout working; orders still save to Firestore/admin. */
+const EMAILJS={publicKey:"", serviceId:"", templateId:"", customerTemplateId:"", ownerTemplateId:""};
+function emailjsReady(){ return !!(EMAILJS.publicKey && EMAILJS.serviceId && (EMAILJS.templateId || EMAILJS.customerTemplateId || EMAILJS.ownerTemplateId) && window.emailjs); }
+function emailjsInit(){ try{ if(emailjsReady() && window.__emailjsKey!==EMAILJS.publicKey){ emailjs.init({publicKey:EMAILJS.publicKey}); window.__emailjsKey=EMAILJS.publicKey; } }catch(e){} }
+function sendReceiptEmail(oid, lines, total, disc, refOff, contact){
+  const tmpl=EMAILJS.customerTemplateId||(!EMAILJS.ownerTemplateId?EMAILJS.templateId:"");
+  if(!emailjsReady() || !tmpl) return Promise.resolve(false);
+  const toEmail=(contact&&contact.email)||((state.user&&state.user.email)||"");
+  if(!toEmail) return Promise.resolve(false);
+  const name=(contact&&contact.name)||((state.user&&state.user.displayName)||"").trim() || (toEmail.split("@")[0]||"there");
   const params={
-    to_email: state.user.email,
+    to_email: toEmail,
     to_name: name,
     order_id: oid,
     items: lines.join("\n") + (disc?("\nCoupon discount: −"+inr(disc)):"") + (refOff?("\nReferral discount: −"+inr(refOff)):""),
@@ -2685,24 +2696,166 @@ function sendReceiptEmail(oid, lines, total, disc, refOff){
     whatsapp: "+"+CONFIG.whatsapp.replace(/^91/,"").replace(/(\d{5})(\d{5})/,"$1 $2")
   };
   try{
-    emailjs.init({publicKey:EMAILJS.publicKey});
-    emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, params)
-      .then(()=>console.log("[receipt] email sent for "+oid))
-      .catch(e=>console.warn("[receipt] send failed:", e && e.text || e));
-  }catch(e){ console.warn("[receipt] skipped:", e && e.message); }
+    emailjsInit();
+    return emailjs.send(EMAILJS.serviceId, tmpl, params)
+      .then(()=>{ console.log("[receipt] email sent for "+oid); return true; })
+      .catch(e=>{ console.warn("[receipt] send failed:", e && e.text || e); return false; });
+  }catch(e){ console.warn("[receipt] skipped:", e && e.message); return Promise.resolve(false); }
+}
+function sendOwnerOrderEmail(order, contact){
+  const tmpl=EMAILJS.ownerTemplateId||EMAILJS.templateId;
+  if(!emailjsReady() || !tmpl) return Promise.resolve(false);
+  const params={
+    to_email: CONFIG.email,
+    to_name: CONFIG.brand+" owner",
+    owner_email: CONFIG.email,
+    order_id: order.oid,
+    items: (order.items||[]).join("\n"),
+    total: inr(order.total||0),
+    customer_name: (contact&&contact.name)||"",
+    customer_whatsapp: (contact&&contact.wa)||"",
+    customer_email: (contact&&contact.email)||"",
+    checkout_action: order.checkoutAction||"checkout",
+    brand: CONFIG.brand,
+    admin_url: location.origin+location.pathname.replace(/index\.html$/,"")+"#/admin",
+    whatsapp: "+"+CONFIG.whatsapp.replace(/^91/,"").replace(/(\d{5})(\d{5})/,"$1 $2"),
+    upi_id: CONFIG.upiId
+  };
+  try{
+    emailjsInit();
+    return emailjs.send(EMAILJS.serviceId, tmpl, params)
+      .then(()=>{ console.log("[owner-alert] email sent for "+order.oid); return true; })
+      .catch(e=>{ console.warn("[owner-alert] send failed:", e && e.text || e); return false; });
+  }catch(e){ console.warn("[owner-alert] skipped:", e && e.message); return Promise.resolve(false); }
 }
 
 /* ============ checkout ============ */
+const LS_CO="hd_checkout_contact_v1";
+function savedCheckoutContact(){ try{return JSON.parse(localStorage.getItem(LS_CO)||"{}");}catch(e){return{};} }
+function saveCheckoutContact(c){ try{localStorage.setItem(LS_CO, JSON.stringify(c||{}));}catch(e){} }
+function checkoutContactFromForm(){
+  const digits=v=>String(v||"").replace(/[^0-9]/g,"");
+  const rawWa=(($("#co-wa")||{}).value||"").trim();
+  let wa=digits(rawWa);
+  if(wa.length===10) wa="91"+wa;
+  return {
+    name:(($("#co-name")||{}).value||"").trim(),
+    wa:wa,
+    email:(($("#co-email")||{}).value||"").trim().toLowerCase()
+  };
+}
+function checkoutContactError(c){
+  if(!c.name || c.name.length<2) return "Please enter the buyer name so we can identify the order.";
+  if(!c.wa || c.wa.length<10 || c.wa.length>15) return "Please enter a valid WhatsApp number with country code, e.g. 919876543210.";
+  if(c.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c.email)) return "Please enter a valid email address, or leave email blank.";
+  return "";
+}
+function checkoutMsg(html){ const el=$("#checkoutMsg"); if(el) el.innerHTML=html||""; }
+function setCheckoutBusy(on){ document.querySelectorAll("[data-checkout-action]").forEach(b=>{ b.disabled=!!on; }); }
+function checkoutWaUrl(action){
+  const c=checkoutContactFromForm(), ch=state.checkout||{};
+  const label=action==="upi"?"I am paying via UPI":action==="copy"?"I copied the UPI ID and will pay":"I've paid / I want to confirm payment";
+  const msg="New order "+ch.oid+" on "+CONFIG.brand+"\n"+(ch.lines||[]).join("\n")+
+    (ch.disc?"\nCoupon: "+(ch.coupon||"")+" (−"+inr(ch.disc)+")":"")+(ch.refOff?"\nReferral: "+(ch.refBy||"")+" (−"+inr(ch.refOff)+")":"")+
+    "\nTotal: "+inr(ch.total||0)+"\nName: "+c.name+"\nWhatsApp: +"+c.wa+(c.email?"\nEmail: "+c.email:"")+"\nStatus: "+label;
+  return "https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(msg);
+}
+async function persistWebsiteOrder(action, contact){
+  const ch=state.checkout;
+  if(!ch) return false;
+  if(ch.saved){ checkoutMsg('<div class="ok-note">Order '+esc(ch.oid)+' is already saved. You can continue payment or WhatsApp us.</div>'); return true; }
+  if(!(window.firebase && firebaseConfigured())){
+    checkoutMsg('<div class="err">Could not save this order automatically because Firebase is not ready. Please use WhatsApp so we receive the order details.</div>');
+    return false;
+  }
+  const now=Date.now();
+  const auth=firebase.auth();
+  try{
+    if(!auth.currentUser){
+      try{ await auth.signInAnonymously(); }catch(e){ console.warn("[checkout] anonymous auth unavailable; trying public order create", e && e.code || e); }
+    }
+    const u=auth.currentUser;
+    const order={
+      uid:(u&&u.uid)||"guest",
+      guest:!(u&&!u.isAnonymous),
+      items:ch.lines,
+      total:ch.total,
+      oid:ch.oid,
+      ts:now,
+      updatedAt:now,
+      status:"pending",
+      source:"website",
+      refBy:ch.refBy||null,
+      coupon:ch.coupon||null,
+      discount:ch.disc||0,
+      refOff:ch.refOff||0,
+      checkoutAction:action||"checkout",
+      contactProvided:true
+    };
+    const contactDoc={
+      oid:ch.oid,
+      name:contact.name,
+      wa:contact.wa,
+      email:contact.email||((u&&!u.isAnonymous&&u.email)||""),
+      ts:now,
+      updatedAt:now,
+      source:"website",
+      checkoutAction:action||"checkout"
+    };
+    const db=firebase.firestore();
+    const oref=db.collection("orders").doc(ch.oid);
+    const exists=await oref.get().then(d=>d.exists).catch(()=>false);
+    if(!exists){
+      const batch=db.batch();
+      batch.set(oref, order);
+      batch.set(db.collection("orderContacts").doc(ch.oid), contactDoc);
+      await batch.commit();
+      try{ await sendOwnerOrderEmail(order, contactDoc); }catch(e){}
+      try{ sendReceiptEmail(ch.oid, ch.lines, ch.total, ch.disc, ch.refOff, contactDoc); }catch(e){}
+    }
+    ch.saved=true;
+    checkoutMsg('<div class="ok-note">Order '+esc(ch.oid)+' saved. It is now visible in the owner dashboard.</div>');
+    return true;
+  }catch(err){
+    console.warn("[checkout] order save failed", err);
+    checkoutMsg('<div class="err">Order was not saved automatically: '+esc(String(err.message||err).slice(0,120))+'. Use the WhatsApp button so we receive it before you pay.</div>');
+    return false;
+  }
+}
+async function handleCheckoutAction(btn){
+  const action=btn.dataset.checkoutAction||"upi";
+  const contact=checkoutContactFromForm();
+  const bad=checkoutContactError(contact);
+  if(bad){ checkoutMsg('<div class="err">'+esc(bad)+'</div>'); return; }
+  saveCheckoutContact(contact);
+  let popup=null;
+  if(action==="wa") popup=window.open("about:blank","_blank");
+  setCheckoutBusy(true);
+  const saved=await persistWebsiteOrder(action, contact);
+  setCheckoutBusy(false);
+  if(action==="wa"){
+    const url=checkoutWaUrl(action);
+    if(popup) popup.location.href=url; else window.open(url,"_blank","noopener");
+    return;
+  }
+  if(!saved) return;
+  if(action==="copy"){
+    copyText(CONFIG.upiId);
+    checkoutMsg('<div class="ok-note">Order saved and UPI ID copied. Use payment note <b>'+esc((state.checkout||{}).oid||"")+'</b>.</div>');
+    return;
+  }
+  if(action==="upi") window.location.href=(state.checkout||{}).upi||"#";
+}
 function openCheckout(){
   const ids=Object.keys(cart); if(!ids.length) return;
   const oid="HD-"+Math.random().toString(36).slice(2,7).toUpperCase();
   const disc=discountAmount(); const refOff=state.refBy?state.refOff:0; const total=Math.max(0,cartTotal()-disc-refOff);
   const lines=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return cart[k]+"× "+p.title+(opt==="p2"?" ("+optLabel(p,true)+")":"")+" — "+inr(priceOf(p,opt)*cart[k]);});
-  const waMsg="New order "+oid+" on "+CONFIG.brand+"\n"+lines.join("\n")+
-    (disc?"\nCoupon: "+appliedCoupon+" (−"+inr(disc)+")":"")+(refOff?"\nReferral: "+state.refBy+" (−"+inr(refOff)+")":"")+"\nTotal: "+inr(total)+"\nName: \nWhatsApp: ";
-  const wa="https://wa.me/"+CONFIG.whatsapp+"?text="+encodeURIComponent(waMsg);
   const upi="upi://pay?pa="+encodeURIComponent(CONFIG.upiId)+"&pn="+encodeURIComponent(CONFIG.brand)+"&am="+total+"&cu=INR&tn="+encodeURIComponent(oid);
   const rows=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return '<div class="sumline"><span>'+cart[k]+'× '+esc(p.title)+(opt==="p2"?' <b class="t2l">'+optLabel(p,true)+'</b>':'')+'</span><span>'+inr(priceOf(p,opt)*cart[k])+'</span></div>';}).join("");
+  const saved=savedCheckoutContact();
+  const defaultEmail=(state.user&&state.user.email)||saved.email||"";
+  state.checkout={oid:oid, lines:lines, total:total, disc:disc, refOff:refOff, refBy:state.refBy||null, coupon:appliedCoupon||null, upi:upi, saved:false};
   $("#modalRoot").innerHTML=
    '<div class="overlay" data-overlay><div class="modal" role="dialog" aria-modal="true" aria-label="Checkout">'+
    '<button class="x" data-close-modal aria-label="Close">✕</button>'+
@@ -2711,23 +2864,28 @@ function openCheckout(){
    (disc?'<div class="sumline"><span>Coupon '+esc(appliedCoupon||"")+'</span><span>− '+inr(disc)+'</span></div>':'')+
    (refOff?'<div class="sumline"><span>Referral '+esc(state.refBy||"")+'</span><span>− '+inr(refOff)+'</span></div>':'')+
    '<div class="sumline total"><span>Total</span><span>'+inr(total)+'</span></div></div>'+
-   '<div class="tstrip"><span>\u2713 30-day warranty</span><span>\u2713 Guided setup till you play</span><span>\u2713 Replacement or refund</span></div>'+
-   '<div class="paybtns">'+
-   '<a class="btn btn-block" href="'+upi+'">Pay '+inr(total)+' via any UPI app</a>'+
-   '<button class="btn btn-ghost btn-block" data-copy="'+esc(CONFIG.upiId)+'">Copy UPI ID: '+esc(CONFIG.upiId)+'</button>'+
-   '<a class="btn btn-block" target="_blank" rel="noopener" href="'+wa+'">I&#39;ve paid — confirm on WhatsApp</a>'+
+   '<div class="tstrip"><span>\u2713 30-day warranty</span><span>\u2713 Guided setup till you play</span><span>\u2713 Saved to owner dashboard</span></div>'+
+   '<div class="panel" style="background:rgba(255,255,255,.025);margin:12px 0;padding:12px">'+
+   '<h4 style="margin:0 0 8px">Buyer details</h4>'+
+   '<div class="form2"><div><label for="co-name">Name</label><input class="f" id="co-name" autocomplete="name" placeholder="Your name" value="'+esc(saved.name||'')+'"></div>'+
+   '<div><label for="co-wa">WhatsApp number</label><input class="f" id="co-wa" inputmode="tel" autocomplete="tel" placeholder="919876543210" value="'+esc(saved.wa||'')+'"></div>'+
+   '<div><label for="co-email">Email <span class="hint">optional</span></label><input class="f" id="co-email" type="email" autocomplete="email" placeholder="you@gmail.com" value="'+esc(defaultEmail)+'"></div></div>'+
+   '<p class="hint" style="margin:8px 0 0">We save these details before payment, so your order reaches us even if UPI/WhatsApp does not open correctly.</p>'+
    '</div>'+
-   '<p class="hint"><b>How this works:</b> pay, tap confirm, we verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Track this order anytime with ID <b>'+oid+'</b> on our Track page.</p>'+
+   '<div id="checkoutMsg"></div>'+
+   '<div class="paybtns">'+
+   '<button class="btn btn-block" data-checkout-action="upi">Save order &amp; pay '+inr(total)+' via UPI</button>'+
+   '<button class="btn btn-ghost btn-block" data-checkout-action="copy">Save order &amp; copy UPI ID: '+esc(CONFIG.upiId)+'</button>'+
+   '<button class="btn btn-block" data-checkout-action="wa">I&#39;ve paid — notify us on WhatsApp</button>'+
+   '</div>'+
+   '<p class="hint"><b>How this works:</b> enter details → save order → pay via UPI → tap WhatsApp confirmation. We verify in our bank app and hand over on WhatsApp — usually under 10 minutes during '+esc(CONFIG.hours)+'. Track this order anytime with ID <b>'+oid+'</b>.</p>'+
    '</div></div>';
-  if(state.user && window.firebase){
-    try{ firebase.firestore().collection("orders").doc(oid).set({uid:state.user.uid, email:state.user.email||"", items:lines, total:total, oid:oid, ts:Date.now(), status:"pending", refBy:state.refBy||null},{merge:true}).catch(()=>{}); }catch(e){}
-  }
-  try{ sendReceiptEmail(oid, lines, total, disc, refOff); }catch(e){}
   state.refBy=null; state.refOff=0;
   document.body.style.overflow="hidden";
   const ov=$("[data-overlay]"); if(ov) ov.addEventListener("click",e=>{if(e.target===ov) closeModal();});
+  const name=$("#co-name"); if(name&&!name.value) setTimeout(()=>name.focus(),40);
 }
-function closeModal(){ $("#modalRoot").innerHTML=""; document.body.style.overflow=""; }
+function closeModal(){ $("#modalRoot").innerHTML=""; document.body.style.overflow=""; state.checkout=null; }
 
 /* ============ router ============ */
 const ROUTES={
@@ -2977,6 +3135,7 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-rm]"))){ delete cart[el.dataset.rm]; saveCart(cart); route(); toast("Removed from cart"); return; }
   if(q("[data-checkout]")){ openCheckout(); return; }
   if(q("[data-close-modal]")){ closeModal(); return; }
+  if((el=q("[data-checkout-action]"))){ e.preventDefault(); await handleCheckoutAction(el); return; }
   if((el=q("[data-copy]"))){ copyText(el.dataset.copy); return; }
   if(q("[data-coupon]")){
     const inp=($("#coupon")||{}).value||""; const code=inp.trim().toUpperCase();
@@ -3055,8 +3214,14 @@ document.addEventListener("click", async function(e){
     const oid="HD-"+Math.random().toString(36).slice(2,7).toUpperCase();
     el.disabled=true;
     try{
-      await firebase.firestore().collection("orders").doc(oid).set({uid:"manual", email:(g("#mo-name")||"").trim()||"WhatsApp order", wa:(g("#mo-wa")||"").trim(), name:(g("#mo-name")||"").trim(), items:items, total:total, oid:oid, ts:Date.now(), status:g("#mo-status")||"pending"});
-      state.orders.unshift({uid:"manual", email:(g("#mo-name")||"").trim()||"WhatsApp order", wa:(g("#mo-wa")||"").trim(), name:(g("#mo-name")||"").trim(), items:items, total:total, oid:oid, ts:Date.now(), status:g("#mo-status")||"pending"});
+      const now=Date.now(), status=g("#mo-status")||"pending", name=(g("#mo-name")||"").trim(), wa=(g("#mo-wa")||"").trim();
+      const order={uid:"manual", items:items, total:total, oid:oid, ts:now, updatedAt:now, status:status, source:"manual"};
+      const contact={oid:oid, email:name||"WhatsApp order", name:name, wa:wa, ts:now, updatedAt:now, source:"manual"};
+      const db=firebase.firestore(), batch=db.batch();
+      batch.set(db.collection("orders").doc(oid), order);
+      batch.set(db.collection("orderContacts").doc(oid), contact);
+      await batch.commit();
+      state.orders.unshift({...contact, ...order});
       state.ordersLoaded=true; renderOrders(); pmClose(); toast("Order "+oid+" saved");
     }catch(err){ if(msg) msg.textContent="Save failed: "+err.message; el.disabled=false; }
     return;
