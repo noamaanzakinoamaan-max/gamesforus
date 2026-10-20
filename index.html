@@ -872,6 +872,10 @@ const CONFIG = {
    kind: account | subscription | wallet
    ============================================================ */
 const SEED = [
+ /* ---- Call of Duty: Modern Warfare 4 ---- */
+ {id:"psn-call-of-duty-modern-warfare-4", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare 4 — PS5", region:"India", games:["Call of Duty: Modern Warfare 4"], price:1799, mrp:6999, stock:8, tag:"New Release", p2:3499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
+ {id:"pc-call-of-duty-modern-warfare-4", platform:"pc", kind:"account", title:"Call of Duty: Modern Warfare 4 — PC", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:399, mrp:5999, stock:5, tag:"New Release", p2:2499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
+ {id:"xbox-call-of-duty-modern-warfare-4", platform:"xbox", kind:"account", title:"Call of Duty: Modern Warfare 4 — Xbox", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:1399, mrp:5999, stock:5, tag:"New Release", featured:true, active:true, img:"img/cod-mw4-cover.webp"},
  /* ---- PSN ---- (img = poster; remove/replace freely in admin) */
  {id:"psn-psplus-extra-1m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 1 Month", region:"India", games:["PS Plus Extra · 1 Month"], price:499, mrp:3999, stock:9, tag:"New Arrival", featured:true, active:true, img:"img/17e93c0ec4b0.webp"},
  {id:"psn-psplus-extra-3m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 3 Months", region:"India", games:["PS Plus Extra · 3 Months"], price:1299, mrp:3999, stock:6, tag:"", featured:false, active:true, img:"img/17e93c0ec4b0.webp"},
@@ -962,8 +966,6 @@ const SEED = [
   img:"img/2e499e8a792b.png", featured:false, active:true},
  {id:"psn-call-of-duty-black-ops-ii", platform:"psn", kind:"account", title:"Call of Duty: Black Ops II — PS5", region:"Global", games:["Call of Duty: Black Ops II"], price:799, mrp:4999, stock:5, tag:"", p2:2299,
   img:"img/39a83966b1d6.jpg", featured:false, active:true},
- {id:"psn-call-of-duty-modern-warfare-4", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare 4 — PS5", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:1549, mrp:4999, stock:8, tag:"", p2:2949,
-  img:"img/f1ae50df1fea.jpg", featured:false, active:true},
  {id:"psn-call-of-duty-black-ops", platform:"psn", kind:"account", title:"Call of Duty: Black Ops — PS5", region:"Global", games:["Call of Duty: Black Ops"], price:799, mrp:4999, stock:6, tag:"", p2:2299,
   img:"img/2ef67eccd8d4.jpg", featured:false, active:true},
  {id:"psn-call-of-duty-modern-warfare-ii", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare II — PS5", region:"Global", games:["Call of Duty: Modern Warfare II"], price:999, mrp:4998, stock:4, tag:"", p2:2299,
@@ -1494,7 +1496,10 @@ const CATALOG_OVERRIDES = {
   "psn-control-resonant": {tag:"Bestseller"},
   "psn-blood-of-dawnwalker": {tag:"Bestseller"},
   "psn-ghost-of-yotei": {price:1099, p2:2499},
-  "psn-spiderman-2": {featured:false}
+  "psn-spiderman-2": {featured:false},
+  "pc-call-of-duty-modern-warfare-4": {price:399, p2:2499, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
+  "psn-call-of-duty-modern-warfare-4": {price:1799, p2:3499, mrp:6999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
+  "xbox-call-of-duty-modern-warfare-4": {price:1399, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"}
 };
 /* was this exact field last set by the owner in the admin panel? */
 function ownerEdited(p, field){
@@ -1538,7 +1543,18 @@ function enforcePricePolicy(products=state.products){
   return products;
 }
 function loadLocal(){
-  try{ const p=JSON.parse(localStorage.getItem(LS_P)||"null"); if(p&&p.length){ p.forEach(x=>state.products[x.id]=x); SEED.forEach(x=>{ if(!state.products[x.id]) state.products[x.id]=x; }); } else SEED.forEach(x=>state.products[x.id]=x); }catch(e){ SEED.forEach(x=>state.products[x.id]=x); }
+  const del=deletedIds();
+  state.products={};
+  SEED.forEach(x=>{ if(!del.includes(x.id)) state.products[x.id]={...x}; });
+  try{
+    const p=JSON.parse(localStorage.getItem(LS_P)||"null");
+    if(p&&p.length){
+      p.forEach(x=>{
+        if(!x||!x.id||del.includes(x.id)) return;
+        state.products[x.id]={...(state.products[x.id]||{}),...x};
+      });
+    }
+  }catch(e){}
   enforcePricePolicy();
   try{ const s=JSON.parse(localStorage.getItem(LS_S)||"null"); if(s) state.settings={...DEFAULT_SETTINGS,...s}; }catch(e){}
 }
@@ -1669,7 +1685,7 @@ async function syncCatalog(btn){
       if(doc && (doc.adminEdited || p.adminEdited)){
         /* Owner-managed listing: only add fields Firestore is missing, never overwrite a value you set. */
         const add={}; let n=0;
-        Object.keys(p).forEach(k=>{ if(!(k in doc)){ add[k]=p[k]; n++; } });
+        Object.keys(p).forEach(k=>{ if(!(k in doc) || (CATALOG_OVERRIDES[id] && (k in CATALOG_OVERRIDES[id]) && !ownerEdited(doc,k))){ add[k]=p[k]; n++; } });
         if(n) payloads.push([id,add]); else kept++;
         return;
       }
@@ -2466,7 +2482,7 @@ function pmClose(){ const ov=$("#pmOv"); if(ov) ov.remove(); document.body.style
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") pmClose(); });
 function openProdModal(id){
   const p=id?byId(id):null;
-  const tags=["","Bestseller","Deal","New","Hot","Instant","Bundle","Limited","Preorder"];
+  const tags=["","Bestseller","Deal","New","New Release","Hot","Trending","Instant","Bundle","Limited","Preorder"];
   $("#modalRoot").innerHTML=
   '<div class="pm-ov" id="pmOv" onclick="if(event.target===this)pmClose()">'+
   '<div class="pm-dl" role="dialog" aria-modal="true" aria-label="'+(p?"Edit product":"Add product")+'">'+
