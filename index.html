@@ -872,6 +872,10 @@ const CONFIG = {
    kind: account | subscription | wallet
    ============================================================ */
 const SEED = [
+ /* ---- Phantom Blade Zero ---- */
+ {id:"psn-phantom-blade-zero", platform:"psn", kind:"account", title:"Phantom Blade Zero — PS5", region:"India", games:["Phantom Blade Zero"], price:1699, mrp:5999, stock:5, tag:"New Release", p2:2999, featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
+ {id:"pc-phantom-blade-zero", platform:"pc", kind:"account", title:"Phantom Blade Zero — PC", region:"Global", games:["Phantom Blade Zero"], price:499, mrp:5999, stock:5, tag:"New Release", p2:1999, featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
+ {id:"xbox-phantom-blade-zero", platform:"xbox", kind:"account", title:"Phantom Blade Zero — Xbox", region:"Global", games:["Phantom Blade Zero"], price:1499, mrp:5999, stock:5, tag:"New Release", featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
  /* ---- Call of Duty: Modern Warfare 4 ---- */
  {id:"psn-call-of-duty-modern-warfare-4", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare 4 — PS5", region:"India", games:["Call of Duty: Modern Warfare 4"], price:1799, mrp:6999, stock:8, tag:"New Release", p2:3499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
  {id:"pc-call-of-duty-modern-warfare-4", platform:"pc", kind:"account", title:"Call of Duty: Modern Warfare 4 — PC", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:399, mrp:5999, stock:5, tag:"New Release", p2:2499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
@@ -1114,7 +1118,7 @@ const SEED = [
   img:"img/0e74f41c839c.png", featured:false, active:true},
  {id:"pc-transport-fever-3-deluxe-edition", platform:"pc", kind:"account", title:"Transport Fever 3 - Deluxe Edition — PC", region:"Global", games:["Transport Fever 3 - Deluxe Edition"], price:499, mrp:3699, stock:7, tag:"", p2:549,
   img:"img/9373c503c5c1.jpg", featured:false, active:true},
- {id:"pc-phantom-blade-zero-deluxe-edition", platform:"pc", kind:"account", title:"Phantom Blade Zero Deluxe Edition — PC", region:"Global", games:["Phantom Blade Zero Deluxe Edition"], price:499, mrp:5199, stock:8, tag:"", p2:549,
+ {id:"pc-phantom-blade-zero-deluxe-edition", platform:"pc", kind:"account", title:"Phantom Blade Zero Deluxe Edition — PC", region:"Global", games:["Phantom Blade Zero Deluxe Edition"], price:499, mrp:5199, stock:8, tag:"", p2:1999,
   img:"img/5323cbdc046f.png", featured:false, active:true},
  {id:"pc-onimusha-wots-premium-deluxe-edition", platform:"pc", kind:"account", title:"Onimusha: WotS - Premium Deluxe Edition — PC", region:"Global", games:["Onimusha: WotS - Premium Deluxe Edition"], price:499, mrp:5699, stock:3, tag:"", p2:549,
   img:"img/f33755318d4e.jpg", featured:false, active:true},
@@ -1499,7 +1503,11 @@ const CATALOG_OVERRIDES = {
   "psn-spiderman-2": {featured:false},
   "pc-call-of-duty-modern-warfare-4": {price:399, p2:2499, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
   "psn-call-of-duty-modern-warfare-4": {price:1799, p2:3499, mrp:6999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
-  "xbox-call-of-duty-modern-warfare-4": {price:1399, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"}
+  "xbox-call-of-duty-modern-warfare-4": {price:1399, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
+  "pc-phantom-blade-zero": {price:499, p2:1999, mrp:5999, tag:"New Release", featured:true, img:"img/phantom-blade-zero-cover.jpg"},
+  "psn-phantom-blade-zero": {price:1699, p2:2999, mrp:5999, tag:"New Release", featured:true, img:"img/phantom-blade-zero-cover.jpg"},
+  "xbox-phantom-blade-zero": {price:1499, mrp:5999, tag:"New Release", featured:true, img:"img/phantom-blade-zero-cover.jpg"},
+  "pc-phantom-blade-zero-deluxe-edition": {price:499, p2:1999}
 };
 /* was this exact field last set by the owner in the admin panel? */
 function ownerEdited(p, field){
