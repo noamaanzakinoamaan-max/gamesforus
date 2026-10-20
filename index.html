@@ -872,13 +872,19 @@ const CONFIG = {
    kind: account | subscription | wallet
    ============================================================ */
 const SEED = [
- /* ---- Phantom Blade Zero ---- */
+ /* ---- Homepage Bestsellers (#1 – #8) ---- */
  {id:"psn-phantom-blade-zero", platform:"psn", kind:"account", title:"Phantom Blade Zero — PS5", region:"India", games:["Phantom Blade Zero"], price:1699, mrp:5999, stock:5, tag:"New Release", p2:2999, featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
- {id:"pc-phantom-blade-zero", platform:"pc", kind:"account", title:"Phantom Blade Zero — PC", region:"Global", games:["Phantom Blade Zero"], price:499, mrp:5999, stock:5, tag:"New Release", p2:1999, featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
- {id:"xbox-phantom-blade-zero", platform:"xbox", kind:"account", title:"Phantom Blade Zero — Xbox", region:"Global", games:["Phantom Blade Zero"], price:1499, mrp:5999, stock:5, tag:"New Release", featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
- /* ---- Call of Duty: Modern Warfare 4 ---- */
  {id:"psn-call-of-duty-modern-warfare-4", platform:"psn", kind:"account", title:"Call of Duty: Modern Warfare 4 — PS5", region:"India", games:["Call of Duty: Modern Warfare 4"], price:1799, mrp:6999, stock:8, tag:"New Release", p2:3499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
+ {id:"psn-gta-6", platform:"psn", kind:"account", title:"Grand Theft Auto VI — PS5 (Preorder)", region:"India", games:["Grand Theft Auto VI"], price:1999, mrp:7999, stock:5, tag:"Preorder", featured:true, active:true, img:"img/236e8dfe7df7.webp"},
+ {id:"psn-wolverine", platform:"psn", kind:"account", title:"Marvel's Wolverine — PS5", region:"India", games:["Marvel's Wolverine"], price:1399, mrp:4999, stock:2, tag:"New Release", p2:2519, featured:true, active:true, img:"img/5bc87779b227.jpg"},
+ {id:"psn-007-first-light", platform:"psn", kind:"account", title:"007 First Light — PS5", region:"India", games:["007 First Light"], price:1099, mrp:6999, stock:2, tag:"New Release", p2:2699, featured:true, active:true, img:"img/585a355a3599.png"},
+ {id:"psn-control-resonant", platform:"psn", kind:"account", title:"CONTROL Resonant — PS5", region:"India", games:["CONTROL Resonant"], price:1299, mrp:5999, stock:3, tag:"Bestseller", p2:2499, featured:true, active:true, img:"img/control-resonant-cover.jpg"},
+ {id:"psn-crimson-desert", platform:"psn", kind:"account", title:"Crimson Desert — PS5", region:"India", games:["Crimson Desert"], price:1099, mrp:4999, stock:4, tag:"New Release", p2:2299, featured:true, active:true, img:"img/crimson-desert-cover.png"},
+ {id:"psn-fc27", platform:"psn", kind:"account", title:"EA SPORTS FC 27 — PS5 & PS4", region:"India", games:["EA SPORTS FC 27"], price:1699, mrp:4499, stock:4, tag:"New Release", p2:2999, featured:true, active:true, img:"img/fc27-cover.png"},
+ /* ---- New Releases — PC & Xbox ---- */
+ {id:"pc-phantom-blade-zero", platform:"pc", kind:"account", title:"Phantom Blade Zero — PC", region:"Global", games:["Phantom Blade Zero"], price:499, mrp:5999, stock:5, tag:"New Release", p2:1999, featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
  {id:"pc-call-of-duty-modern-warfare-4", platform:"pc", kind:"account", title:"Call of Duty: Modern Warfare 4 — PC", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:399, mrp:5999, stock:5, tag:"New Release", p2:2499, featured:true, active:true, img:"img/cod-mw4-cover.webp"},
+ {id:"xbox-phantom-blade-zero", platform:"xbox", kind:"account", title:"Phantom Blade Zero — Xbox", region:"Global", games:["Phantom Blade Zero"], price:1499, mrp:5999, stock:5, tag:"New Release", featured:true, active:true, img:"img/phantom-blade-zero-cover.jpg"},
  {id:"xbox-call-of-duty-modern-warfare-4", platform:"xbox", kind:"account", title:"Call of Duty: Modern Warfare 4 — Xbox", region:"Global", games:["Call of Duty: Modern Warfare 4"], price:1399, mrp:5999, stock:5, tag:"New Release", featured:true, active:true, img:"img/cod-mw4-cover.webp"},
  /* ---- PSN ---- (img = poster; remove/replace freely in admin) */
  {id:"psn-psplus-extra-1m", platform:"psn", kind:"subscription", title:"PS Plus Extra — 1 Month", region:"India", games:["PS Plus Extra · 1 Month"], price:499, mrp:3999, stock:9, tag:"New Arrival", featured:true, active:true, img:"img/17e93c0ec4b0.webp"},
@@ -889,14 +895,8 @@ const SEED = [
  {id:"psn-wwe-2k24", img:"img/b0c3e99cff39.png", platform:"psn", kind:"account", title:"WWE 2K24 — PS5", region:"India", games:["WWE 2K24"], price:1499, mrp:7999, stock:2, tag:"Deal", p2:2849, featured:false, active:true},
  {id:"psn-dbz-sparking-zero", img:"img/6402b0f76689.png", platform:"psn", kind:"account", title:"Dragon Ball: Sparking Zero Ultimate — PS5/PS4", region:"India", games:["Dragon Ball: Sparking Zero Ultimate"], price:1999, mrp:8999, stock:2, tag:"Hot", p2:3799, featured:true, active:true},
  {id:"psn-fc26", platform:"psn", kind:"account", title:"EA SPORTS FC 26 — PS5 & PS4", region:"India", games:["EA SPORTS FC 26"], price:1499, mrp:7999, stock:3, tag:"Trending", p2:2699, featured:true, active:true, img:"img/e417d484d820.png"},
- {id:"psn-fc27", platform:"psn", kind:"account", title:"EA SPORTS FC 27 — PS5 & PS4", region:"India", games:["EA SPORTS FC 27"], price:1699, mrp:4499, stock:4, tag:"New Release", p2:2999, featured:true, active:true, img:"img/fc27-cover.png"},
- {id:"psn-crimson-desert", platform:"psn", kind:"account", title:"Crimson Desert — PS5", region:"India", games:["Crimson Desert"], price:1099, mrp:4999, stock:4, tag:"New Release", p2:2299, featured:true, active:true, img:"img/crimson-desert-cover.png"},
- {id:"psn-control-resonant", platform:"psn", kind:"account", title:"CONTROL Resonant — PS5", region:"India", games:["CONTROL Resonant"], price:1299, mrp:5999, stock:3, tag:"Bestseller", p2:2499, featured:true, active:true, img:"img/control-resonant-cover.jpg"},
  {id:"psn-blood-of-dawnwalker", platform:"psn", kind:"account", title:"The Blood of Dawnwalker — PS5", region:"India", games:["The Blood of Dawnwalker"], price:1499, mrp:6999, stock:3, tag:"Bestseller", p2:2999, featured:true, active:true, img:"img/blood-of-dawnwalker-cover.jpg"},
  {id:"psn-ff16", img:"img/4666f4386f6d.jpg", platform:"psn", kind:"account", title:"Final Fantasy XVI — PS5", region:"India", games:["Final Fantasy XVI"], price:999, mrp:5999, stock:3, tag:"Deal", p2:2299, featured:false, active:true},
- {id:"psn-wolverine", platform:"psn", kind:"account", title:"Marvel's Wolverine — PS5", region:"India", games:["Marvel's Wolverine"], price:1399, mrp:4999, stock:2, tag:"New Release", p2:2519, featured:true, active:true, img:"img/5bc87779b227.jpg"},
- {id:"psn-gta-6", platform:"psn", kind:"account", title:"Grand Theft Auto VI — PS5 (Preorder)", region:"India", games:["Grand Theft Auto VI"], price:1999, mrp:7999, stock:5, tag:"Preorder", featured:false, active:true, img:"img/236e8dfe7df7.webp"},
- {id:"psn-007-first-light", platform:"psn", kind:"account", title:"007 First Light — PS5", region:"India", games:["007 First Light"], price:1099, mrp:6999, stock:2, tag:"New Release", p2:2699, featured:false, active:true, img:"img/585a355a3599.png"},
  {id:"psn-ac-black-flag", platform:"psn", kind:"account", title:"Assassin's Creed Black Flag Resynced — PS5", region:"India", games:["AC Black Flag Resynced"], price:1799, mrp:6999, stock:3, tag:"Trending", p2:3599, featured:false, active:true, img:"img/eba96f66a04c.webp"},
  {id:"psn-ghost-of-yotei", platform:"psn", kind:"account", title:"Ghost of Yotei — PS5", region:"India", games:["Ghost of Yotei"], price:1099, mrp:6999, stock:2, tag:"New Release", p2:2499, featured:true, active:true, img:"img/9524759650d5.png"},
  {id:"psn-battlefield-6", platform:"psn", kind:"account", title:"Battlefield 6 — PS5", region:"India", games:["Battlefield 6"], price:899, mrp:6999, stock:3, tag:"Trending", p2:2299, featured:false, active:true, img:"img/5619835a90cb.png"},
@@ -1496,11 +1496,27 @@ const state = { products:{}, settings:{...DEFAULT_SETTINGS}, source:"local", fbR
 /* store price policy — enforced at runtime on every product source (seed, localStorage, Firestore).
    Anything the owner edits in the admin panel is stamped with adminEdited/adminFields and is never
    rewritten here again: an owner's price, badge or toggle always beats the shipped defaults. */
+const BESTSELLER_LINEUP_REV = 1;
+const BESTSELLER_IDS = [
+  "psn-phantom-blade-zero",
+  "psn-call-of-duty-modern-warfare-4",
+  "psn-gta-6",
+  "psn-wolverine",
+  "psn-007-first-light",
+  "psn-control-resonant",
+  "psn-crimson-desert",
+  "psn-fc27"
+];
 const CATALOG_OVERRIDES = {
-  "psn-control-resonant": {tag:"Bestseller"},
+  "psn-control-resonant": {tag:"Bestseller", featured:true},
   "psn-blood-of-dawnwalker": {tag:"Bestseller"},
   "psn-ghost-of-yotei": {price:1099, p2:2499},
   "psn-spiderman-2": {featured:false},
+  "psn-gta-6": {featured:true},
+  "psn-wolverine": {featured:true},
+  "psn-007-first-light": {featured:true},
+  "psn-crimson-desert": {featured:true},
+  "psn-fc27": {featured:true},
   "pc-call-of-duty-modern-warfare-4": {price:399, p2:2499, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
   "psn-call-of-duty-modern-warfare-4": {price:1799, p2:3499, mrp:6999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
   "xbox-call-of-duty-modern-warfare-4": {price:1399, mrp:5999, tag:"New Release", featured:true, img:"img/cod-mw4-cover.webp"},
@@ -1546,6 +1562,11 @@ function enforcePricePolicy(products=state.products){
     }
     const ov=CATALOG_OVERRIDES[p.id];
     if(ov) Object.keys(ov).forEach(k=>{ if(!ownerEdited(p,k)) p[k]=ov[k]; });
+    if(BESTSELLER_IDS.indexOf(p.id)>-1 && (p.bestsellerRev||0)<BESTSELLER_LINEUP_REV){
+      p.featured=true;
+      p.active=true;
+      p.bestsellerRev=BESTSELLER_LINEUP_REV;
+    }
     psnPricePolicy(p);
   });
   return products;
@@ -1559,7 +1580,7 @@ function loadLocal(){
     if(p&&p.length){
       p.forEach(x=>{
         if(!x||!x.id||del.includes(x.id)) return;
-        state.products[x.id]={...(state.products[x.id]||{}),...x};
+        state.products[x.id]={...(state.products[x.id]||{}),...x,bestsellerRev:x.bestsellerRev||0};
       });
     }
   }catch(e){}
@@ -1613,7 +1634,7 @@ function mergeProductSnapshot(snap){
   const merged={};
   Object.keys(state._seedProducts).forEach(k=>{ if(!del.includes(k)) merged[k]={...state._seedProducts[k]}; });
   if(!snap.empty){
-    snap.forEach(d=>{ if(!del.includes(d.id)) merged[d.id]={...(merged[d.id]||{}),...d.data(),id:d.id}; });
+    snap.forEach(d=>{ if(!del.includes(d.id)){ const data=d.data()||{}; merged[d.id]={...(merged[d.id]||{}),...data,id:d.id,bestsellerRev:data.bestsellerRev||0}; } });
     state.source="firestore";
   }
   state.fsCount=snap.size; state.products=merged;
@@ -1649,7 +1670,7 @@ function initFirebase(){
 }
 /* Owner edit → Firestore. `changed` lists the fields the owner actually touched so the runtime
    price policy and the catalog sync both know to leave them alone from now on. */
-const ADMIN_META=["id","adminEdited","adminFields","updatedAt"];
+const ADMIN_META=["id","adminEdited","adminFields","bestsellerRev","updatedAt"];
 async function fsAdd(data, changed){
   const db=firebase.firestore();
   const product={...data};
@@ -1659,6 +1680,7 @@ async function fsAdd(data, changed){
   const known=Array.isArray(prev.adminFields)?prev.adminFields:[];
   product.adminEdited=true;
   product.adminFields=known.concat(touched.filter(k=>known.indexOf(k)<0));
+  product.bestsellerRev=BESTSELLER_LINEUP_REV;
   product.updatedAt=Date.now();
   enforcePricePolicy({[product.id]:product});
   await db.collection("products").doc(product.id).set(product, {merge:true});
@@ -1693,7 +1715,8 @@ async function syncCatalog(btn){
       if(doc && (doc.adminEdited || p.adminEdited)){
         /* Owner-managed listing: only add fields Firestore is missing, never overwrite a value you set. */
         const add={}; let n=0;
-        Object.keys(p).forEach(k=>{ if(!(k in doc) || (CATALOG_OVERRIDES[id] && (k in CATALOG_OVERRIDES[id]) && !ownerEdited(doc,k))){ add[k]=p[k]; n++; } });
+        const revUpgrade = BESTSELLER_IDS.indexOf(id)>-1 && (doc.bestsellerRev||0)<BESTSELLER_LINEUP_REV;
+        Object.keys(p).forEach(k=>{ if(!(k in doc) || (CATALOG_OVERRIDES[id] && (k in CATALOG_OVERRIDES[id]) && !ownerEdited(doc,k)) || (revUpgrade && (k==="featured"||k==="active"||k==="bestsellerRev"))){ add[k]=p[k]; n++; } });
         if(n) payloads.push([id,add]); else kept++;
         return;
       }
@@ -3391,7 +3414,7 @@ document.addEventListener("click", async function(e){
        correct so the save toast can explain why the stored prices differ from what was typed. */
     const psnWhy=psnPricePolicy({...data}).join(" · ");
     try{
-      if(id){ const p=byId(id); await fsAdd({...p,...data,id:id}, Object.keys(data)); }
+      if(id){ const p=byId(id); const diff=Object.keys(data).filter(k=>JSON.stringify(p?.[k])!==JSON.stringify(data[k])); await fsAdd({...p,...data,id:id}, diff.length?diff:["updatedAt"]); }
       else{ await fsAdd(data, Object.keys(data)); }
       toast(psnWhy ? "Saved — PSN price policy applied: "+psnWhy : (id?"Product updated — live":"Product added — live on site"));
       pmClose(); route();
