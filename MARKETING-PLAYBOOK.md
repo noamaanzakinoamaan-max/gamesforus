@@ -94,7 +94,7 @@ Download **WhatsApp Business** (free) and set up:
 ## 6. Fraud & safety playbook (protect the business)
 
 - **Fake payment screenshots:** use the unique-paise trick (₹1,499.72 → order HD-7GK2Q). Never deliver on a screenshot — only on money visible in YOUR bank app.
-- **Refund abuse:** warranty is replacement-first, refund-second. "Problem? I'll replace it right now" filters 95% of frauds.
+- **Refund abuse:** the store is final-sale — replacement only, no cash refunds. "Problem? I'll replace it right now" filters 95% of frauds, and the written no-refund policy backs you up.
 - **Buyer scams ("my friend will pay you later"):** no payment = no credentials, no exceptions, politely.
 - **Platform risk:** never promise "officially approved by Sony/Microsoft" in writing — it's false endorsement and ad-ban bait. Your warranty framing is your shield.
 - **Scale rule:** when you cross ~20 orders/day, revisit PAYMENTS-GATEWAY.md Phase 2 (Razorpay webhook auto-verification) so money-checking stops eating your day.
