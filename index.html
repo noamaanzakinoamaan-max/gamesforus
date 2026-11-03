@@ -755,6 +755,43 @@ img{max-width:100%}
   .wrap{max-width:1440px}
   body{font-size:17px}
 }
+/* ============ Diwali campaign (auto-expires — see DIWALI.endsAt in script) ============ */
+body.diwali{--gold:#ffc96b;--gold2:#ffe7ad;--line:rgba(255,186,102,.20)}
+body.diwali .aurora i:nth-child(1){background:#ff8a3c;opacity:.22}
+body.diwali .aurora i:nth-child(2){background:#e2452f;opacity:.12}
+body.diwali .aurora i:nth-child(3){background:#ffd166;opacity:.10}
+body.diwali .site-head{background:rgba(14,10,6,.78)}
+body.diwali .pcard,body.diwali .club-card,body.diwali .colcard,body.diwali .gcard{border-color:rgba(255,186,102,.22);box-shadow:0 12px 34px rgba(255,138,60,.08)}
+.announce.dw-announce{background:linear-gradient(90deg,#3a1b06,#2b1204 45%,#3a1b06);border-bottom-color:#7d4a12;color:#ffe2a8}
+.announce.dw-announce b{color:#ffd166}
+.dw-band{max-width:1120px;margin:14px auto 0;padding:0 16px;position:relative;z-index:2}
+.dw-band[hidden]{display:none}
+.dw-card{position:relative;overflow:hidden;display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-radius:20px;border:1px solid rgba(255,186,102,.3);padding:18px 20px;background:radial-gradient(120% 180% at 8% 0%,rgba(255,158,60,.20),transparent 58%),radial-gradient(120% 180% at 92% 100%,rgba(226,69,47,.16),transparent 58%),linear-gradient(180deg,rgba(30,19,10,.92),rgba(20,13,7,.92));box-shadow:0 18px 50px rgba(0,0,0,.4)}
+.dw-card:before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle at 10px 10px,rgba(255,214,138,.14) 1.4px,transparent 1.5px);background-size:26px 26px;opacity:.55;pointer-events:none}
+.dw-left,.dw-side{position:relative;z-index:1;min-width:240px}
+.dw-lamps{display:flex;gap:7px;font-size:17px;line-height:1;margin-bottom:6px}
+.dw-lamps i{font-style:normal;display:inline-block;animation:dwFlicker 2.8s ease-in-out infinite}
+.dw-lamps i:nth-child(2n){animation-delay:.45s}
+.dw-lamps i:nth-child(3n){animation-delay:.95s}
+@keyframes dwFlicker{0%,100%{opacity:.6;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+.dw-title{margin:0;font-size:19px;letter-spacing:-.02em}
+.dw-sub{margin:4px 0 0;font-size:13px;color:#d9cdb8;max-width:54ch}
+.dw-code{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;font-weight:900;letter-spacing:.05em;color:#2a1a05;background:linear-gradient(135deg,#ffd98a,#ffb347);border-radius:999px;padding:5px 12px;border:1px dashed rgba(42,26,5,.4)}
+.dw-side{display:flex;flex-direction:column;gap:9px;align-items:flex-end;text-align:right}
+.dw-timer{font-family:var(--mono);font-size:12px;color:#ffdcaa;background:rgba(255,186,102,.10);border:1px solid rgba(255,186,102,.28);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.dw-cta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.dw-fine{color:#a99c88;font-size:11px}
+.dw-garland{height:14px;margin-top:8px;border-radius:999px;background-image:radial-gradient(circle,#ff9a3c 3.5px,transparent 4px),radial-gradient(circle,#ffd166 3.5px,transparent 4px);background-size:22px 14px,22px 14px;background-position:0 0,11px 5px;background-repeat:repeat-x;opacity:.5}
+.dw-badge{border-color:rgba(255,186,102,.4)!important;color:#ffdcaa!important}
+.foot-badges span[hidden]{display:none}
+.dw-offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.dw-offer{position:relative;overflow:hidden;border:1px solid rgba(255,186,102,.24);border-radius:18px;padding:16px;background:linear-gradient(160deg,rgba(40,24,10,.85),rgba(20,13,7,.85))}
+.dw-offer .tagx{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:900;color:#ffb347}
+.dw-offer h3{margin:6px 0 4px;font-size:16.5px}
+.dw-offer p{margin:0;color:var(--mut);font-size:13px}
+.dw-offer .see-all{display:inline-block;margin-top:10px}
+@media(max-width:760px){.dw-side{align-items:flex-start;text-align:left}.dw-cta{justify-content:flex-start}.dw-offers{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.dw-lamps i{animation:none}}
 </style>
 </head>
 <body>
@@ -800,6 +837,24 @@ img{max-width:100%}
   </div>
 </header>
 
+<!-- Diwali campaign band — shown only while the campaign is live (see DIWALI in script) -->
+<div class="dw-band" id="dwBand" hidden>
+  <div class="dw-card">
+    <div class="dw-left">
+      <div class="dw-lamps" aria-hidden="true"><i>🪔</i><i>🪔</i><i>🪔</i><i>🪔</i><i>🪔</i></div>
+      <h2 class="dw-title">Happy Diwali from HeavenDigital</h2>
+      <p class="dw-sub">Same low prices as always — nothing is marked up for the festival. Use the Diwali code for the usual <b>10% off</b>, with free guided setup and support through the festival week.</p>
+      <span class="dw-code">CODE&nbsp;<b>DIWALI10</b>&nbsp;· 10% off · same prices</span>
+    </div>
+    <div class="dw-side">
+      <span class="dw-timer" id="dwTimer">Offer ends soon</span>
+      <div class="dw-cta"><a class="btn btn-sm" href="#/pc">Shop Diwali deals</a><a class="btn btn-ghost btn-sm" href="#/membership">Mystery drops</a></div>
+      <small class="dw-fine">Ends 16 Nov 2026 · one code per order · all sales are final</small>
+    </div>
+  </div>
+  <div class="dw-garland" aria-hidden="true"></div>
+</div>
+
 <main id="app" class="wrap" tabindex="-1"></main>
 
 <!-- mobile bottom tab bar -->
@@ -821,7 +876,7 @@ img{max-width:100%}
       <a href="/guides/xbox-game-pass-cheap-india.html" style="color:var(--mut)">Game Pass options</a> ·
       <a href="/guides/pc-games-steam-account-offline-online.html" style="color:var(--mut)">PC offline vs online</a> ·
       <a href="/guides/is-buying-game-accounts-safe.html" style="color:var(--mut)">Account risks</a></div>
-    <div class="foot-badges"><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
+    <div class="foot-badges"><span class="dw-badge" id="dwBadge" hidden><b>🪔</b> Diwali offer · code DIWALI10</span><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 30-day warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
     <div class="foot-in">
       <div class="foot-brand">
         <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
@@ -1454,6 +1509,42 @@ window.REVIEWS=window.REVIEWS||[];
 /* ============ state ============ */
 const LS_P="hd_products_v1", LS_C="hd_cart_v1", LS_S="hd_settings_v1";
 const DEFAULT_GA_ID="G-EG9CFD4R0Q";
+/* ============ Diwali campaign ============
+   Set DIWALI.on=false or pass DIWALI.endsAt and the whole festive layer
+   (banner, band, footer badge, home offers, coupon alias) switches itself off. */
+var DIWALI = {
+  on: true,
+  endsAt: "2026-11-16T23:59:59+05:30",
+  code: "DIWALI10",
+  aliases: ["DIWALI10", "HEAVEN10"],
+  pct: 10,
+  announce: "\uD83E\uDD94 Diwali offer \u2014 10% off with DIWALI10 \u00b7 same low prices, no festival mark-ups \u00b7 ends 16 Nov"
+};
+function diwaliActive(){
+  if(!DIWALI.on) return false;
+  const end = new Date(DIWALI.endsAt).getTime();
+  if(isNaN(end)) return true;
+  return Date.now() <= end;
+}
+function couponPercentFor(code){
+  const c = String(code||"").trim().toUpperCase();
+  if(!c) return 0;
+  const s = (typeof state!=="undefined" && state.settings) || {};
+  if(c === String(s.couponCode||"").toUpperCase() && s.couponOn) return Number(s.couponPercent)||0;
+  if(diwaliActive() && DIWALI.aliases.indexOf(c)>-1) return DIWALI.pct;
+  return 0;
+}
+function diwaliHome(){
+  if(!diwaliActive()) return "";
+  return '<section class="sec dw-home"><div class="sec-head rv"><div><span class="eyebrow">Diwali \u00b7 5\u201316 November</span><h2>\uD83E\uDD94 Festival offers, same prices</h2><p class="sub">Nothing is marked up for the season \u2014 the sticker you see is the sticker you pay. Pick whichever Diwali offer suits you.</p></div></div>'+
+    '<div class="dw-offers rv">'+
+      '<div class="dw-offer"><span class="tagx">Coupon</span><h3>10% off with DIWALI10</h3><p>Apply the code in your cart for the usual 10% off. Same low prices, no festival surcharge.</p><a class="see-all" href="#/pc">Shop PC deals \u2192</a></div>'+
+      '<div class="dw-offer"><span class="tagx">Gifting</span><h3>Gift a game this Diwali</h3><p>Buying for a friend or family member? We hand the account over and guide them on WhatsApp too.</p><a class="see-all" href="#/psn">Browse PSN \u2192</a></div>'+
+      '<div class="dw-offer"><span class="tagx">Mystery drop</span><h3>Mystery game from \u20B999</h3><p>Published prize pools and AAA-tier odds, confirmed before payment. Festive surprise, clear terms.</p><a class="see-all" href="#/membership">Open drops \u2192</a></div>'+
+    '</div>'+
+    '<p class="hint" style="margin-top:12px">\uD83E\uDD94 Guided setup and WhatsApp support continue through the festival week ('+esc(CONFIG.hours)+'). All sales are final \u2014 see the <a href="#/refund-policy">refund policy</a>.</p>'+
+  '</section>';
+}
 const DEFAULT_SETTINGS = {announce:"Buy any 2 accounts and get flat 10% OFF — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true,
   brand:CONFIG.brand, whatsapp:CONFIG.whatsapp, upiId:CONFIG.upiId, email:CONFIG.email, instagram:CONFIG.instagram, hours:CONFIG.hours,
   chatIntro:"", chatQA:"", adminUid:"", ownerEmail:"", gaId:DEFAULT_GA_ID, cfToken:"", dealEnds:""};
@@ -1615,7 +1706,7 @@ function updateBadge(){
 }
 let appliedCoupon=null;
 function cartTotal(){ return Object.entries(cart).reduce((a,[k,q])=>{const [id,opt]=splitKey(k);const p=byId(id); return p?a+priceOf(p,opt)*q:a;},0); }
-function discountAmount(){ return appliedCoupon ? Math.round(cartTotal()*state.settings.couponPercent/100) : 0; }
+function discountAmount(){ return appliedCoupon ? Math.round(cartTotal()*couponPercentFor(appliedCoupon)/100) : 0; }
 
 /* ============ firebase ============ */
 function firebaseConfigured(){
@@ -1775,8 +1866,32 @@ function cardHTML(p){
     (p.stock>0?'<button class="btn btn-sm" data-add="'+p.id+'" aria-label="Add '+esc(p.title)+' to cart">Add</button>':'<span class="stock-low">Sold out</span>')+
     '</div></div></article>';
 }
+let dwTimerId=null;
+function dwTick(){
+  const t=$("#dwTimer"); if(!t) return;
+  const ms=new Date(DIWALI.endsAt).getTime()-Date.now();
+  if(!(ms>0)){ t.textContent="Diwali offer ended"; return; }
+  const d=Math.floor(ms/864e5), h=Math.floor(ms/36e5)%24, m=Math.floor(ms/6e4)%60, sec=Math.floor(ms/1e3)%60;
+  t.textContent="Ends in "+(d>0?d+"d ":"")+String(h).padStart(2,"0")+"h "+String(m).padStart(2,"0")+"m "+String(sec).padStart(2,"0")+"s";
+}
+function applyDiwali(){
+  const active=diwaliActive();
+  document.body.classList.toggle("diwali",active);
+  ["#dwBand","#dwBadge"].forEach(sel=>{ const el=$(sel); if(el) el.hidden=!active; });
+  if(active){
+    dwTick();
+    if(!dwTimerId) dwTimerId=setInterval(dwTick,1000);
+  } else if(dwTimerId){ clearInterval(dwTimerId); dwTimerId=null; }
+  return active;
+}
 function renderAnnounce(){
-  const el=$("#announceBar");
+  const el=$("#announceBar"); if(!el) return;
+  if(diwaliActive()){
+    el.classList.add("dw-announce");
+    el.innerHTML=esc(DIWALI.announce).replace(new RegExp(DIWALI.code,"g"),"<b>"+esc(DIWALI.code)+"</b>");
+    return;
+  }
+  el.classList.remove("dw-announce");
   const code=String(state.settings.couponCode||"");
   if(state.settings.couponOn && code){
     const rx=new RegExp(code.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"g");
@@ -1825,6 +1940,8 @@ function vHome(){
       </div>
     </div>
   </section>
+
+  ${diwaliHome()}
 
   <div class="ticker-wrap" aria-hidden="true"><div class="ticker"><span>${esc(tick)}</span><span>${esc(tick)}</span></div></div>
 
@@ -2039,7 +2156,7 @@ function vCart(){
       <h3 style="margin-top:0">Order summary</h3>
       <div class="couprow"><input class="f" id="coupon" placeholder="Coupon code" value="${appliedCoupon?esc(appliedCoupon):""}"><button class="btn btn-sm" data-coupon>Apply</button></div>
       ${state.refBy?'<div class="coup-ok">🎁 Referral '+esc(state.refBy)+' applied — ₹50 off <button class="rm" data-ref-remove style="margin-left:8px">remove</button></div>':'<div class="couprow"><input class="f" id="refCode" placeholder="Referral code (₹50 off)" style="text-transform:uppercase"><button class="btn btn-sm" data-ref-apply>Apply</button></div>'}
-      <div id="couponMsg">${appliedCoupon?'<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+state.settings.couponPercent+'% off</div>':""}</div>
+      <div id="couponMsg">${appliedCoupon?'<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+couponPercentFor(appliedCoupon)+'% off</div>':""}</div>
       <div class="sumline"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
       ${disc?'<div class="sumline"><span>Coupon ('+esc(state.settings.couponCode)+')</span><span>− '+inr(disc)+'</span></div>':""}
       <div class="sumline"><span>Delivery (WhatsApp handover)</span><span>Free</span></div>
@@ -2201,6 +2318,7 @@ function vAdmin(){
     <div>
       <div class="panel" style="margin-bottom:18px">
         <h3>Offers &amp; announcement</h3>
+        ${diwaliActive()?'<div class="demo-note" style="margin:0 0 14px;font-size:12.5px">\uD83E\uDD94 <b>Diwali campaign is live</b> until '+esc(new Date(DIWALI.endsAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}))+'. The site shows the festive announcement bar, band, footer badge and home offers, and <b>'+esc(DIWALI.code)+'</b> works at checkout at '+DIWALI.pct+'% — the announcement text below is paused until it ends. Switch it off early with <code>DIWALI.on=false</code>.</div>':'<p class="hint" style="margin-top:0">No campaign running — the announcement bar below is live as typed.</p>'}
         <label for="set-announce">Announcement bar text</label>
         <input class="f" id="set-announce" value="${esc(state.settings.announce)}">
         <div class="form2">
@@ -3224,8 +3342,9 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-copy]"))){ copyText(el.dataset.copy); return; }
   if(q("[data-coupon]")){
     const inp=($("#coupon")||{}).value||""; const code=inp.trim().toUpperCase();
-    const valid=state.settings.couponOn && code && code===String(state.settings.couponCode||"").toUpperCase();
-    if(valid){ appliedCoupon=code; toast("Coupon applied — "+state.settings.couponPercent+"% off"); buzz(15); route(); }
+    const pct=couponPercentFor(code);
+    const valid=!!pct;
+    if(valid){ appliedCoupon=code; toast("Coupon applied — "+pct+"% off"); buzz(15); route(); }
     else{ appliedCoupon=null; const m=$("#couponMsg"); if(m) m.innerHTML='<div class="coup-no">Invalid or expired coupon.</div>'; }
     return;
   }
@@ -3479,6 +3598,7 @@ document.addEventListener("click", async function(e){
 });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
 $("#yr").textContent=new Date().getFullYear();
+applyDiwali();
 renderAnnounce();
 route();
 </script>
@@ -3502,6 +3622,7 @@ route();
    {k:["safe","legit","trust","real","scam","fake","risk"],a:"Every account is tested before delivery and carries a 30-day replacement warranty — if anything goes wrong that isn't your doing, we replace it. All sales are final: no refunds in any case. 4,200+ gamers have bought from us, most through referrals.",c:[["Read how it works","#/how"],["Warranty terms","#/refund-policy"]]},
          {k:["cheap","why so","discount","how come","lower price"],a:"We source accounts in bulk from regions where games are priced lower — same game, same official download, far less money. Every listing states its region so you know exactly what you're getting.",c:[["Today's deals","#/pc"]]},
    {k:["warranty","refund","replace","guarantee","broken","stopped","not working"],a:"30-day replacement warranty on every order: if credentials fail or the account develops a problem not caused by you, message us with your order ID and we replace the account. Replacement is the only remedy — all sales are final, no refunds.",c:[["Full warranty terms","#/refund-policy"]]},
+   {k:["diwali","festival","offer","coupon","code","discount","sale"],a:"🪔 Diwali offer: use code "+((window.DIWALI&&window.DIWALI.code)||"DIWALI10")+" for 10% off — we keep the same low prices, with no festival mark-ups. Guided setup and the 30-day replacement warranty are unchanged, and all sales are final (no refunds). The offer runs until 16 Nov.",c:[["Shop deals","#/pc"],["Refund policy","#/refund-policy"]]},
    {k:["pay","upi","gpay","phonepe","paytm","payment","cash"],a:"We accept all UPI apps — GPay, PhonePe, Paytm, BHIM. Pay, confirm on WhatsApp, and get delivered in minutes. No cards needed.",c:[["Have a question on WhatsApp",null]]},
    {k:["stock","available","availability","find","looking for","source","arrange"],a:"If it's listed, it's in stock — stock counts are live on every product. Don't see your game? Message us the title: if it exists, we source it.",c:[["Ask about a game",null]]},
    {k:["human","agent","person","support","talk","whatsapp","contact"],a:"WhatsApp us — a real human (who actually games) replies during "+HRS+". Orders always get priority.",c:[["Open WhatsApp",null]]},

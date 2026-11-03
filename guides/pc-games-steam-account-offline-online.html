@@ -64,10 +64,19 @@ footer a{color:var(--gold);text-decoration:none}
 .rel{display:grid;gap:8px;margin:14px 0}
 .rel a{color:var(--tx);text-decoration:none;border:1px solid var(--line);border-radius:11px;padding:11px 14px;font-size:14px}
 .rel a:hover{border-color:var(--gold)}
+/* Diwali campaign strip (hidden after the campaign end date) */
+body.diwali{background:radial-gradient(circle at 85% 0,rgba(255,138,60,.17),transparent 32rem),var(--bg)}
+body.diwali .card{border-color:rgba(255,186,102,.22);box-shadow:0 12px 30px rgba(255,138,60,.07)}
+.diwali-strip{display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap;padding:.5rem 1rem;font-size:.84rem;color:#ffe2a8;background:linear-gradient(90deg,#3a1b06,#2b1204 45%,#3a1b06);border-bottom:1px solid #7d4a12;text-align:center}
+.diwali-strip[hidden]{display:none}
+.diwali-strip b{color:#ffd166}
+.diwali-strip a{color:#ffd166;font-weight:800;text-decoration:none;white-space:nowrap}
 </style>
 </head>
 <body>
 <header><div class="wrap"><a class="brand" href="/">🎮 Heaven<b>Digital</b></a><span><a class="btn ghost" href="/guides/">All guides</a> <a class="btn" href="/">Open store</a></span></div></header>
+<div class="diwali-strip" id="diwaliStrip" hidden><span aria-hidden="true">🪔</span><span><b>Diwali offer:</b> 10% off with code <b>DIWALI10</b> — same low prices, ends 16 Nov</span><a href="/#/pc">Shop the Diwali drop →</a></div>
+<script>(function(){try{if(Date.now()<=new Date("2026-11-16T23:59:59+05:30").getTime()){var e=document.getElementById("diwaliStrip");if(e)e.hidden=false;document.body.classList.add("diwali");}}catch(_){}})();</script>
 <div class="wrap">
 <h1>Cheap PC Games in India — Steam Accounts, Offline vs Online Tiers</h1>
 <p class="meta">By the HeavenDigital team · Updated September 2026 · 8 min read</p>

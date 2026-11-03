@@ -25,3 +25,11 @@ details{border:1px solid var(--line);border-radius:.8rem;background:var(--surfac
 .cta{margin:2rem 0;padding:1.5rem;border:1px solid rgba(245,192,68,.35);border-radius:1rem;background:linear-gradient(135deg,rgba(245,192,68,.14),rgba(245,192,68,.03))}.cta p{color:#cbd1dd}
 .site-foot{margin-top:3rem;border-top:1px solid var(--line);padding:2rem 0 2.5rem;color:var(--muted);font-size:.88rem}.foot-links{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.8rem}.foot-links a{color:var(--text)}
 @media(max-width:760px){.nav{align-items:flex-start;padding:.85rem 0;flex-direction:column}.nav-links{gap:.65rem 1rem}.hero{padding:3.4rem 0 2rem}.grid,.grid.two{grid-template-columns:1fr}section{padding:2rem 0}}
+
+/* ============ Diwali campaign strip (pages hide it after the end date) ============ */
+body.diwali{background:radial-gradient(circle at 85% 0,rgba(255,138,60,.17),transparent 32rem),var(--bg)}
+body.diwali .card{border-color:rgba(255,186,102,.22);box-shadow:0 12px 30px rgba(255,138,60,.07)}
+.diwali-strip{display:flex;gap:.5rem;align-items:center;justify-content:center;flex-wrap:wrap;padding:.5rem 1rem;font-size:.84rem;color:#ffe2a8;background:linear-gradient(90deg,#3a1b06,#2b1204 45%,#3a1b06);border-bottom:1px solid #7d4a12;text-align:center}
+.diwali-strip[hidden]{display:none}
+.diwali-strip b{color:#ffd166}
+.diwali-strip a{color:#ffd166;font-weight:800;text-decoration:none;white-space:nowrap}
