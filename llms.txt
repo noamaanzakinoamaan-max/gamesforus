@@ -2,7 +2,7 @@
 
 > HeavenDigital is an independent online storefront serving India with account-based PlayStation, Xbox and PC game listings, selected subscriptions, top-ups and store memberships. Prices are shown in INR; checkout supports UPI; account-product delivery and setup guidance are provided on WhatsApp.
 
-HeavenDigital is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft, EA or game publishers. Products labelled as accounts are not redeem codes and are not purchases attached to the buyer's personal platform profile. Account buying, transfer or sharing may conflict with platform terms and can carry suspension or access-loss risk. The store's stated warranty cannot prevent platform enforcement.
+HeavenDigital is not affiliated with Sony Interactive Entertainment, Microsoft, Valve, Ubisoft, EA or game publishers. Products labelled as accounts are not redeem codes and are not purchases attached to the buyer's personal platform profile. Account buying, transfer or sharing may conflict with platform terms and can carry suspension or access-loss risk. The store's stated warranty cannot prevent platform enforcement. All sales are final: the store does not issue refunds in any case, and published delivery times are estimates rather than guarantees.
 
 ## Store pages
 
@@ -12,7 +12,7 @@ HeavenDigital is not affiliated with Sony Interactive Entertainment, Microsoft, 
 - [Xbox and Game Pass](https://heavendigital.store/xbox/): Account and subscription listings; buyers should verify exact duration and device support
 - [How ordering works](https://heavendigital.store/how-it-works/): Listing checks, UPI confirmation, WhatsApp delivery and guided setup
 - [About and contact](https://heavendigital.store/about/): Entity details, support channels and independent-reseller disclosure
-- [Policies](https://heavendigital.store/policies/): Refund, stated 30-day warranty, terms, privacy and analytics
+- [Policies](https://heavendigital.store/policies/): No-refund policy, stated 30-day replacement warranty, terms, liability limits, privacy and analytics
 
 ## Buyer guides
 

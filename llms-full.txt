@@ -58,10 +58,11 @@ Process page: https://heavendigital.store/how-it-works/
 - Email: support@heavendigital.in
 - Published support hours: 10am–11pm IST
 - Typical stated delivery target: about 10 minutes after payment verification during support hours; this is a target, not a guarantee
-- Stated account warranty: 30 days for eligible account problems not caused by the buyer, subject to the current written conditions
+- Stated account warranty: 30 days for eligible account problems not caused by the buyer; the remedy is replacement of the account, subject to the current written conditions
+- Refund position: all sales are final — no refunds, reversals, exchanges or cancellations in any case, including non-delivery or delay
 - Policy page: https://heavendigital.store/policies/
 
-The policy summary states that credentials handed over before cancellation can affect refund eligibility. Exclusions include buyer-caused bans or restrictions, fraudulent payments, credential sharing, setup actions contrary to supplied guidance and requests outside the stated period. The live written policy controls if a summary and the storefront differ.
+The policy states that orders cannot be cancelled after payment and that no refund is issued for any reason, including a change of mind, wrong product, platform, region or tier, unused access, platform enforcement, non-delivery or delay. Delivery timings are estimates only; delays do not create a refund right. Where a product is unavailable, the store may substitute, hold the order or offer store credit at its discretion. Replacement is the only remedy for eligible account problems. Chargebacks and payment disputes are treated as a breach of the terms, liability is limited to the amount paid for the affected order, and the terms are governed by Indian law with exclusive jurisdiction at Mumbai, Maharashtra. Exclusions include buyer-caused bans or restrictions, fraudulent payments, credential sharing, setup actions contrary to supplied guidance and requests outside the stated period. The live written policy controls if a summary and the storefront differ.
 
 ## Privacy and measurement
 
