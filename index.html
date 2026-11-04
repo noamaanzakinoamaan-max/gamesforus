@@ -1541,7 +1541,13 @@ var DIWALI = {
 /* ============ coupon rule ============
    The flat coupon only applies once the cart subtotal reaches the minimum
    order value. Change it in admin (Offers) or here. */
-var COUPON_RULE = { minOrder: 5500 };
+var COUPON_RULE = {
+  minOrder: 5500,
+  /* codes that used to work but are no longer honoured */
+  retired: ["DIWALI10"],
+  /* shown when someone enters a real code that cannot be applied */
+  limitMsg: "Coupon limit reached — this coupon has reached its usage limit."
+};
 function couponMinOrder(){
   const n = Number(((typeof state!=="undefined" && state.settings) || {}).minOrder);
   return (isFinite(n) && n>0) ? n : COUPON_RULE.minOrder;
@@ -2191,7 +2197,7 @@ function vCart(){
       <div id="couponMsg">${appliedCoupon?(
         couponPercentFor(appliedCoupon)>0
           ? '<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+couponPercentFor(appliedCoupon)+'% off</div>'
-          : '<div class="coup-no">Coupon '+esc(appliedCoupon)+' saved — it applies once your subtotal reaches '+inr(couponMinOrder())+' (add '+inr(Math.max(0,couponMinOrder()-cartTotal()))+' more).</div>'
+          : '<div class="coup-no">'+esc(COUPON_RULE.limitMsg)+'</div>'
       ):""}</div>
       <div class="sumline"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
       ${disc?'<div class="sumline"><span>Coupon ('+esc(state.settings.couponCode)+')</span><span>− '+inr(disc)+'</span></div>':""}
@@ -3386,14 +3392,14 @@ document.addEventListener("click", async function(e){
     const pct=couponPercentFor(code);
     if(pct>0){ appliedCoupon=code; toast("Coupon applied — "+pct+"% off"); buzz(15); route(); return; }
     const st=state.settings||{};
-    const codeOk=code && code===String(st.couponCode||"").toUpperCase() && st.couponOn;
-    const need=couponMinOrder()-cartTotal();
-    if(codeOk && need>0){
-      appliedCoupon=code; route();
-      toast("Add "+inr(need)+" more to unlock "+(Number(st.couponPercent)||10)+"% off");
-      return;
-    }
-    appliedCoupon=null; const m=$("#couponMsg"); if(m) m.innerHTML='<div class="coup-no">Invalid or expired coupon.</div>';
+    const known=!!code && (code===String(st.couponCode||"").toUpperCase() || COUPON_RULE.retired.indexOf(code)>-1);
+    appliedCoupon=null;
+    const m=$("#couponMsg");
+    if(m) m.innerHTML = known
+      ? '<div class="coup-no">'+esc(COUPON_RULE.limitMsg)+'</div>'
+      : '<div class="coup-no">Invalid coupon code — check the spelling, or ask us on WhatsApp.</div>';
+    if(known) toast("Coupon limit reached");
+    buzz(25);
     return;
   }
   if(q("[data-wasend]")){
