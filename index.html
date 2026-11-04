@@ -826,7 +826,7 @@ body.diwali .pcard,body.diwali .club-card,body.diwali .colcard,body.diwali .gcar
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div id="glow" aria-hidden="true"></div>
 
-<div class="announce" id="announceBar">Buy any 2 accounts and get flat 10% OFF — use coupon <b>HEAVEN10</b> at checkout</div>
+<div class="announce" id="announceBar"><b>Happy Diwali</b> — 10% OFF applied automatically on orders above ₹5,500 · no code needed</div>
 
 <header class="site-head" id="siteHead">
   <div class="wrap head-in">
@@ -859,8 +859,8 @@ body.diwali .pcard,body.diwali .club-card,body.diwali .colcard,body.diwali .gcar
     <div class="dw-left">
       <div class="dw-lamps" aria-hidden="true"><i>🪔</i><i>🪔</i><i>🪔</i><i>🪔</i><i>🪔</i></div>
       <h2 class="dw-title">Happy Diwali from HeavenDigital</h2>
-      <p class="dw-sub">Same low prices as always — nothing is marked up for the festival. Checkout is unchanged too: the flat <b>10% coupon</b> applies on orders of <b>₹5,500 or more</b>.</p>
-      <span class="dw-code">SAVE 10%&nbsp;· orders ₹5,500+</span>
+      <p class="dw-sub">Same low prices as always — nothing is marked up for the festival. Checkout is unchanged too: <b>10% comes off automatically</b> on orders of <b>₹5,500 or more</b> — there is no code to type.</p>
+      <span class="dw-code">10% OFF AUTOMATICALLY&nbsp;· orders ₹5,500+</span>
     </div>
     <div class="dw-side">
       <span class="dw-timer" id="dwTimer">Offer ends soon</span>
@@ -892,7 +892,7 @@ body.diwali .pcard,body.diwali .club-card,body.diwali .colcard,body.diwali .gcar
       <a href="/guides/xbox-game-pass-cheap-india.html" style="color:var(--mut)">Game Pass options</a> ·
       <a href="/guides/pc-games-steam-account-offline-online.html" style="color:var(--mut)">PC offline vs online</a> ·
       <a href="/guides/is-buying-game-accounts-safe.html" style="color:var(--mut)">Account risks</a></div>
-    <div class="foot-badges"><span class="dw-badge" id="dwBadge" hidden><b>🪔</b> Happy Diwali · 10% off on orders ₹5,500+</span><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 2-year warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
+    <div class="foot-badges"><span class="dw-badge" id="dwBadge" hidden><b>🪔</b> Happy Diwali · 10% off automatically on ₹5,500+</span><span><b>⚡</b> 10-min delivery</span><span><b>🛡️</b> 2-year warranty</span><span><b>🔒</b> Secure UPI checkout</span><span><b>🇮🇳</b> Indian seller, human support</span></div>
     <div class="foot-in">
       <div class="foot-brand">
         <a class="brand" href="#/"><svg class="logo" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#f5c044"/><path d="M8 11a8 8 0 0 1 16 0" fill="none" stroke="#0b0d12" stroke-width="2.4" stroke-linecap="round"/><rect x="8" y="14" width="16" height="9" rx="4.5" fill="#0b0d12"/><circle cx="12.4" cy="18.5" r="1.4" fill="#f5c044"/><circle cx="19.6" cy="18.5" r="1.4" fill="#f5c044"/></svg><span>HeavenDigital</span></a>
@@ -1535,19 +1535,26 @@ var DIWALI = {
   on: true,
   endsAt: "2026-11-16T23:59:59+05:30",
   code: "",                 // Diwali-only discount retired
-  announce: "\uD83E\uDD94 Happy Diwali \u2014 same low prices, no festival mark-ups \u00b7 flat 10% off on orders above \u20B95,500 \u00b7 ends 16 Nov"
+  announce: "\uD83E\uDD94 Happy Diwali \u2014 same low prices, no festival mark-ups \u00b7 10% off applied automatically on orders above \u20B95,500 \u00b7 ends 16 Nov"
 };
 
 /* ============ coupon rule ============
    The flat coupon only applies once the cart subtotal reaches the minimum
    order value. Change it in admin (Offers) or here. */
 var COUPON_RULE = {
-  minOrder: 5500,
+  minOrder: 5500,        /* 10% comes off automatically at or above this subtotal */
+  auto: true,
   /* codes that used to work but are no longer honoured */
-  retired: ["DIWALI10"],
-  /* shown when someone enters a real code that cannot be applied */
+  retired: ["HEAVEN10", "DIWALI10"],
+  /* shown when someone types one of those old codes */
   limitMsg: "Coupon limit reached — this coupon has reached its usage limit."
 };
+function autoDiscountPct(){
+  const s = (typeof state!=="undefined" && state.settings) || {};
+  if(s.couponOn === false) return 0;
+  if(cartTotal() < couponMinOrder()) return 0;
+  return Number(s.couponPercent) || 10;
+}
 function couponMinOrder(){
   const n = Number(((typeof state!=="undefined" && state.settings) || {}).minOrder);
   return (isFinite(n) && n>0) ? n : COUPON_RULE.minOrder;
@@ -1558,28 +1565,21 @@ function diwaliActive(){
   if(isNaN(end)) return true;
   return Date.now() <= end;
 }
-function couponPercentFor(code, total){
-  const c = String(code||"").trim().toUpperCase();
-  if(!c) return 0;
-  const s = (typeof state!=="undefined" && state.settings) || {};
-  if(c !== String(s.couponCode||"").toUpperCase()) return 0;
-  if(!s.couponOn) return 0;
-  const cart = (typeof total==="number") ? total : cartTotal();
-  if(cart < couponMinOrder()) return 0;   /* 10% only above the minimum order value */
-  return Number(s.couponPercent)||0;
-}
+/* No discount is ever granted by typing a code any more — the 10% is automatic
+   above the minimum order value. Kept so older callers stay harmless. */
+function couponPercentFor(){ return 0; }
 function diwaliHome(){
   if(!diwaliActive()) return "";
   return '<section class="sec dw-home"><div class="sec-head rv"><div><span class="eyebrow">Diwali \u00b7 5\u201316 November</span><h2>\uD83E\uDD94 Festival offers, same prices</h2><p class="sub">Nothing is marked up for the season \u2014 the sticker you see is the sticker you pay. Pick whichever Diwali offer suits you.</p></div></div>'+
     '<div class="dw-offers rv">'+
-      '<div class="dw-offer"><span class="tagx">Coupon</span><h3>10% off on orders ₹5,500+</h3><p>Apply the coupon in your cart once your subtotal reaches ₹5,500. Same low prices, no festival surcharge.</p><a class="see-all" href="#/pc">Shop PC deals \u2192</a></div>'+
+      '<div class="dw-offer"><span class="tagx">Automatic</span><h3>10% off on orders ₹5,500+</h3><p>No code needed — once your cart subtotal reaches ₹5,500 the 10% comes off by itself at checkout. Same low prices, no festival surcharge.</p><a class="see-all" href="#/pc">Shop PC deals \u2192</a></div>'+
       '<div class="dw-offer"><span class="tagx">Gifting</span><h3>Gift a game this Diwali</h3><p>Buying for a friend or family member? We hand the account over and guide them on WhatsApp too.</p><a class="see-all" href="#/psn">Browse PSN \u2192</a></div>'+
       '<div class="dw-offer"><span class="tagx">Mystery drop</span><h3>Mystery game from \u20B999</h3><p>Published prize pools and AAA-tier odds, confirmed before payment. Festive surprise, clear terms.</p><a class="see-all" href="#/membership">Open drops \u2192</a></div>'+
     '</div>'+
     '<p class="hint" style="margin-top:12px">\uD83E\uDD94 Guided setup and WhatsApp support continue through the festival week ('+esc(CONFIG.hours)+'). All sales are final \u2014 see the <a href="#/refund-policy">refund policy</a>.</p>'+
   '</section>';
 }
-const DEFAULT_SETTINGS = {announce:"Flat 10% OFF on orders above ₹5,500 — use coupon HEAVEN10 at checkout", couponCode:"HEAVEN10", couponPercent:10, couponOn:true, minOrder:5500,
+const DEFAULT_SETTINGS = {announce:"10% OFF applied automatically on orders above ₹5,500 — no code needed", couponCode:"HEAVEN10", couponPercent:10, couponOn:true, minOrder:5500,
   brand:CONFIG.brand, whatsapp:CONFIG.whatsapp, upiId:CONFIG.upiId, email:CONFIG.email, instagram:CONFIG.instagram, channel:CONFIG.channel, hours:CONFIG.hours,
   chatIntro:"", chatQA:"", adminUid:"", ownerEmail:"", gaId:DEFAULT_GA_ID, cfToken:"", dealEnds:""};
 function applySettings(){
@@ -1740,7 +1740,7 @@ function updateBadge(){
 }
 let appliedCoupon=null;
 function cartTotal(){ return Object.entries(cart).reduce((a,[k,q])=>{const [id,opt]=splitKey(k);const p=byId(id); return p?a+priceOf(p,opt)*q:a;},0); }
-function discountAmount(){ return appliedCoupon ? Math.round(cartTotal()*couponPercentFor(appliedCoupon)/100) : 0; }
+function discountAmount(){ return Math.round(cartTotal()*autoDiscountPct()/100); }
 
 /* ============ firebase ============ */
 function firebaseConfigured(){
@@ -2185,22 +2185,23 @@ function vCart(){
     '<div class="ci-t"><b>'+esc(p.title)+'</b><span>'+esc(p.region||"Global")+(opt==="p2"?' · <b class="t2l">'+optLabel(p,true)+'</b>':'')+' · '+inr(priceOf(p,opt))+' each</span></div>'+
     '<div class="ci-r"><span class="price">'+inr(priceOf(p,opt)*cart[k])+'</span><button class="rm" data-rm="'+k+'">Remove</button></div></div>';}).join("");
   const disc=discountAmount();
+  const autoPct=autoDiscountPct() || (Number(state.settings.couponPercent)||10);
+  const minOrder=couponMinOrder();
+  const gap=Math.max(0,minOrder-cartTotal());
   return `
   <div class="sec-head" style="padding-top:26px;margin-bottom:10px"><div><h2>Your cart</h2><p class="sub">${cartCount()} item${cartCount()!==1?"s":""} · delivered on WhatsApp</p></div></div>
   <div class="cartlay">
     <div class="panel">${rows}</div>
     <div class="panel">
       <h3 style="margin-top:0">Order summary</h3>
-      <div class="couprow"><input class="f" id="coupon" placeholder="Coupon code" value="${appliedCoupon?esc(appliedCoupon):""}"><button class="btn btn-sm" data-coupon>Apply</button></div>
-      <p class="hint" style="margin:-2px 0 0">Flat ${state.settings.couponPercent||10}% off applies on orders of <b>${inr(couponMinOrder())}</b> or more.</p>
+      <div class="couprow"><input class="f" id="coupon" placeholder="Coupon code (optional)" value="${appliedCoupon?esc(appliedCoupon):""}"><button class="btn btn-sm" data-coupon>Apply</button></div>
       ${state.refBy?'<div class="coup-ok">🎁 Referral '+esc(state.refBy)+' applied — ₹50 off <button class="rm" data-ref-remove style="margin-left:8px">remove</button></div>':'<div class="couprow"><input class="f" id="refCode" placeholder="Referral code (₹50 off)" style="text-transform:uppercase"><button class="btn btn-sm" data-ref-apply>Apply</button></div>'}
-      <div id="couponMsg">${appliedCoupon?(
-        couponPercentFor(appliedCoupon)>0
-          ? '<div class="coup-ok">Coupon '+esc(appliedCoupon)+' applied — '+couponPercentFor(appliedCoupon)+'% off</div>'
-          : '<div class="coup-no">'+esc(COUPON_RULE.limitMsg)+'</div>'
-      ):""}</div>
+      <div id="couponMsg">${appliedCoupon && !disc?'<div class="coup-no">'+esc(COUPON_RULE.limitMsg)+'</div>':""}</div>
       <div class="sumline"><span>Subtotal</span><span>${inr(cartTotal())}</span></div>
-      ${disc?'<div class="sumline"><span>Coupon ('+esc(state.settings.couponCode)+')</span><span>− '+inr(disc)+'</span></div>':""}
+      ${disc?'<div class="sumline"><span>'+autoPct+'% off (orders '+inr(minOrder)+'+)</span><span>− '+inr(disc)+'</span></div>':""}
+      ${disc
+        ? '<div class="coup-ok">🎉 '+autoPct+'% off applied automatically — no code needed.</div>'
+        : '<p class="hint" style="margin:0 0 8px">Add <b>'+inr(gap)+'</b> more and '+((state.settings.couponPercent)||10)+'% comes off automatically.</p>'}
       <div class="sumline"><span>Delivery (WhatsApp handover)</span><span>Free</span></div>
       ${(state.refBy&&state.refOff)?'<div class="sumline"><span>Referral ('+esc(state.refBy)+')</span><span>− '+inr(state.refOff)+'</span></div>':""}
       <div class="sumline total"><span>Total</span><span>${inr(Math.max(0,cartTotal()-disc-state.refOff))}</span></div>
@@ -2221,6 +2222,7 @@ function vFaq(){
    ["What if the account stops working?","2-year replacement warranty: message us with your order ID and a description and we replace the account. Replacement is the only remedy — refunds are not available. See the refund policy for what's covered."],
    ["Can I buy games for a friend?","Yes — accounts make great gifts. Just order normally and share it after setup — we guide the whole process."],
    ["Bulk or reseller orders?","Yes — cafés, gifting, resellers. WhatsApp us quantities for pricing."],
+   ["Do I need a coupon code?","No. 10% comes off automatically as soon as your cart subtotal reaches ₹5,500 — nothing to type. Old codes like HEAVEN10 no longer work; if one is entered the cart says the coupon limit has been reached. Below ₹5,500 the cart shows how much more is needed."],
    ["How do Heaven Points work?","Earn 1 point per ₹10 on completed orders. 100 points = ₹50 off, redeemable from 100 points for up to 20% of an order. Silver, Gold and Platinum multiply points while active. Cancelled orders earn nothing."],
    ["What can I get in a mystery game drop?","One random eligible game from the prize pool confirmed on WhatsApp before payment. Every tier publishes its minimum pool value and AAA-tier chance. Odds apply per purchase and never guarantee an AAA title. We do not include third-party login credentials."],
    ["How do I reach support?","WhatsApp is fastest (button below), or email "+esc(CONFIG.email)+". Replies in minutes during "+esc(CONFIG.hours)+"."]
@@ -2363,13 +2365,13 @@ function vAdmin(){
     <div>
       <div class="panel" style="margin-bottom:18px">
         <h3>Offers &amp; announcement</h3>
-        ${diwaliActive()?'<div class="demo-note" style="margin:0 0 14px;font-size:12.5px">\uD83E\uDD94 <b>Diwali campaign is live</b> until '+esc(new Date(DIWALI.endsAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}))+'. The site shows the festive decorations only — there is no Diwali-only discount, and the flat coupon applies on orders of '+inr(couponMinOrder())+' or more. The announcement text below is paused until it ends. Switch it off early with <code>DIWALI.on=false</code>.</div>':'<p class="hint" style="margin-top:0">No campaign running — the announcement bar below is live as typed.</p>'}
+        ${diwaliActive()?'<div class="demo-note" style="margin:0 0 14px;font-size:12.5px">\uD83E\uDD94 <b>Diwali campaign is live</b> until '+esc(new Date(DIWALI.endsAt).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}))+'. The site shows the festive decorations only — the 10% comes off automatically on orders of '+inr(couponMinOrder())+' or more, with no code to type. The announcement text below is paused until it ends. Switch it off early with <code>DIWALI.on=false</code>.</div>':'<p class="hint" style="margin-top:0">No campaign running — the announcement bar below is live as typed.</p>'}
         <label for="set-announce">Announcement bar text</label>
         <input class="f" id="set-announce" value="${esc(state.settings.announce)}">
         <div class="form2">
-          <div><label for="set-code">Coupon code</label><input class="f" id="set-code" value="${esc(state.settings.couponCode)}" style="text-transform:uppercase"></div>
+          <div><label for="set-code">Old coupon code (only used to detect retired codes)</label><input class="f" id="set-code" value="${esc(state.settings.couponCode)}" style="text-transform:uppercase"></div>
           <div><label for="set-pct">Discount %</label><input class="f" id="set-pct" type="number" min="1" max="90" value="${esc(state.settings.couponPercent)}"></div>
-          <div><label for="set-min">Minimum order for coupon (₹)</label><input class="f" id="set-min" type="number" min="0" step="100" value="${esc(couponMinOrder())}"></div>
+          <div><label for="set-min">Minimum order for the automatic discount (₹)</label><input class="f" id="set-min" type="number" min="0" step="100" value="${esc(couponMinOrder())}"></div>
         </div>
         <label style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="set-on" ${state.settings.couponOn?"checked":""}> Coupon active</label>
         <label for="set-dealends" style="margin-top:14px">Deal countdown — real end time (honest timer; empty = hidden)</label>
@@ -3102,13 +3104,13 @@ function openCheckout(){
   const rows=ids.map(k=>{const [id,opt]=splitKey(k);const p=byId(id); return '<div class="sumline"><span>'+cart[k]+'× '+esc(p.title)+(opt==="p2"?' <b class="t2l">'+optLabel(p,true)+'</b>':'')+'</span><span>'+inr(priceOf(p,opt)*cart[k])+'</span></div>';}).join("");
   const saved=savedCheckoutContact();
   const defaultEmail=(state.user&&state.user.email)||saved.email||"";
-  state.checkout={oid:oid, lines:lines, total:total, disc:disc, refOff:refOff, refBy:state.refBy||null, coupon:appliedCoupon||null, upi:upi, saved:false};
+  state.checkout={oid:oid, lines:lines, total:total, disc:disc, refOff:refOff, refBy:state.refBy||null, coupon:null, upi:upi, saved:false};
   $("#modalRoot").innerHTML=
    '<div class="overlay" data-overlay><div class="modal" role="dialog" aria-modal="true" aria-label="Checkout">'+
    '<button class="x" data-close-modal aria-label="Close">✕</button>'+
    '<h3>Checkout</h3><div class="oid">Order '+oid+'</div>'+
    '<div style="margin-top:12px">'+rows+
-   (disc?'<div class="sumline"><span>Coupon '+esc(appliedCoupon||"")+'</span><span>− '+inr(disc)+'</span></div>':'')+
+   (disc?'<div class="sumline"><span>'+autoDiscountPct()+'% off (orders '+inr(couponMinOrder())+'+)</span><span>− '+inr(disc)+'</span></div>':'')+
    (refOff?'<div class="sumline"><span>Referral '+esc(state.refBy||"")+'</span><span>− '+inr(refOff)+'</span></div>':'')+
    '<div class="sumline total"><span>Total</span><span>'+inr(total)+'</span></div></div>'+
    '<div class="tstrip"><span>\u2713 2-year warranty</span><span>\u2713 Guided setup till you play</span><span>\u2713 Saved to owner dashboard</span></div>'+
@@ -3389,8 +3391,6 @@ document.addEventListener("click", async function(e){
   if((el=q("[data-copy]"))){ copyText(el.dataset.copy); return; }
   if(q("[data-coupon]")){
     const inp=($("#coupon")||{}).value||""; const code=inp.trim().toUpperCase();
-    const pct=couponPercentFor(code);
-    if(pct>0){ appliedCoupon=code; toast("Coupon applied — "+pct+"% off"); buzz(15); route(); return; }
     const st=state.settings||{};
     const known=!!code && (code===String(st.couponCode||"").toUpperCase() || COUPON_RULE.retired.indexOf(code)>-1);
     appliedCoupon=null;
@@ -3676,7 +3676,7 @@ route();
    {k:["safe","legit","trust","real","scam","fake","risk"],a:"Every account is tested before delivery and carries a 2-year replacement warranty — if anything goes wrong that isn't your doing, we replace it. All sales are final: no refunds in any case. 4,200+ gamers have bought from us, most through referrals.",c:[["Read how it works","#/how"],["Warranty terms","#/refund-policy"]]},
          {k:["cheap","why so","discount","how come","lower price"],a:"We source accounts in bulk from regions where games are priced lower — same game, same official download, far less money. Every listing states its region so you know exactly what you're getting.",c:[["Today's deals","#/pc"]]},
    {k:["warranty","refund","replace","guarantee","broken","stopped","not working"],a:"2-year replacement warranty on every order: if credentials fail or the account develops a problem not caused by you, message us with your order ID and we replace the account. Replacement is the only remedy — all sales are final, no refunds.",c:[["Full warranty terms","#/refund-policy"]]},
-   {k:["diwali","festival","offer","coupon","code","discount","sale"],a:"🪔 Happy Diwali! We keep the same low prices, with no festival mark-ups. The flat 10% coupon applies on orders of ₹5,500 or more — your cart shows exactly how much more is needed. Guided setup and the 2-year replacement warranty are unchanged, and all sales are final (no refunds).",c:[["Shop deals","#/pc"],["Refund policy","#/refund-policy"]]},
+   {k:["diwali","festival","offer","coupon","code","discount","sale"],a:"🪔 Happy Diwali! We keep the same low prices, with no festival mark-ups. 10% comes off automatically on orders of ₹5,500 or more — there is no code to type, and your cart shows exactly how much more is needed. Guided setup and the 2-year replacement warranty are unchanged, and all sales are final (no refunds).",c:[["Shop deals","#/pc"],["Refund policy","#/refund-policy"]]},
    {k:["channel","feedback","review","reviews","proof","proofs","updates","follow","social","instagram"],a:"We post real buyer feedback, order proofs and updates on our WhatsApp channel — you can read everything publicly before you order. Tap below to join.",c:[["Join the channel","https://whatsapp.com/channel/0029Vb7GVvPAu3aJtGRSjb2t"],["Read reviews","#/reviews"]]},
    {k:["pay","upi","gpay","phonepe","paytm","payment","cash"],a:"We accept all UPI apps — GPay, PhonePe, Paytm, BHIM. Pay, confirm on WhatsApp, and get delivered in minutes. No cards needed.",c:[["Have a question on WhatsApp",null]]},
    {k:["stock","available","availability","find","looking for","source","arrange"],a:"If it's listed, it's in stock — stock counts are live on every product. Don't see your game? Message us the title: if it exists, we source it.",c:[["Ask about a game",null]]},

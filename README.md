@@ -121,12 +121,12 @@ var DIWALI = {
   on: true,                            // false = switch the whole campaign off
   endsAt: "2026-11-16T23:59:59+05:30", // auto-off after this moment
   code: "",                            // no Diwali-only discount
-  // flat coupon applies only above the minimum order value:
-  // var COUPON_RULE = { minOrder: 5500 };
+  // 10% is automatic above the minimum order value:
+  // var COUPON_RULE = { minOrder: 5500, retired: ["HEAVEN10","DIWALI10"] };
 };
 ```
 
-While it is live the site automatically shows: the festive announcement bar, the Diwali band under the header, the home-page festival-offers block, a footer badge, the gold/marigold theme accents, and the countdown. The flat 10% coupon (`HEAVEN10`) applies only when the cart subtotal is **₹5,500 or more** — set `minOrder` in Admin → Offers. **No product price, MRP or tier is changed anywhere.**
+While it is live the site automatically shows: the festive announcement bar, the Diwali band under the header, the home-page festival-offers block, a footer badge, the gold/marigold theme accents, and the countdown. **10% comes off automatically** when the cart subtotal is **₹5,500 or more** — there is no code to type. Set `minOrder` in Admin → Offers. Old codes (`HEAVEN10`, `DIWALI10`) are retired and answer with "Coupon limit reached". **No product price, MRP or tier is changed anywhere.**
 
 When `endsAt` passes, the band, badge and home block disappear on their own and the announcement bar reverts to whatever is saved in the admin panel. To end it early, set `on: false`. Static SEO pages (`/psn/`, `/pc/`, `/guides/` …) carry the same strip with the same end date in a small inline script.
 
