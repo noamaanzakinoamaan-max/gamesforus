@@ -6,8 +6,8 @@ Zero-budget-first plan to get your first 50 orders, then scale. Built around how
 
 ## 0. Positioning (decide this once, use everywhere)
 
-- **One-liner:** "Any game you want — PS5, Xbox or PC — at up to 90% off. Delivered on WhatsApp in 10 minutes, guided setup till you're playing, 30-day warranty."
-- **Three trust pillars** (repeat these in every bio, ad and reply): **Tested before delivery · Live guided setup on WhatsApp · 30-day replacement warranty**
+- **One-liner:** "Any game you want — PS5, Xbox or PC — at up to 90% off. Delivered on WhatsApp in 10 minutes, guided setup till you're playing, 2-year warranty."
+- **Three trust pillars** (repeat these in every bio, ad and reply): **Tested before delivery · Live guided setup on WhatsApp · 2-year replacement warranty**
 - **Price anchor content:** official PS Store price vs your price, side by side. This is your single most viral format.
 - **Wording safety:** say "digital delivery", "game access", "guided download". Avoid the word "account" in *paid ads* (see §4).
 
@@ -18,7 +18,7 @@ Zero-budget-first plan to get your first 50 orders, then scale. Built around how
 **Profile setup (once):**
 - Username clean: `@heavendigital.in` (or your domain name)
 - Name field (searchable!): `HeavenDigital | PS5 & PC Games — 90% Off`
-- Bio: `🎮 PS5 · Xbox · PC games at up to 90% off\n⚡ WhatsApp delivery in 10 min\n🛡️ 30-day warranty · 4,200+ buyers\n👇 Order now`
+- Bio: `🎮 PS5 · Xbox · PC games at up to 90% off\n⚡ WhatsApp delivery in 10 min\n🛡️ 2-year warranty · 4,200+ buyers\n👇 Order now`
 - Link: your site (or a free linktr.ee with: Website / WhatsApp / Reviews)
 - **Highlights:** "Reviews" (screenshot your WhatsApp thank-yous), "How to order", "FAQ", "Proof" (delivery screenshots with names hidden)
 

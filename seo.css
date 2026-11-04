@@ -33,3 +33,9 @@ body.diwali .card{border-color:rgba(255,186,102,.22);box-shadow:0 12px 30px rgba
 .diwali-strip[hidden]{display:none}
 .diwali-strip b{color:#ffd166}
 .diwali-strip a{color:#ffd166;font-weight:800;text-decoration:none;white-space:nowrap}
+
+/* WhatsApp channel */
+.ch-link{color:#7ee2a8!important;font-weight:800}
+.ch-card{border-color:rgba(37,211,102,.35)!important;background:linear-gradient(145deg,rgba(37,211,102,.12),rgba(18,21,29,.9))!important}
+.ch-card .kicker{color:#7ee2a8!important}
+.ch-btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:2.6rem;padding:.55rem .9rem;border-radius:.7rem;background:linear-gradient(135deg,#25d366,#0f9d58);color:#06210f!important;font-weight:900;text-decoration:none}

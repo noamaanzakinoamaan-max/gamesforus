@@ -83,7 +83,7 @@ How to pay:
 After paying, confirm on WhatsApp: {{whatsapp}}
 We verify and deliver on WhatsApp, usually under 10 minutes during {{hours}}.
 
-Every order carries a 30-day replacement warranty. All sales are final — no refunds in any case.
+Every order carries a 2-year replacement warranty. All sales are final — no refunds in any case.
 Track anytime with order ID {{order_id}} on the website.
 
 Game on,

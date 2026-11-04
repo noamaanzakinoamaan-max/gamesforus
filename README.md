@@ -120,14 +120,14 @@ Everything festive lives behind one object in `index.html`:
 var DIWALI = {
   on: true,                            // false = switch the whole campaign off
   endsAt: "2026-11-16T23:59:59+05:30", // auto-off after this moment
-  code: "DIWALI10",                    // festive coupon
-  aliases: ["DIWALI10", "HEAVEN10"],   // both codes work, same %
-  pct: 10                              // same discount as always — no price changes
+  code: "",                            // no Diwali-only discount
+  // flat coupon applies only above the minimum order value:
+  // var COUPON_RULE = { minOrder: 5500 };
 };
 ```
 
-While it is live the site automatically shows: the festive announcement bar, the Diwali band under the header, the home-page festival-offers block, a footer badge, the gold/marigold theme accents, and the countdown. `DIWALI10` (or the usual `HEAVEN10`) gives the standard 10% at checkout. **No product price, MRP or tier is changed anywhere.**
+While it is live the site automatically shows: the festive announcement bar, the Diwali band under the header, the home-page festival-offers block, a footer badge, the gold/marigold theme accents, and the countdown. The flat 10% coupon (`HEAVEN10`) applies only when the cart subtotal is **₹5,500 or more** — set `minOrder` in Admin → Offers. **No product price, MRP or tier is changed anywhere.**
 
-When `endsAt` passes, the band, badge, home block and coupon alias disappear on their own and the announcement bar reverts to whatever is saved in the admin panel. To end it early, set `on: false`. Static SEO pages (`/psn/`, `/pc/`, `/guides/` …) carry the same strip with the same end date in a small inline script.
+When `endsAt` passes, the band, badge and home block disappear on their own and the announcement bar reverts to whatever is saved in the admin panel. To end it early, set `on: false`. Static SEO pages (`/psn/`, `/pc/`, `/guides/` …) carry the same strip with the same end date in a small inline script.
 
 Prices, warranty and the no-refund policy are untouched by the campaign — the festive copy repeats "all sales are final" so it can't contradict the policy.
