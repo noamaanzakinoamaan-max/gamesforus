@@ -38,7 +38,7 @@ In `index.html`, top of the `<script>` block:
 ```js
 const CONFIG = {
   whatsapp: "919XXXXXXXXX",   // your WhatsApp number
-  upiId: "yourname@upi",      // your UPI ID
+  upiId: "Q693100998@ybl",    // UPI ID shown at checkout (PhonePe business VPA)
   email: "support@yourdomain",
   instagram: "https://instagram.com/yourhandle",
 };
@@ -131,3 +131,16 @@ While it is live the site automatically shows: the festive announcement bar, the
 When `endsAt` passes, the band, badge and home block disappear on their own and the announcement bar reverts to whatever is saved in the admin panel. To end it early, set `on: false`. Static SEO pages (`/psn/`, `/pc/`, `/guides/` …) carry the same strip with the same end date in a small inline script.
 
 Prices, warranty and the no-refund policy are untouched by the campaign — the festive copy repeats "all sales are final" so it can't contradict the policy.
+
+## 💰 Price floors (invariants, not defaults)
+
+Three floors are enforced in code by `enforcePricePolicy()` in `index.html`, so **every** catalog source — the seeded catalog, the owner's `localStorage` copy and the Firestore documents — corrects itself on load. No catalogue re-upload is needed after a change here.
+
+| Scope | Floor | Function |
+|---|---|---|
+| PSN game accounts — Secondary (`price`) | ₹799 | `psnPricePolicy()` |
+| PSN game accounts — Primary (`p2`) | ₹2,299 (and Primary can never be cheaper than Secondary — reversed tiers are swapped) | `psnPricePolicy()` |
+| **Xbox game accounts** (`price`) | **₹899** | `xboxPricePolicy()` |
+| PC accounts | ₹499 (`p2` ₹549) | `enforcePricePolicy()` |
+
+Xbox subscriptions such as Game Pass Ultimate 1 Month (₹549) are **not** game accounts and sit outside the ₹899 floor; PSN subscriptions are outside the PSN floors for the same reason. Editing a product in the admin panel previews any correction in the save toast.
