@@ -11,7 +11,8 @@ service cloud.firestore {
     function ownerless() {
       return request.auth != null
         && ( !exists(/databases/$(database)/documents/settings/store)
-             || !("adminUid" in get(/databases/$(database)/documents/settings/store).data) );
+             || !("adminUid" in get(/databases/$(database)/documents/settings/store).data)
+             || get(/databases/$(database)/documents/settings/store).data.adminUid == "" );
     }
     function shortString(v, max) {
       return v is string && v.size() <= max;
@@ -19,11 +20,19 @@ service cloud.firestore {
     function maybeShortString(d, key, max) {
       return !(key in d) || d[key] == null || shortString(d[key], max);
     }
+    function maybeNonNegNum(d, key, max) {
+      return !(key in d) || d[key] == null || (d[key] is number && d[key] >= 0 && d[key] <= max);
+    }
     function validWebsiteOrderCreate(oid) {
       let d = request.resource.data;
       return oid.matches('^HD-[A-Z0-9]{3,8}$')
         && d.oid == oid
-        && d.keys().hasOnly(['uid', 'guest', 'items', 'total', 'oid', 'ts', 'updatedAt', 'status', 'source', 'refBy', 'coupon', 'discount', 'refOff', 'checkoutAction', 'contactProvided'])
+        && d.keys().hasOnly([
+          'uid', 'guest', 'items', 'total', 'oid', 'ts', 'updatedAt',
+          'status', 'source', 'refBy', 'coupon', 'discount', 'refOff',
+          'promoCode', 'promoOff', 'pointsRequested', 'pointsOff', 'hasUtr',
+          'checkoutAction', 'contactProvided'
+        ])
         && d.source == 'website'
         && d.status == 'pending'
         && d.contactProvided == true
@@ -40,20 +49,26 @@ service cloud.firestore {
         && d.updatedAt is number
         && (d.refBy == null || shortString(d.refBy, 40))
         && (d.coupon == null || shortString(d.coupon, 40))
+        && maybeShortString(d, 'promoCode', 40)
         && d.discount is number
         && d.refOff is number
+        && maybeNonNegNum(d, 'promoOff', 100000)
+        && maybeNonNegNum(d, 'pointsRequested', 100000)
+        && maybeNonNegNum(d, 'pointsOff', 100000)
+        && (!( 'hasUtr' in d ) || d.hasUtr is bool)
         && shortString(d.checkoutAction, 40);
     }
     function validOrderContactCreate(oid) {
       let d = request.resource.data;
       return oid.matches('^HD-[A-Z0-9]{3,8}$')
         && d.oid == oid
-        && d.keys().hasOnly(['oid', 'name', 'wa', 'email', 'ts', 'updatedAt', 'source', 'checkoutAction'])
+        && d.keys().hasOnly(['oid', 'name', 'wa', 'email', 'utr', 'ts', 'updatedAt', 'source', 'checkoutAction'])
         && shortString(d.name, 80)
         && d.name.size() >= 2
         && shortString(d.wa, 15)
         && d.wa.matches('^[0-9]{10,15}$')
         && maybeShortString(d, 'email', 120)
+        && maybeShortString(d, 'utr', 24)
         && d.ts is number
         && d.updatedAt is number
         && d.source == 'website'
@@ -66,19 +81,21 @@ service cloud.firestore {
     }
     match /settings/{id} {
       allow read: if true;
-      allow create: if isAdmin() || ownerless();
-      allow update: if isAdmin() || ownerless();
+      allow create: if isAdmin() || (ownerless() && (!('adminUid' in request.resource.data) || request.resource.data.adminUid == request.auth.uid));
+      allow update: if isAdmin() || (ownerless() && (!('adminUid' in request.resource.data) || request.resource.data.adminUid == request.auth.uid));
       allow delete: if false;
     }
     match /users/{uid} {
       allow read: if request.auth != null && (request.auth.uid == uid || isAdmin());
-      // Customers may maintain contact/preferences, but only the owner can record redeemed
-      // or manually adjusted loyalty points.
+      // Customers may maintain contact, wishlist, priceAlerts & push consent preferences,
+      // while only the store owner can credit/adjust/redeem loyalty points or referral payouts.
       allow create: if request.auth != null && request.auth.uid == uid
-        && !request.resource.data.keys().hasAny(['pointsRedeemed', 'pointsAdjusted']);
+        && !request.resource.data.keys().hasAny(['pointsRedeemed', 'pointsAdjusted', 'isAdmin'])
+        && (!('earned' in request.resource.data) || request.resource.data.earned == 0)
+        && (!('referrals' in request.resource.data) || request.resource.data.referrals == 0);
       allow update: if isAdmin() || (request.auth != null && request.auth.uid == uid
         && !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(['pointsRedeemed', 'pointsAdjusted']));
+          .hasAny(['pointsRedeemed', 'pointsAdjusted', 'earned', 'referrals', 'isAdmin']));
       allow delete: if false;
     }
     match /refcodes/{code} {
@@ -87,17 +104,41 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
     match /orders/{oid} {
-      allow get: if true; // single-order tracking by random ID (status + items only)
+      allow get: if true; // single-order tracking by random ID (status + items only, no PII)
       // Customer account queries must constrain uid to the signed-in user's UID.
       allow list: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
       // Public website checkout creates a limited, non-sensitive order document.
-      // Buyer name/WhatsApp/email are written to /orderContacts/{oid}, which only the owner can read.
+      // Buyer name/WhatsApp/email/UTR are written to /orderContacts/{oid}, which only the owner can read.
       allow create: if isAdmin() || validWebsiteOrderCreate(oid);
       allow update, delete: if isAdmin();
     }
     match /orderContacts/{oid} {
       allow read, update, delete: if isAdmin();
       allow create: if isAdmin() || validOrderContactCreate(oid);
+    }
+    match /pushSubscriptions/{subId} {
+      allow read: if isAdmin() || (request.auth != null && resource != null && resource.data.uid == request.auth.uid);
+      allow create, update: if subId.size() >= 8 && subId.size() <= 128
+        && request.resource.data.keys().hasOnly(['uid', 'endpoint', 'keys', 'fcmToken', 'topics', 'consentAt', 'updatedAt', 'ua', 'platform', 'active'])
+        && shortString(request.resource.data.endpoint, 600)
+        && request.resource.data.consentAt is number
+        && request.resource.data.updatedAt is number
+        && (request.auth == null ? request.resource.data.uid == 'guest' : (request.resource.data.uid == request.auth.uid || isAdmin()));
+      allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+    }
+    match /priceAlerts/{alertId} {
+      allow read: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow create, update: if request.auth != null && request.resource.data.uid == request.auth.uid
+        && shortString(request.resource.data.productId, 80)
+        && shortString(request.resource.data.title, 160)
+        && request.resource.data.targetPrice is number
+        && request.resource.data.targetPrice > 0
+        && request.resource.data.targetPrice <= 100000;
+      allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+    }
+    match /notifications/{nid} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
     }
   }
 }

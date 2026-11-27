@@ -144,3 +144,67 @@ Three floors are enforced in code by `enforcePricePolicy()` in `index.html`, so 
 | PC accounts | ₹499 (`p2` ₹549) | `enforcePricePolicy()` |
 
 Xbox subscriptions such as Game Pass Ultimate 1 Month (₹549) are **not** game accounts and sit outside the ₹899 floor; PSN subscriptions are outside the PSN floors for the same reason. Editing a product in the admin panel previews any correction in the save toast.
+
+---
+
+## 🆕 v4 upgrade layer — PWA, wishlist, alerts, account & admin dashboards
+
+The site is still a no-build static store: `index.html` holds the store, and one extra
+file, **`pwa-features.js`**, layers the v4 features on top of it. Loaded at the end of
+`<body>` (after the chat widget), it runs inside a private IIFE and talks to the store
+through exactly three globals the inline script publishes:
+
+```js
+window.hdCore = { getState, getCart, getProducts, getSettings, getUser, byId, route, toast };
+```
+
+Nothing in `pwa-features.js` declares a second `state`, `cart`, `route` or `toast`, so it
+can never shadow the store's own lexicals — that was the bug that used to throw
+`Identifier 'state' has already been declared`.
+
+### What you get
+
+| Area | Where | What it does |
+|---|---|---|
+| PWA | `manifest.json`, `sw.js`, `offline.html` | Installable app, offline shell, cached catalogue, update prompt, iOS splash screens |
+| Wishlist | `#/wishlist`, ♥ on every card | Saved on the device and in the buyer's account, cloud-merged on sign-in |
+| Price alerts | product page → **Price alert** | Target price, instant notice when the listing drops to it, quick −5/10/15/20% presets |
+| Notifications | 🔔 in the header | In-app centre, per-category preferences, Web Push when a VAPID key is set |
+| Account | `#/account` | Orders, invoices, Heaven Points, wishlist, alerts, profile, referral code, data requests |
+| Checkout | cart → **Proceed to checkout** | UPI QR + app links, UTR field, promo codes, points redemption, saved contact, live price re-check |
+| Owner tools | `#/admin` | Command centre: orders, revenue, customers, catalog, promos, push composer, settings |
+| SEO | `/deals/`, `/releases/` | Static pages mirroring the two new storefront routes, in `sitemap.xml` |
+
+### Files in this upgrade
+
+| File | Purpose |
+|---|---|
+| `pwa-features.js` | All v4 behaviour (≈2.5k lines, one IIFE, no dependencies) |
+| `pwa-features.css` | Styles for every v4 component, plus print rules for invoices |
+| `sw.js` | Service worker v5: precache shell, network-first pages (4.5 s), cache-first images |
+| `manifest.json` | App identity, 4 shortcuts, maskable icons, screenshots |
+| `offline.html` | Standalone offline page (also used by the SW navigation fallback) |
+| `qrcode.min.js` | Vendored QR generator so UPI QR renders offline |
+| `img/pwa/*` | Icons 72→512, maskable, 7 apple splash screens, store screenshots |
+| `tests/*.js` | Node/jsdom checks: route smoke test, interaction test, scope analysis, asset integrity |
+
+### Run the checks
+
+```bash
+npm install --no-save jsdom acorn   # only for the tests, nothing ships
+node tests/smoke.js        # renders every route, fails on a 404 mismatch or console error
+node tests/interact.js     # cart, checkout, wishlist, alerts, search, admin gate, offline bar
+node tests/scope.js        # every identifier resolves — catches refactor typos
+node tests/assets.js       # manifest / precache / referenced files all exist
+```
+
+### Owner setup for the new features (all optional)
+
+1. **Push notifications** — Firebase console → Project settings → Cloud Messaging →
+   Web Push certificates → copy the key pair into `settings/store.vapidPublicKey`
+   (Admin → Push), and deploy `firebase.json` (it already serves `sw.js` with the right
+   scope and headers). Without a key the in-app 🔔 centre still works.
+2. **Promo codes** — Admin → Promos writes `settings/store.promos`
+   (`[{code, pct|off, min, on}]`). The 10% automatic discount above ₹5,500 is separate
+   and always wins.
+3. **Order e-mail** — unchanged: EmailJS keys in `CONFIG`/settings.
