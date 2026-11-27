@@ -200,10 +200,9 @@ node tests/assets.js       # manifest / precache / referenced files all exist
 
 ### Owner setup for the new features (all optional)
 
-1. **Push notifications** — Firebase console → Project settings → Cloud Messaging →
-   Web Push certificates → copy the key pair into `settings/store.vapidPublicKey`
-   (Admin → Push), and deploy `firebase.json` (it already serves `sw.js` with the right
-   scope and headers). Without a key the in-app 🔔 centre still works.
+1. **Push notifications** — follow **`PUSH-SETUP.md`** (5 minutes): generate the VAPID
+   key pair in Firebase, save it at Admin → Push, publish `firestore.rules`. Without a
+   key the in-app 🔔 centre still works, it just cannot wake a closed tab.
 2. **Promo codes** — Admin → Promos writes `settings/store.promos`
    (`[{code, pct|off, min, on}]`). The 10% automatic discount above ₹5,500 is separate
    and always wins.
