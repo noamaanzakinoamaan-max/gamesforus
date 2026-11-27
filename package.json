@@ -1,0 +1,14 @@
+{
+  "name": "heavendigital-store",
+  "private": true,
+  "version": "4.0.0",
+  "description": "HeavenDigital storefront — static SPA plus the v4 PWA/dashboard layer. No build step.",
+  "scripts": {
+    "test": "node tests/scope.js && node tests/assets.js && node tests/smoke.js && node tests/interact.js && node tests/deferred.js",
+    "serve": "python3 -m http.server 8080"
+  },
+  "devDependencies": {
+    "acorn": "^8.11.0",
+    "jsdom": "^24.0.0"
+  }
+}

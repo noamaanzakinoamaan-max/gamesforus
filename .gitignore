@@ -2,6 +2,7 @@
 data/
 # local/dev noise
 node_modules/
+.venv/
 .firebase/
 .firebaserc
 *.log
